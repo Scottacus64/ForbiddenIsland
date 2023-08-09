@@ -1,0 +1,9 @@
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/Solitaire.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/edit_cache.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/rebuild_cache.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/list_install_components.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/install.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/install/local.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/install/strip.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/Solitaire_autogen_timestamp_deps.dir
+/Users/scottmiller/VSC/CPP/Solitaire/build/CMakeFiles/Solitaire_autogen.dir
