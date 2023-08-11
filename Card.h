@@ -10,16 +10,16 @@ public:
     Card();
     ~Card();
     Card(int fv, int av, int idn, char s, string pv);
-    int getFaceValue();
-    int getActualValue();
-    string getPrintValue();
+    int  getFaceValue();
+    int  getActualValue();
     bool getFaceUp();
     char getSuit();
     void flipCard();
     void flipFaceUp();
     void printCard();
     void printAV();
-    int getID();
+    int  getID();
+    string getPrintValue();
 
 private:
     int actualValue;

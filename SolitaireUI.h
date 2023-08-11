@@ -21,8 +21,10 @@ public:
     ~SolitaireUI();
     void refreshScreen();
     void dealCards();
-    void updateDecks(int deck, int cards);
+    void updateDecks(int deck, int cardsDelt);
     void checkForWin();
+    void enableDrawPile(int pile, int id);
+    void disableDrawPile(int pile);
 
 public slots:
     void cardClicked();
@@ -33,9 +35,11 @@ private:
 
     QPushButton* m_pA[4];
     QPushButton* m_pC[133];
-    QPushButton* m_pD[2];
+    QPushButton* m_pD[4];
     QPushButton* m_newGame;
 
     Solitaire* m_pSolitaire;
+    int cardsDelt = 0;
+    bool drawPileFlag;
 };
 #endif // SOLITAIREUI_H

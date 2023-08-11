@@ -50,7 +50,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
             std::string name = "C" + std::to_string(j+(k*19));
             m_pC[j+(k*19)] = new QPushButton (QString::fromStdString(name), this);
             m_pC[j+(k*19)]->setObjectName(QString::fromStdString(name));
-            m_pC[j+(k*19)]->setGeometry(QRect(130+(k*110), 160+(j*30), 100, 140));
+            m_pC[j+(k*19)]->setGeometry(QRect(130+(k*110), 160+(j*25), 100, 140));
             m_pC[j+(k*19)]->setIcon(QPixmap(QString::fromUtf8("../../VSC/CPP/Solitaire/CardPNGs/13S.png")));
             m_pC[j+(k*19)]->setText(QString());
             m_pC[j+(k*19)]->setStyleSheet(QString::fromUtf8("border: none"));
@@ -61,23 +61,29 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         }
     }
 
-        // set up the two deck piles at the bottom
-    for (int i = 0; i < 2; i++) 
+        // set up the deck and draw piles at the bottom
+    int j=0;
+    int k=10;    
+    for (int i = 0; i < 4; i++) 
     {
+        if (i>0){j=110;}
         std::string name = "D" + std::to_string(i);
         m_pD[i] = new QPushButton(QString::fromStdString(name), this);
         m_pD[i]->setObjectName(QString::fromStdString(name));
-        m_pD[i]->setGeometry(QRect(390 + (i * 110), 750, 100, 140));
+        m_pD[i]->setGeometry(QRect(290+j+k, 750, 100, 140));
         m_pD[i]->setText(QString());
-        
+        k+=20;
         QSize iconSize(100, 140);
         m_pD[i]->setIconSize(iconSize);
         connect(m_pD[i], &QPushButton::clicked, this, &SolitaireUI::cardClicked);
     }
     m_pD[0]->setIcon(QPixmap(cardImage[0]));
     m_pD[0]->setEnabled(true); 
-    m_pD[1]->setIcon(QPixmap()); 
-    m_pD[1]->setEnabled(false);
+    for(int i=1; i<4; i++)
+    {
+        m_pD[i]->setIcon(QPixmap()); 
+        m_pD[i]->setEnabled(false);
+    }
 
     std::string name = "NewGame";
     m_newGame = new QPushButton(QString::fromStdString(name), this);
@@ -103,9 +109,12 @@ void SolitaireUI::dealCards()
     m_pD[0]->setEnabled(true);
     m_pD[0]->setIcon(QPixmap(cardImage[0]));
     m_pD[0]->setText(QString());
-    m_pD[1]->setEnabled(false);
-    m_pD[1]->setIcon(QPixmap());
-    m_pD[1]->setText(QString());
+    for (int i=1; i<4; i++)
+    {
+        m_pD[i]->setEnabled(false);
+        m_pD[i]->setIcon(QPixmap());
+        m_pD[i]->setText(QString());
+    }
 }
 
 void SolitaireUI::refreshScreen()
@@ -158,6 +167,9 @@ void SolitaireUI::cardClicked()
     QPushButton* clickedCard = qobject_cast<QPushButton*>(sender());
     if (clickedCard) 
     {
+        int dpSize = m_pSolitaire->getDrawPileSize();
+        if (dpSize > 2 && drawPileFlag == true ){cardsDelt = 3;}
+        std::cout << "** Top of card clicked cardsDelt = " << cardsDelt << "\n";
         bool lastCard = false;
         QString cardName = clickedCard->objectName();
         QChar firstChar = cardName.at(0);
@@ -180,6 +192,7 @@ void SolitaireUI::cardClicked()
                 bool flipped = p_test->getFaceUp();
                 if (flipped == false) {lastCard = true;}
             }
+            drawPileFlag = false;
             m_pSolitaire->checkCanMove(p_c, col, row, lastCard);
         }
         /*********** if the aceStack is clicked **************/
@@ -192,38 +205,43 @@ void SolitaireUI::cardClicked()
             int size = aceStack.getSize(aceStack);
             
             Card* p_c = aceStack.getCard(size-1);
+            drawPileFlag = false;
             m_pSolitaire->checkCanMove(p_c, 100, suit, true);
         }
         /*********** if the draw pile or deck stack is clicked *************/
         else if(firstChar == 'D')
         {
-            
             std::string deck = cardName.toStdString();
-            std::cout << "Clicked on Deck" << deck << "\n";
+            std::cout << "Clicked on " << deck << "\n";
             if (deck == "D0") 
             {
-                int active = m_pSolitaire->cycleDeck();
-                if (active > 0) {updateDecks(0, 1); updateDecks(1,1);}
-                else {updateDecks(0,0);updateDecks(1,1);}
+                cardsDelt = m_pSolitaire->cycleDeck();                              // deals cards and returns how many
+                if (cardsDelt > 0) {updateDecks(0, 1); updateDecks(1,cardsDelt);}   // sets up the cards in draw piles
+                Deck* p_deck = m_pSolitaire->getDeck();
+                int dSize = p_deck->cardsLeft();
+                drawPileFlag = false;
+                if (dSize == 0) {updateDecks(0,0);}                                 // if the deck is empty update that data
             }
             else 
             {
-                int size = m_pSolitaire->getDrawPileSize();
-                std::cout << "UI drawPile size = " << size << "\n";
-
-                if (size > 0) 
+                int dPiles = secondChar.digitValue();               // get the number of the pile clicked
+                int dpSize = m_pSolitaire->getDrawPileSize();       // get the size of the draw pile
+                
+                if (dpSize < 3) {cardsDelt = dpSize;}               // if there are less than 3 cards in dp set cardsDelt to that number
+                std::cout << "**** CardClicked cardsDelt = " << cardsDelt << " dpSize = " << dpSize << "\n";
+                if (dPiles == cardsDelt)                            // if the pile clicked is the active pile
                 {
-                    Card c = m_pSolitaire->getTopDrawPileCard();
-                    Card* p_c = &c;
-                    m_pSolitaire->checkCanMove(p_c, 100, 100, true);
-                    std::cout << "checking from draw pile\n" ;
-                    int endSize = m_pSolitaire->getDrawPileSize();
-                    endSize > 0 ? updateDecks(1, 1) : updateDecks(1,0);
-                }
-                else 
-                {
-                    updateDecks(1,0);
-                    std::cout << "Draw Pile empty\n";
+                    if (dpSize > 0) 
+                    {
+                        Card* p_c = m_pSolitaire->getTopDrawPileCard();
+                        bool canMove = m_pSolitaire->checkCanMove(p_c, 100, 100, true);
+                        if (canMove==true) {updateDecks(1,m_pSolitaire->getDrawPileSize());}    // needs a fresh dpSize
+                    }
+                    else 
+                    {
+                        updateDecks(1,0);
+                        std::cout << "Draw Pile empty\n";
+                    }
                 }
             }
         }
@@ -238,11 +256,11 @@ void SolitaireUI::cardClicked()
     }
 }
 
-void SolitaireUI::updateDecks(int deck, int cards)
+void SolitaireUI::updateDecks(int deck, int cDelt)
 {
     if (deck == 0)
     {
-        if (cards > 0)
+        if (cDelt > 0)
         {
             m_pD[0]->setEnabled(true);
             m_pD[0]->setIcon(QPixmap(cardImage[0]));
@@ -256,13 +274,22 @@ void SolitaireUI::updateDecks(int deck, int cards)
     }
     else
     {
-    if (cards >0)
+    if (cDelt > 0)
         {
-            m_pD[1]->setEnabled(true);
-            Card card = m_pSolitaire->getTopDrawPileCard();
-            int id = card.getID();
-            m_pD[1]->setText(QString());
-            m_pD[1]->setIcon(QPixmap(cardImage[id]));
+            for (int i=1; i<4; i++){disableDrawPile(i);}
+            if (cDelt > 2){cDelt = 3;}
+            int dpSize = m_pSolitaire->getDrawPileSize();           // get the size of the drawPile
+            std::cout << "** UpdateDecks cards delt = " << cDelt << " dpSize = " << dpSize <<"\n";
+            for (int i=1; i<cDelt+1; i++)                       // go from D1 to D3
+            {
+                int slot = dpSize-cDelt-1+i;                    // start with the -2 to 0 slot from the back
+                std::cout << " slot = "<< slot<< "\n";
+                Card* p_card = m_pSolitaire->getDrawPileAt(slot);   // get the Card pointer for this slot
+                int id = p_card->getID();                           // get the card's id
+                enableDrawPile(i, id);                              // enable that draw pile deck stack
+            }
+            drawPileFlag = true;
+            std::cout << "**** UpdateDecks dpSize = " << dpSize << " cardsDelt = " << cardsDelt << "\n";
         }
         else
         {
@@ -271,16 +298,6 @@ void SolitaireUI::updateDecks(int deck, int cards)
             m_pD[1]->setIcon(QPixmap()); 
         }        
     }
-    /*bool win = m_pSolitaire->getWin();
-    std::cout << "Win = " << win << "\n";
-    if (win == true)
-    {
-        m_pD[0]->setEnabled(false);
-        m_pD[0]->setText("WIN!!");
-        m_pD[1]->setEnabled(false);
-        m_pD[1]->setIcon(QPixmap()); 
-        m_pD[1]->setText("WIN!!");
-    }*/
 }
 
 void SolitaireUI::checkForWin()
@@ -295,4 +312,23 @@ void SolitaireUI::checkForWin()
         m_pD[1]->setIcon(QPixmap()); 
         m_pD[1]->setText("WIN!!");
     } 
+}
+
+void SolitaireUI::enableDrawPile(int pile, int id)
+{
+    m_pD[pile]->setEnabled(true);
+    m_pD[pile]->setIcon(QPixmap(cardImage[id]));
+    m_pD[pile]->raise();
+}
+
+void SolitaireUI::disableDrawPile(int pile)
+{
+    m_pD[pile]->setEnabled(false);
+    m_pD[pile]->setIcon(QPixmap());
+    m_pD[pile]->setStyleSheet(QString::fromUtf8("border: none"));
+    if (pile>1)
+    {
+        m_pD[pile-1]->setEnabled(true);
+        m_pD[pile]->lower();              // lower the card 
+    }
 }

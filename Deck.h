@@ -22,7 +22,7 @@ public:
     void printTopCard();
 
     Card* getTopDeckCard();
-    Card getDeckCardAt(int slot);
+    Card* getDeckCardAt(int slot);
 
 private:
     std::vector<Card> m_deck;  //this is the vector that will hold the deck

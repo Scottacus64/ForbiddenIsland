@@ -15,17 +15,19 @@ public:
     int  cycleDeck();
     void playGame();
     void moveToColumn(int destinationCol, int col, int slot, bool lastCard);
-    void checkCanMove(Card* c, int col, int row, bool lastCard);
+    bool checkCanMove(Card* c, int col, int row, bool lastCard);
 
     Hand  getColumn(int col);
     int   getTopAce(int suit);
     Card* getColCardAt(int col, int row);
     int   getColumnSize(int col);
-    Card  getTopDrawPileCard();
+    Card* getTopDrawPileCard();
     Deck* getDrawPile();
     Deck* getDeck();
+    int   getDeckSize();
     Hand* getAceStack(int suit);
     int   getDrawPileSize();
+    Card* getDrawPileAt(int slot);
 
     Card removeColCard(int col, int row, bool lastCard);
     void aceStackMove(int col, int row, int suit, Card* c, bool lastCard);

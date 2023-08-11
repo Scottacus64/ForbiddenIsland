@@ -96,35 +96,50 @@ void Solitaire::printGame()
 int Solitaire::cycleDeck()
 {
     if (solitaireDeck.cardsLeft() == 0 && getDrawPileSize() > 0){reuseDeck();}
+    int cardsDelt = 0;
+    std::cout << "the drawPile address is: " << &drawPile << "\n";
     for (int i=0; i<3; i++)
     {
         if (solitaireDeck.cardsLeft() > 0)
         {
-            Card c = solitaireDeck.deal();
-            c.flipFaceUp();
-            drawPile.addCard(c);
-            dpSize ++;
+            Card c = solitaireDeck.deal();          // get and remove the Card object from the solitaireDeck
+            c.flipFaceUp();                         // set it's face up bool to true
+            int id = c.getID();
+            Card* p_c = &c;
+            std::cout << "\nthe card delt's id is " << id << "\n";
+            std::cout << "the delt cards address is " << &p_c << "\n";
+            drawPile.addCard(c);                    // add the Card object to the deck drawPile
+            dpSize ++;                              // increment dpSize and cardsDelt
+            cardsDelt ++;
             c.printCard();
             cout << " draw pile size: " << dpSize << "\n";
         }
+        Card* p_c = drawPile.getTopDeckCard();
+        int id = p_c->getID();
+        std::cout << "Card Cycle id of top card: " << id << "\n";
     }
     
-    std::cout << "\033[0m" << "top card: ";
+    std::cout << "\033[0m" << "\ntop card: ";
     
     drawPile.printTopCard();
     std::cout << "\033[0m" <<"\n";
         
     int remaining = solitaireDeck.cardsLeft();
-    std::cout << "Cycle deck cards remaining = " << remaining << "\n";
-    return remaining;
+    std::cout << "Cycle deck cards remaining = " << remaining << "\n\n";
+    return cardsDelt;                               // this let's the calling function know how many cards were delt
 }
 
 
 
-Card Solitaire::getTopDrawPileCard()
+Card* Solitaire::getTopDrawPileCard()
 {
-    Card c = drawPile.getDeckCardAt(dpSize-1);
-    return c;
+    std::cout << "GTCDP deck = " << &drawPile << "\n";
+    Card* p_c = drawPile.getTopDeckCard();
+    drawPile.printTopCard();
+    std::cout << "***** GTCDP Card Address = " << &p_c << "\n\n\n";
+    int id = p_c->getID();
+    std::cout << "****** GTDPC id = " << id << "\n";
+    return p_c;
 }
 
 
@@ -137,6 +152,18 @@ Deck* Solitaire::getDrawPile()
 int Solitaire::getDrawPileSize()
 {
     return dpSize;
+}
+
+int Solitaire::getDeckSize()
+{
+    int size = solitaireDeck.cardsLeft();
+    return size;
+}
+
+Card* Solitaire::getDrawPileAt(int slot)
+{
+    Card* m_pc = drawPile.getDeckCardAt(slot);
+    return m_pc;
 }
 
 
@@ -160,19 +187,26 @@ int Solitaire::getTopAce(int suit)
  *          This is the setion that looks over the ID number and suit of a card sent to it         
  *          to check if that card can be played on either a colmn or the aces above         
 ********************************************************************************************/
-void Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
+bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
 {
     bool cardRed;
     bool columnRed;
     bool sameCardClicked = false;
+    bool canMove = false;
     char suits[4] = {'C', 'S', 'H', 'D'};
     int moveSize;
     bool aceMatch = false;
-    Card c = *p_c;
-   
+    //Card c = *p_c;
+
+    possibleMoves.clear();
+    std::cout << "CheckCanMove's Card address is: " << &p_c << "\n";
+    bool fu = p_c->getFaceUp();
+    std::cout << "the card in checkCanMove's facuUp value is: "  << fu << "\n";
+
     if (p_c->getFaceUp() == true)                      // if the card is not flipped up, disregard it
     {
         int id = p_c->getID();                         // from the card's ID, face value and suit
+        std::cout << "CheckPosMoves id = " << id << "\n";
 
         /********  check if the same card was clicked again  *******/
         if (id == lastCardClicked)                  // if the same card is clicked again
@@ -197,6 +231,8 @@ void Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
 
         int cardValue = p_c->getFaceValue();         
         char suit = p_c->getSuit();
+
+        std::cout << "IN CheckPossMoves CardValue = " << cardValue << " suit = " << suit << "\n";
 
         /************ check each of the four aceStacks at the top to see if the card can move here ***********/
         for (int j=0; j<4; j++)                                    // check if a card can play on an ace stack at the top of the table
@@ -261,6 +297,7 @@ void Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
     }
 
     moveSize = possibleMoves.size();
+    if (moveSize>0) {canMove=true;}
     std::cout << "Possible moves: " ;
     for (int i=0; i<moveSize; i++)
     {
@@ -297,6 +334,7 @@ void Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
             }             
         }
     }
+    return canMove;
 }
 
 
@@ -350,14 +388,6 @@ void Solitaire::playFromDrawPile(int col)
         cardCol[col].addCard(c);
         dpSize --;
     }
-
-    int remaining = dpSize;
-    std::cout << "****remaining: " << remaining << "\n";
-    for (int i=0; i<remaining; i++ )
-    {
-        Card c = drawPile.getDeckCardAt(i);
-        c.printCard();
-    }
 }
 
 
@@ -391,8 +421,9 @@ void Solitaire::aceStackMove(int col, int row, int suit, Card* p_c, bool lastCar
     }
     Aces[suit].addCard(c);                                    // move the card to the Ace stack
     aceFlag = true;
-    win = true;
-    for (int i=0; i<4; i++)
+
+    win = true;                                               // this checks for the win condition
+    for (int i=0; i<4; i++)                                   
     {
         int aceSize = Aces[i].getSize(Aces[i]);
         if (aceSize < 13) {win = false;}
@@ -417,11 +448,12 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
 {
     Card c;
     int length = getColumnSize(col);
+        std::cout << "** RemoveColCard row = " << row << " length = " << length << "\n";
     for (int slot=row; slot<length; slot++)     // remove each card from the column
     {
         c = cardCol[col].removeCard(slot);
     }
-    std::cout << "row = " << row << "\n";
+
     if (row > 0 && lastCard == true)
     {
         Card* p_c = cardCol[col].getCard(row-1);

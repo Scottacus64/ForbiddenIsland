@@ -215,7 +215,7 @@ build Solitaire_autogen/timestamp Solitaire_autogen/mocs_compilation.cpp | ${cma
 #############################################
 # Phony custom command for CMakeFiles/Solitaire_autogen_timestamp_deps
 
-build CMakeFiles/Solitaire_autogen_timestamp_deps | ${cmake_ninja_workdir}CMakeFiles/Solitaire_autogen_timestamp_deps: phony /usr/local/share/qt/libexec/uic /usr/local/share/qt/libexec/moc /usr/local/lib/QtWidgets.framework/Versions/A/QtWidgets /usr/local/lib/QtCore.framework/Versions/A/QtCore
+build CMakeFiles/Solitaire_autogen_timestamp_deps | ${cmake_ninja_workdir}CMakeFiles/Solitaire_autogen_timestamp_deps: phony /usr/local/lib/QtCore.framework/Versions/A/QtCore /usr/local/lib/QtWidgets.framework/Versions/A/QtWidgets /usr/local/share/qt/libexec/moc /usr/local/share/qt/libexec/uic
 
 
 #############################################
