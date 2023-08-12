@@ -167,8 +167,9 @@ void SolitaireUI::cardClicked()
     QPushButton* clickedCard = qobject_cast<QPushButton*>(sender());
     if (clickedCard) 
     {
-        int dpSize = m_pSolitaire->getDrawPileSize();
+        int dpSize = m_pSolitaire->getDrawPileSize();           // this allows expansion of the last draw piles to register
         if (dpSize > 2 && drawPileFlag == true ){cardsDelt = 3;}
+        
         std::cout << "** Top of card clicked cardsDelt = " << cardsDelt << "\n";
         bool lastCard = false;
         QString cardName = clickedCard->objectName();

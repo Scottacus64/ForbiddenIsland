@@ -412,7 +412,7 @@ void Solitaire::aceStackMove(int col, int row, int suit, Card* p_c, bool lastCar
     Card c;
     if (col<100)
     {      
-        c = removeColCard(col, row, true);                     // remove the card from the cardCol    
+        c = removeForAce(col, row);                     // remove the card from the cardCol    
     }
     else
     {
@@ -455,6 +455,17 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
     }
 
     if (row > 0 && lastCard == true)
+    {
+        Card* p_c = cardCol[col].getCard(row-1);
+        p_c->flipFaceUp();
+    }
+    return c;
+ }
+
+ Card Solitaire::removeForAce(int col,int row)
+ {
+    Card c = cardCol[col].removeCard(row);
+    if (row > 0)
     {
         Card* p_c = cardCol[col].getCard(row-1);
         p_c->flipFaceUp();

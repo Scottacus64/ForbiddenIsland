@@ -30,6 +30,7 @@ public:
     Card* getDrawPileAt(int slot);
 
     Card removeColCard(int col, int row, bool lastCard);
+    Card removeForAce(int col, int row);
     void aceStackMove(int col, int row, int suit, Card* c, bool lastCard);
     void playFromDrawPile(int col);
     void playFromAces(int col, int suit);
