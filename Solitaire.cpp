@@ -66,12 +66,113 @@ Card* Solitaire::getColCardAt(int col, int row)
     return c;
 }
 
+
 Deck* Solitaire::getDeck()
 {
     Deck* p_deck = &solitaireDeck;
     return p_deck;
 }
 
+
+void Solitaire::printField()
+ {
+    Card* cardArray[7];
+    for (int row=0; row<19; row++)
+    {
+        bool emptyRow = true;
+        for (int col=0; col<7; col++)
+        {
+            if (row < cardCol[col].getSize())
+            {
+                Card* p_c = cardCol[col].getCard(row);
+                cardArray[col]= p_c;
+                emptyRow = false;
+            }
+            else
+            {
+                cardArray[col] = nullptr;
+            }
+        }
+        if (emptyRow == false)
+        {
+            for (int i=0; i<7; i++)
+            {
+                Card* p_c = cardArray[i];
+                if (p_c != nullptr){p_c->printCard();}
+
+                cout << "\t";
+            }
+            cout << "\n";
+        }
+    }
+ }
+
+
+Card* Solitaire::getTopDrawPileCard()
+{
+    cout << "GTCDP deck = " << &drawPile << endl;;
+    Card* p_c = drawPile.getTopDeckCard();
+    drawPile.printTopCard();
+    cout << "***** GTCDP Card Address = " << &p_c << "\n\n\n";
+    int id = p_c->getID();
+    cout << "****** GTDPC id = " << id << endl;;
+    return p_c;
+}
+
+
+Deck* Solitaire::getDrawPile()
+{
+    Deck* p_drawPile = &drawPile;
+    return p_drawPile;
+}
+
+
+int Solitaire::getDrawPileSize()
+{
+    return dpSize;
+}
+
+
+int Solitaire::getDeckSize()
+{
+    int size = solitaireDeck.cardsLeft();
+    return size;
+}
+
+
+Card* Solitaire::getDrawPileAt(int slot)
+{
+    Card* m_pc = drawPile.getDeckCardAt(slot);
+    return m_pc;
+}
+
+
+int Solitaire::getColumnSize(int col)
+{
+    int size = cardCol[col].getSize();
+    return size;
+}
+
+
+
+int Solitaire::getTopAce(int suit)
+{
+    int id = Aces[suit].getLastCardID();
+    return id;
+}
+
+
+Hand* Solitaire::getAceStack(int suit)
+{
+    Hand* aceStack = &Aces[suit];
+    return aceStack;
+}
+
+
+bool Solitaire::getWin()
+{
+    return win;
+}
 
 
 int Solitaire::cycleDeck()
@@ -108,58 +209,6 @@ int Solitaire::cycleDeck()
     int remaining = solitaireDeck.cardsLeft();
     cout << "Cycle deck cards remaining = " << remaining << "\n\n";
     return cardsDelt;                               // this let's the calling function know how many cards were delt
-}
-
-
-
-Card* Solitaire::getTopDrawPileCard()
-{
-    cout << "GTCDP deck = " << &drawPile << endl;;
-    Card* p_c = drawPile.getTopDeckCard();
-    drawPile.printTopCard();
-    cout << "***** GTCDP Card Address = " << &p_c << "\n\n\n";
-    int id = p_c->getID();
-    cout << "****** GTDPC id = " << id << endl;;
-    return p_c;
-}
-
-
-Deck* Solitaire::getDrawPile()
-{
-    Deck* p_drawPile = &drawPile;
-    return p_drawPile;
-}
-
-int Solitaire::getDrawPileSize()
-{
-    return dpSize;
-}
-
-int Solitaire::getDeckSize()
-{
-    int size = solitaireDeck.cardsLeft();
-    return size;
-}
-
-Card* Solitaire::getDrawPileAt(int slot)
-{
-    Card* m_pc = drawPile.getDeckCardAt(slot);
-    return m_pc;
-}
-
-
-int Solitaire::getColumnSize(int col)
-{
-    int size = cardCol[col].getSize();
-    return size;
-}
-
-
-
-int Solitaire::getTopAce(int suit)
-{
-    int id = Aces[suit].getLastCardID();
-    return id;
 }
 
 
@@ -413,17 +462,6 @@ void Solitaire::aceStackMove(int col, int row, int suit, Card* p_c, bool lastCar
 }
 
 
-Hand* Solitaire::getAceStack(int suit)
-{
-    Hand* aceStack = &Aces[suit];
-    return aceStack;
-}
-
-bool Solitaire::getWin()
-{
-    return win;
-}
-
 
 Card Solitaire::removeColCard(int col, int row, bool lastCard)
 {
@@ -468,35 +506,5 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
     }
  }
 
- void Solitaire::printField()
- {
-    Card* cardArray[7];
-    for (int row=0; row<19; row++)
-    {
-        bool emptyRow = true;
-        for (int col=0; col<7; col++)
-        {
-            if (row < cardCol[col].getSize())
-            {
-                Card* p_c = cardCol[col].getCard(row);
-                cardArray[col]= p_c;
-                emptyRow = false;
-            }
-            else
-            {
-                cardArray[col] = nullptr;
-            }
-        }
-        if (emptyRow == false)
-        {
-            for (int i=0; i<7; i++)
-            {
-                Card* p_c = cardArray[i];
-                if (p_c != nullptr){p_c->printCard();}
 
-                cout << "\t";
-            }
-            cout << "\n";
-        }
-    }
- }
+ 
