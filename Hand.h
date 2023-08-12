@@ -14,7 +14,7 @@ public:
     void clearHand();
 
     Card* getCard(int position);
-    int getSize(Hand hand);
+    int getSize();
     int getLastCardID();
     char getLastCardSuit();
 

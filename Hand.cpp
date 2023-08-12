@@ -35,12 +35,12 @@ Card* Hand::getCard(int position)
 }
 
 
-
-int Hand::getSize(Hand hand)
+int Hand::getSize()
 {
     int size =  m_hand.size();
     return size;
 }
+
 
 
 void Hand::printHand()
@@ -103,10 +103,12 @@ bool Hand::compareBySuitAndCardValue(Card& card1, Card& card2)
     return card1.getSuit() < card2.getSuit();
 }
 
+
 void Hand::clearHand()
 {
     m_hand.clear();
 }
+
 
 int Hand::getLastCardID()
 {
@@ -117,6 +119,7 @@ int Hand::getLastCardID()
     }
     return id;
 }
+
 
 char Hand::getLastCardSuit()
 {

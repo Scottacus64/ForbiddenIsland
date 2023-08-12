@@ -89,9 +89,10 @@ void Card::printCard()
     else
     {
         std::cout << "\033[0m";
-        cout << "**";
+        cout << " **";
     }
 }
+
 
 void Card::printAV()
 {

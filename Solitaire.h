@@ -11,11 +11,11 @@ public:
     Solitaire();
     ~Solitaire();
     void dealGame();
-    void printGame();
     int  cycleDeck();
     void playGame();
     void moveToColumn(int destinationCol, int col, int slot, bool lastCard);
     bool checkCanMove(Card* c, int col, int row, bool lastCard);
+    void printField();
 
     Hand  getColumn(int col);
     int   getTopAce(int suit);
@@ -43,10 +43,6 @@ private:
 
     Hand cardCol[7];
     Hand suit[4];
-    /*Hand clubs;
-    Hand spades;
-    Hand hearts;
-    Hand diamonds;*/
     Hand Aces[4]; // = {clubs, spades, hearts, diamonds};
 
     std::vector<int> possibleMoves;
