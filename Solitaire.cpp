@@ -522,6 +522,7 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
         }
     }
     if (getDeckSize() > 0) {autoFinish = false;}
+    if (getDrawPileSize() > 0) {autoFinish = false;}
     return autoFinish;
  }
 

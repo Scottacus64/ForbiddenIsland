@@ -27,6 +27,7 @@ public:
     void disableDrawPile(int pile);
     void paintEvent(QPaintEvent *event);
     void autoFinish();
+    void delayTimer(int delay);
 
 public slots:
     void cardClicked();

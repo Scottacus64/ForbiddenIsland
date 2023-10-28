@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <QPainter>
+#include <QTimer>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -278,6 +279,7 @@ void SolitaireUI::autoFinish()
     {
         gameDone = m_pSolitaire->nextCard();
         refreshScreen();
+        delayTimer(200);
     }
 }
 
@@ -369,4 +371,16 @@ void SolitaireUI::paintEvent(QPaintEvent *event) {
     painter.drawPixmap(0, 0, width(), height(), green);
 
     // ... your existing painting code
+}
+
+
+void SolitaireUI::delayTimer(int delay)
+{
+    QTimer timer;
+    timer.setInterval(delay); 
+    timer.start();
+    // Use a loop to wait until the QTimer times out (25ms)
+    QEventLoop loop;
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    loop.exec();
 }
