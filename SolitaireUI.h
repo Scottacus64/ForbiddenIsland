@@ -25,6 +25,8 @@ public:
     void checkForWin();
     void enableDrawPile(int pile, int id);
     void disableDrawPile(int pile);
+    void paintEvent(QPaintEvent *event);
+    void autoFinish();
 
 public slots:
     void cardClicked();
@@ -32,6 +34,7 @@ public slots:
 private:
     Ui::SolitaireUI *ui;
     QPixmap cardImage[53];
+    QPixmap green;
 
     QPushButton* m_pA[4];
     QPushButton* m_pC[133];

@@ -121,6 +121,17 @@ int Hand::getLastCardID()
 }
 
 
+int Hand::getLastCardValue()
+{
+    int value = 0;
+    if (m_hand.size() > 0)
+    {
+        value = m_hand[m_hand.size()-1].getFaceValue();
+    }
+    return value;
+}
+
+
 char Hand::getLastCardSuit()
 {
     char suit;

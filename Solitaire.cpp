@@ -7,7 +7,6 @@ using namespace std;
 
 Solitaire::Solitaire()
 {
-    
     playGame();
 } 
 
@@ -208,6 +207,8 @@ int Solitaire::cycleDeck()
         
     int remaining = solitaireDeck.cardsLeft();
     cout << "Cycle deck cards remaining = " << remaining << "\n\n";
+    if (remaining == 0){bool win = checkAutoFinish();}
+    if (win == true){std::cout << "WIN!!!";}
     return cardsDelt;                               // this let's the calling function know how many cards were delt
 }
 
@@ -244,7 +245,7 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
             sameCardClicked = true;                 // if the same card is clicked again      
             cardCycle ++;                           // increment the counter
             moveSize = possibleMoves.size();
-            if (cardCycle >= moveSize)  // if the counter has reached the possible spots for the card
+            if (cardCycle >= moveSize)              // if the counter has reached the possible spots for the card
             {
                 cardCycle = 0;                      // reset the counter to zero
                 aceFlag = false;                    // if the card can go to an aceStack reset so it can go back up there
@@ -265,7 +266,7 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
         cout << "IN CheckPossMoves CardValue = " << cardValue << " suit = " << suit << endl;;
 
         /************ check each of the four aceStacks at the top to see if the card can move here ***********/
-        for (int j=0; j<4; j++)                                    // check if a card can play on an ace stack at the top of the table
+        for (int j=0; j<4; j++)                     // check if a card can play on an ace stack at the top of the table
         {
             // if the array is not empty, a card has not been moved to aces and it is the last card in the cardCol
             cout << "aceStack" << j << " size = " << Aces[j].getSize()<< " LC = " << lastCard << " AM = " << aceMatch << endl;;
@@ -364,6 +365,8 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
             }             
         }
     }
+    bool win = checkAutoFinish();
+    if (win == true){std::cout << "WIN!!!";}
     return canMove;
 }
 
@@ -449,10 +452,10 @@ void Solitaire::aceStackMove(int col, int row, int suit, Card* p_c, bool lastCar
         c = drawPile.deal();
         dpSize --;
     }
-    Aces[suit].addCard(c);                                    // move the card to the Ace stack
+    Aces[suit].addCard(c);                              // move the card to the Ace stack
     aceFlag = true;
 
-    win = true;                                               // this checks for the win condition
+    win = true;                                         // this checks for the win condition
     for (int i=0; i<4; i++)                                   
     {
         int aceSize = Aces[i].getSize();
@@ -468,7 +471,7 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
     Card c;
     int length = getColumnSize(col);
         cout << "** RemoveColCard row = " << row << " length = " << length << endl;;
-    for (int slot=row; slot<length; slot++)     // remove each card from the column
+    for (int slot=row; slot<length; slot++)             // remove each card from the column
     {
         c = cardCol[col].removeCard(slot);
     }
@@ -506,5 +509,52 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
     }
  }
 
+ bool Solitaire::checkAutoFinish()
+ {
+    bool autoFinish = true;
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<cardCol[i].getSize(); j++)
+        {
+            Card* pTestCard = cardCol[i].getCard(j);
+            Card testCard = *pTestCard;
+            if (testCard.getFaceUp() == false){autoFinish = false;}
+        }
+    }
+    if (getDeckSize() > 0) {autoFinish = false;}
+    return autoFinish;
+ }
 
- 
+ bool Solitaire::nextCard()
+ {
+    int totalCards = 0;
+    int lowestColumn;
+    for (int i=0; i<7; i++) {totalCards = totalCards + cardCol[i].getSize();}
+    if (totalCards > 0)
+    {
+        int cardValues[7];
+        for (int i=0; i<7; i++){cardValues[i] = cardCol[i].getLastCardValue();}
+        int lowestValue = 20;
+        for (int i=0; i<7; i++)
+        {
+            if (cardValues[i] > 0)
+            {
+                if (cardValues[i] < lowestValue)
+                {
+                    lowestValue = cardValues[i];
+                    lowestColumn = i;
+                } 
+            }
+        }
+        int row = cardCol[lowestColumn].getSize() - 1;
+        Card c = cardCol[lowestColumn].removeCard(row); 
+        int ID = c.getID();
+        int suit = ID/14;
+        Aces[suit].addCard(c); 
+        return false;
+    }
+    else
+    {return true;}
+    
+ }
+

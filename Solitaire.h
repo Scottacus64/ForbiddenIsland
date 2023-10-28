@@ -36,6 +36,8 @@ public:
     void playFromAces(int col, int suit);
     void reuseDeck();
     bool getWin();
+    bool checkAutoFinish();
+    bool nextCard();
 
 private:
     Deck solitaireDeck;

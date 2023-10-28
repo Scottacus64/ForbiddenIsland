@@ -16,6 +16,7 @@ public:
     Card* getCard(int position);
     int getSize();
     int getLastCardID();
+    int getLastCardValue();
     char getLastCardSuit();
 
     void sortHandValue();

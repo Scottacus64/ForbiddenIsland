@@ -1,6 +1,7 @@
 #include "SolitaireUI.h"
 #include <string>
 #include <iostream>
+#include <QPainter>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -14,6 +15,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
 
     ui->setupUi(this);
 
+    green = QPixmap(assetPath + "green.png");
     // set up all of the card image QPixmaps
     cardImage[0] = QPixmap(assetPath + "0B.png");
     char suits[4] = {'C', 'S', 'H', 'D'};
@@ -83,6 +85,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     {
         m_pD[i]->setIcon(QPixmap()); 
         m_pD[i]->setEnabled(false);
+        m_pD[i]->hide();
     }
 
     std::string name = "NewGame";
@@ -116,6 +119,7 @@ void SolitaireUI::dealCards()
         m_pD[i]->setEnabled(false);
         m_pD[i]->setIcon(QPixmap());
         m_pD[i]->setText(QString());
+        m_pD[i]->hide();
     }
 }
 
@@ -169,6 +173,7 @@ void SolitaireUI::refreshScreen()
 void SolitaireUI::cardClicked()
 {
     QPushButton* clickedCard = qobject_cast<QPushButton*>(sender());
+    for (int i=0; i<4; i++) {m_pD[i]->show();}
     if (clickedCard) 
     {
         int dpSize = m_pSolitaire->getDrawPileSize();           // this allows expansion of the last draw piles to register
@@ -258,7 +263,21 @@ void SolitaireUI::cardClicked()
         }
         checkForWin();
         refreshScreen();
+        bool aFinish = m_pSolitaire->checkAutoFinish();
+        if (aFinish == true){autoFinish();}
         m_pSolitaire->printField();
+    }
+}
+
+
+void SolitaireUI::autoFinish()
+{
+    std::cout << "In autoFinish \n";
+    bool gameDone = false;
+    while (gameDone == false)
+    {
+        gameDone = m_pSolitaire->nextCard();
+        refreshScreen();
     }
 }
 
@@ -341,4 +360,13 @@ void SolitaireUI::disableDrawPile(int pile)
         m_pD[pile-1]->setEnabled(true);
         m_pD[pile]->lower();              // lower the card 
     }
+}
+
+void SolitaireUI::paintEvent(QPaintEvent *event) {
+    QPainter painter(this);
+
+    // Paint the green background image
+    painter.drawPixmap(0, 0, width(), height(), green);
+
+    // ... your existing painting code
 }
