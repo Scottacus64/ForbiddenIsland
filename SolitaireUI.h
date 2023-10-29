@@ -54,5 +54,7 @@ private:
     Solitaire* m_pSolitaire;
     int cardsDelt = 0;
     bool drawPileFlag;
+    bool gameStarted;
+    qint64 elapsedMilliseconds;
 };
 #endif // SOLITAIREUI_H

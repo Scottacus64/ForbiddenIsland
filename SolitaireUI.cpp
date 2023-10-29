@@ -112,18 +112,16 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_timer->setGeometry(QRect(700, 850, 300, 100));
     m_timer->setFont(font);
     m_timer->setPalette(palette);
-    
-
-    elapsedTimer.start();
+    //elapsedTimer.start();
 
     QObject::connect(&timer, &QTimer::timeout, [&]() {
-        qint64 elapsedMilliseconds = elapsedTimer.elapsed();
+        elapsedMilliseconds = elapsedTimer.elapsed();
         qint64 elapsedSeconds = elapsedMilliseconds / 1000;
         QString elapsedTimeStr = QString("Time: %1 seconds").arg(elapsedSeconds);
         m_timer->setText(elapsedTimeStr);
     });
 
-    timer.start(1000);
+    //timer.start(1000);
 
     m_pSolitaire = new Solitaire();
 
@@ -151,6 +149,10 @@ void SolitaireUI::dealCards()
         m_pD[i]->setText(QString());
         m_pD[i]->hide();
     }
+    gameStarted = false;
+    timer.stop();
+    elapsedMilliseconds = 0;
+    m_timer->setText("Time:");
 }
 
 
@@ -207,6 +209,8 @@ void SolitaireUI::cardClicked()
     QPushButton* clickedCard = qobject_cast<QPushButton*>(sender());
     if (clickedCard) 
     {
+        if (gameStarted == false){elapsedTimer.start(); timer.start(1000);}
+        gameStarted = true;
         int dpSize = m_pSolitaire->getDrawPileSize();           // this allows expansion of the last draw piles to register
         if (dpSize > 2 && drawPileFlag == true ){cardsDelt = 3;}
 
