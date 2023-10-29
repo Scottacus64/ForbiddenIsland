@@ -13,8 +13,8 @@ public:
     void dealGame();
     int  cycleDeck();
     void playGame();
-    void moveToColumn(int destinationCol, int col, int slot, bool lastCard);
-    bool checkCanMove(Card* c, int col, int row, bool lastCard);
+    void moveToColumn(int destinationCol, int col, int slot, bool lastUnflipedCard);
+    bool checkCanMove(Card* c, int col, int row, bool lastCard, bool lastUnflippedCard);
     void printField();
 
     Hand  getColumn(int col);

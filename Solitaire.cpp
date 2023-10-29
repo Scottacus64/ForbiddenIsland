@@ -216,9 +216,9 @@ int Solitaire::cycleDeck()
 
 /*******************************************************************************************
  *          This is the setion that looks over the ID number and suit of a card sent to it         
- *          to check if that card can be played on either a colmn or the aces above         
+ *          to check if that card can be played on either a column or the aces above         
 ********************************************************************************************/
-bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
+bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard, bool lastUnflippedCard)
 {
     bool cardRed;
     bool columnRed;
@@ -227,16 +227,15 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
     char suits[4] = {'C', 'S', 'H', 'D'};
     int moveSize;
     bool aceMatch = false;
-    //Card c = *p_c;
 
     possibleMoves.clear();
     cout << "CheckCanMove's Card address is: " << &p_c << endl;;
     bool fu = p_c->getFaceUp();
     cout << "the card in checkCanMove's facuUp value is: "  << fu << endl;;
 
-    if (p_c->getFaceUp() == true)                      // if the card is not flipped up, disregard it
+    if (p_c->getFaceUp() == true)                   // if the card is not flipped up, disregard it
     {
-        int id = p_c->getID();                         // from the card's ID, face value and suit
+        int id = p_c->getID();                      // from the card's ID, face value and suit
         cout << "CheckPosMoves id = " << id << endl;;
 
         /********  check if the same card was clicked again  *******/
@@ -359,7 +358,7 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
             {
                 if (slot == cardCycle)
                 {
-                    moveToColumn(destination, col, row, lastCard); 
+                    moveToColumn(destination, col, row, lastUnflippedCard); 
                     moved = true;
                 }
             }             
@@ -373,13 +372,13 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard)
 
 
 /******************  this will move the card to a column in the play area  *******************/
-void Solitaire::moveToColumn(int destinationCol, int col, int slot, bool lastCard)
+void Solitaire::moveToColumn(int destinationCol, int col, int slot, bool lastUnflippedCard)
 {
     cout << "In MoveToColumn\n";
     if (col < 100)                              // this means that it came from the play area and not aces or draw pile
     {
         int colSize = cardCol[col].getSize();
-        cout << "row: " << slot << " col size: " << colSize << " last card: " << lastCard << endl;;
+        cout << "row: " << slot << " col size: " << colSize << " last card: " << lastUnflippedCard << endl;;
         for (int i= slot; i<colSize; i++)                    // take each card from the selected card to the end
         {
             std:: cout << "ROW: " << i << endl;;
@@ -391,7 +390,7 @@ void Solitaire::moveToColumn(int destinationCol, int col, int slot, bool lastCar
         if (colLength > 0)                                          // if there are still cards in the col, flip one
         {
             Card* t = cardCol[col].getCard(colLength-1);
-            if (lastCard == true) {t->flipFaceUp();}
+            if (lastUnflippedCard == true) {t->flipFaceUp();}
         }
     }
     else 

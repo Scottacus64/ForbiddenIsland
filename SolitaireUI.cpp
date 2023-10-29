@@ -181,29 +181,30 @@ void SolitaireUI::cardClicked()
 
         std::cout << "** Top of card clicked cardsDelt = " << cardsDelt << endl;;
         bool lastCard = false;
+        bool lastUnflippedCard = false;
         QString cardName = clickedCard->objectName();
         QChar firstChar = cardName.at(0);
         QChar secondChar = cardName.at(1);
         if (firstChar == 'C')
         {
-            cardName.remove(0, 1);
+            cardName.remove(0, 1);                                              //strip the leading C
             std::string card = cardName.toStdString();
             int slot = std::stoi(card);
             int col = slot/19;
             int row = slot%19;
-            Card* p_c = m_pSolitaire->getColCardAt(col, row);
+            Card* p_c = m_pSolitaire->getColCardAt(col, row);                   //find the solitaire card at this location
             Card c = *p_c;
-            int cardID = c.getID();
-            int colLastCardID = m_pSolitaire->getColumn(col).getLastCardID();
-            if (cardID == colLastCardID) {lastCard = true;}
+            int cardID = c.getID();                                             //get the card's ID
+            int colLastCardID = m_pSolitaire->getColumn(col).getLastCardID();   //get the ID of the last card in the column
+            if (cardID == colLastCardID) {lastCard = true;}                     //if they are equal then we have found the last card
             if (row > 0)
             {
-                Card* p_test = m_pSolitaire->getColCardAt(col, row-1);
-                bool flipped = p_test->getFaceUp();
-                if (flipped == false) {lastCard = true;}
+                Card* p_test = m_pSolitaire->getColCardAt(col, row-1);          //this is used if a stack is moved and the last card
+                bool flipped = p_test->getFaceUp();                             //in the column is not flipped
+                if (flipped == false) {lastUnflippedCard = true;}
             }
             drawPileFlag = false;
-            m_pSolitaire->checkCanMove(p_c, col, row, lastCard);
+            m_pSolitaire->checkCanMove(p_c, col, row, lastCard, lastUnflippedCard);
         }
         /*********** if the aceStack is clicked **************/
         else if(firstChar == 'A')
@@ -216,7 +217,7 @@ void SolitaireUI::cardClicked()
             
             Card* p_c = aceStack.getCard(size-1);
             drawPileFlag = false;
-            m_pSolitaire->checkCanMove(p_c, 100, suit, true);
+            m_pSolitaire->checkCanMove(p_c, 100, suit, true, false);
         }
         /*********** if the draw pile or deck stack is clicked *************/
         else if(firstChar == 'D')
@@ -245,7 +246,7 @@ void SolitaireUI::cardClicked()
                     if (dpSize > 0) 
                     {
                         Card* p_c = m_pSolitaire->getTopDrawPileCard();
-                        bool canMove = m_pSolitaire->checkCanMove(p_c, 100, 100, true);
+                        bool canMove = m_pSolitaire->checkCanMove(p_c, 100, 100, true, false);
                         if (canMove==true) {updateDecks(1,m_pSolitaire->getDrawPileSize());}    // needs a fresh dpSize
                     }
                     else 
