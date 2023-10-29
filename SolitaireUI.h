@@ -1,11 +1,16 @@
 #ifndef SOLITAIREUI_H
 #define SOLITAIREUI_H
 
+
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
 #include "ui_solitaire.h"
 #include "Solitaire.h"
+#include <QLabel>
+#include <QTimer>
+#include <QTime>
+#include <QElapsedTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class SolitaireUI; }
@@ -41,7 +46,11 @@ private:
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];
     QPushButton* m_newGame;
-
+    QTimer elapsedTime;
+    QLabel* m_moves;
+    QLabel* m_timer;
+    QTimer timer;
+    QElapsedTimer elapsedTimer;
     Solitaire* m_pSolitaire;
     int cardsDelt = 0;
     bool drawPileFlag;

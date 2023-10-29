@@ -28,6 +28,7 @@ public:
     Hand* getAceStack(int suit);
     int   getDrawPileSize();
     Card* getDrawPileAt(int slot);
+    int   getMoves();
 
     Card removeColCard(int col, int row, bool lastCard);
     Card removeForAce(int col, int row);
@@ -54,6 +55,6 @@ private:
     int  dpSize;
     int  cardCycle;
     bool win;
-
+    int  moves;
 };
 #endif // SOLITAIRE_H

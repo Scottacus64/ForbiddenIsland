@@ -3,7 +3,8 @@
 #include <iostream>
 #include <QPainter>
 #include <QTimer>
-
+#include <QFont>
+#include <QPalette>
 #include <QCoreApplication>
 #include <QDir>
 
@@ -96,6 +97,34 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_newGame->setText(QString("New Game?"));
     connect(m_newGame, &QPushButton::clicked, this, &SolitaireUI::cardClicked);
 
+    QFont font;
+    font.setPointSize(28);
+    QPalette palette;
+    palette.setColor(QPalette::WindowText, Qt::white);
+
+    m_moves = new QLabel("moves", this);
+    m_moves->setGeometry(QRect(700,820,200,100));
+    m_moves->setFont(font);
+    m_moves->setPalette(palette);
+    m_moves->setText(QString("Moves = "));
+
+    m_timer = new QLabel("Time: ", this);           
+    m_timer->setGeometry(QRect(700, 850, 300, 100));
+    m_timer->setFont(font);
+    m_timer->setPalette(palette);
+    
+
+    elapsedTimer.start();
+
+    QObject::connect(&timer, &QTimer::timeout, [&]() {
+        qint64 elapsedMilliseconds = elapsedTimer.elapsed();
+        qint64 elapsedSeconds = elapsedMilliseconds / 1000;
+        QString elapsedTimeStr = QString("Time: %1 seconds").arg(elapsedSeconds);
+        m_timer->setText(elapsedTimeStr);
+    });
+
+    timer.start(1000);
+
     m_pSolitaire = new Solitaire();
 
     dealCards();
@@ -168,6 +197,8 @@ void SolitaireUI::refreshScreen()
             m_pA[i]->setEnabled(false);
         }
     }
+    int moves = m_pSolitaire->getMoves();
+    m_moves->setText(QString("Moves = ") + QString::number(moves));
 }
 
 

@@ -49,6 +49,7 @@ void Solitaire::dealGame()
     drawPile = Deck(0);
     dpSize = 0;
     win = false;
+    moves = 0;
     printField();
 }
 
@@ -209,6 +210,7 @@ int Solitaire::cycleDeck()
     cout << "Cycle deck cards remaining = " << remaining << "\n\n";
     if (remaining == 0){bool win = checkAutoFinish();}
     if (win == true){std::cout << "WIN!!!";}
+    moves ++;
     return cardsDelt;                               // this let's the calling function know how many cards were delt
 }
 
@@ -382,7 +384,7 @@ void Solitaire::moveToColumn(int destinationCol, int col, int slot, bool lastUnf
         for (int i= slot; i<colSize; i++)                    // take each card from the selected card to the end
         {
             std:: cout << "ROW: " << i << endl;;
-            Card c = cardCol[col].removeCard(slot);                     // remove it from the sorce and..
+            Card c = cardCol[col].removeCard(slot);                  // remove it from the sorce and..
             cardCol[destinationCol].addCard(c);                      // add it to the destination
         }
         int colLength = cardCol[col].getSize();
@@ -407,6 +409,7 @@ void Solitaire::moveToColumn(int destinationCol, int col, int slot, bool lastUnf
             playFromAces(destinationCol, slot);
         }
     }
+    moves ++;
 }
 
 
@@ -429,6 +432,7 @@ void Solitaire::playFromAces(int col, int suit)
     int size = Aces[suit].getSize();
     Card c = Aces[suit].removeCard(size-1);
     cardCol[col].addCard(c);  
+    moves ++;
 }
 
 
@@ -461,6 +465,7 @@ void Solitaire::aceStackMove(int col, int row, int suit, Card* p_c, bool lastCar
         if (aceSize < 13) {win = false;}
     }
     cout << "win = " << win << " Out of AceStackMove\n";
+    moves ++;
 }
 
 
@@ -555,6 +560,11 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
     }
     else
     {return true;}
-    
+ 
  }
 
+
+int Solitaire::getMoves()
+{
+    return moves;
+}
