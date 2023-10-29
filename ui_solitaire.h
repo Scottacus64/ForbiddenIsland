@@ -14,6 +14,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QWidget>
 #include <QPushButton>
+#include <QScreen>
 
 QT_BEGIN_NAMESPACE
 
@@ -33,8 +34,13 @@ public:
         if (SolitaireUI->objectName().isEmpty())
         {
             SolitaireUI->setObjectName("SolitaireUI");
+
+            QScreen *primaryScreen = QGuiApplication::primaryScreen();
+            QRect screenGeometry = primaryScreen->geometry();
+            int screenWidth = screenGeometry.width();
+
             SolitaireUI->resize(1087, 1000);
-            SolitaireUI->move(700, 0);
+            SolitaireUI->move(((screenWidth/2) -(1087/2)), 0);
         }
     } 
 };
@@ -46,3 +52,5 @@ namespace Ui {
 QT_END_NAMESPACE
 
 #endif // UI_SOLITAIRE_H
+
+
