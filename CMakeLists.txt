@@ -25,10 +25,10 @@ set(PROJECT_SOURCES
         Card.h 
         Card.cpp 
         ui_solitaire.ui
-        icon.icns
+        Solitaire.icns
 )
 
-set_source_files_properties(icon.icns
+set_source_files_properties(Solitaire.icns
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources
 )
 

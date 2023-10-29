@@ -174,7 +174,6 @@ void SolitaireUI::refreshScreen()
 void SolitaireUI::cardClicked()
 {
     QPushButton* clickedCard = qobject_cast<QPushButton*>(sender());
-    for (int i=0; i<4; i++) {m_pD[i]->show();}
     if (clickedCard) 
     {
         int dpSize = m_pSolitaire->getDrawPileSize();           // this allows expansion of the last draw piles to register
@@ -222,6 +221,7 @@ void SolitaireUI::cardClicked()
         /*********** if the draw pile or deck stack is clicked *************/
         else if(firstChar == 'D')
         {
+            for (int i=0; i<4; i++) {m_pD[i]->show();}
             std::string deck = cardName.toStdString();
             std::cout << "Clicked on " << deck << endl;;
             if (deck == "D0") 
