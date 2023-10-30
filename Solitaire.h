@@ -29,6 +29,7 @@ public:
     int   getDrawPileSize();
     Card* getDrawPileAt(int slot);
     int   getMoves();
+    struct cardState {int ID; bool faceUp;};
 
     Card removeColCard(int col, int row, bool lastCard);
     Card removeForAce(int col, int row);
@@ -39,6 +40,7 @@ public:
     bool getWin();
     bool checkAutoFinish();
     bool nextCard();
+    void saveState();
 
 private:
     Deck solitaireDeck;

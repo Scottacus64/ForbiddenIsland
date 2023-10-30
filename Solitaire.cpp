@@ -568,3 +568,66 @@ int Solitaire::getMoves()
 {
     return moves;
 }
+
+
+void Solitaire::saveState()
+{    
+    cardState sColumn[7][19];
+    cardState sAces[4][13];
+    cardState sSolitaireDeck[26];
+    cardState sDrawPile[26];
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            Card* pCard = cardCol[i].getCard(j);
+            if (pCard != nullptr)
+            {
+                Card cCard = *pCard;
+                cardState sCard;
+                sCard.ID = cCard.getID();
+                sCard.faceUp = cCard.getFaceUp();
+                sColumn[i][j] = sCard;
+            }
+        }
+    }
+    for (int i=0; i<4; i++)
+    {
+        for (int j=0; j<13; j++)
+        {
+            Card* pCard = Aces[i].getCard(j);
+            if (pCard != nullptr)
+            {
+                Card cCard = *pCard;
+                cardState sCard;
+                sCard.ID = cCard.getID();
+                sCard.faceUp = cCard.getFaceUp();
+                sAces[i][j] = sCard;
+            }
+        }
+    }
+    for (int i=0; i<26; i++)
+    {
+        Card* pCard = solitaireDeck.getDeckCardAt(i);
+        if (pCard != nullptr)
+        {
+            Card cCard = *pCard;
+            cardState sCard;
+            sCard.ID = cCard.getID();
+            sCard.faceUp = cCard.getFaceUp();
+            sSolitaireDeck[i] = sCard;
+        }
+    }
+    for (int i=0; i<26; i++)
+    {
+        Card* pCard = drawPile.getDeckCardAt(i);
+        if (pCard != nullptr)
+        {
+            Card cCard = *pCard;
+            cardState sCard;
+            sCard.ID = cCard.getID();
+            sCard.faceUp = cCard.getFaceUp();
+            sDrawPile[i] = sCard;
+        }
+    }
+}
