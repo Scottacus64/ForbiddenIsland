@@ -368,6 +368,8 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard, bool la
     }
     bool win = checkAutoFinish();
     if (win == true){std::cout << "WIN!!!";}
+    saveState();
+    printSave();
     return canMove;
 }
 
@@ -572,62 +574,160 @@ int Solitaire::getMoves()
 
 void Solitaire::saveState()
 {    
-    cardState sColumn[7][19];
-    cardState sAces[4][13];
-    cardState sSolitaireDeck[26];
-    cardState sDrawPile[26];
+    cardState dCard;
+    dCard.ID = 99;
+    dCard.faceUp = 0;
     for (int i=0; i<7; i++)
     {
         for (int j=0; j<19; j++)
         {
-            Card* pCard = cardCol[i].getCard(j);
-            if (pCard != nullptr)
+            int colLen = cardCol[i].getSize();
+            if (j < colLen)
             {
-                Card cCard = *pCard;
-                cardState sCard;
-                sCard.ID = cCard.getID();
-                sCard.faceUp = cCard.getFaceUp();
-                sColumn[i][j] = sCard;
+                Card* pCard = cardCol[i].getCard(j);
+                if (pCard != nullptr)
+                {
+                    Card cCard = *pCard;
+                    cardState sCard;
+                    sCard.ID = cCard.getID();
+                    sCard.faceUp = cCard.getFaceUp();
+                    sColumn[i][j] = sCard;
+                }
             }
+            else {sColumn[i][j] = dCard;}
         }
     }
     for (int i=0; i<4; i++)
     {
         for (int j=0; j<13; j++)
         {
-            Card* pCard = Aces[i].getCard(j);
+            int aceLen = Aces[i].getSize();
+            if (j < aceLen)
+            {
+                Card* pCard = Aces[i].getCard(j);
+                if (pCard != nullptr)
+                {
+                    Card cCard = *pCard;
+                    cardState sCard;
+                    sCard.ID = cCard.getID();
+                    sCard.faceUp = cCard.getFaceUp();
+                    sAces[i][j] = sCard;
+                }
+            }
+            else {sAces[i][j] = dCard;}
+        }
+    }
+    int sdLen = solitaireDeck.cardsLeft();
+    for (int i=0; i<26; i++)
+    {
+        if (i < sdLen)
+        {
+            Card* pCard = solitaireDeck.getDeckCardAt(i);
             if (pCard != nullptr)
             {
                 Card cCard = *pCard;
                 cardState sCard;
                 sCard.ID = cCard.getID();
                 sCard.faceUp = cCard.getFaceUp();
-                sAces[i][j] = sCard;
+                sSolitaireDeck[i] = sCard;
             }
         }
+        else {sSolitaireDeck[i] = dCard;}
+    }
+    int dLen = drawPile.cardsLeft();
+    for (int i=0; i<26; i++)
+    {
+        if (i < dLen)
+        {
+            Card* pCard = drawPile.getDeckCardAt(i);
+            if (pCard != nullptr)
+            {
+                Card cCard = *pCard;
+                cardState sCard;
+                sCard.ID = cCard.getID();
+                sCard.faceUp = cCard.getFaceUp();
+                sDrawPile[i] = sCard;
+            }
+        }
+        else {sDrawPile[i] = dCard;}
+    }
+
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            gameSave.sColumn[i][j] = sColumn[i][j]; 
+        }
+    }
+
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            gameSave.sAces[i][j] = sAces[i][j]; 
+        }
+    }
+
+    for (int i = 0; i < 26; ++i) 
+    {
+        gameSave.sSolitaireDeck[i] = sSolitaireDeck[i];
+        gameSave.sDrawPile[i]= sDrawPile[i];
+    }
+}
+
+void Solitaire::printSave()
+{
+    cardState col[7][19];
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            col[i][j].ID = gameSave.sColumn[i][j].ID;
+            col[i][j].faceUp = gameSave.sColumn[i][j].faceUp;
+        } 
+    }
+    cardState ace[4][13];
+    for (int i=0; i<4; i++)
+    {
+        for (int j=0; j<13; j++)
+        {
+            ace[i][j] = gameSave.sAces[i][j];
+        }
+    }
+    cardState deck[26];
+    for (int i=0; i<26; i++)
+    {
+        deck[i] = gameSave.sSolitaireDeck[i];
+    }
+    cardState draw[26];
+    for (int i=0; i<26; i++)
+    {
+        draw[i] = gameSave.sDrawPile[i];
+    }
+    for (int i=0; i<19; i++)
+    {
+        std::cout << "\n";
+        for (int j=0; j<7; j++)
+        {
+            std::cout << col[j][i].ID << ":" << col[j][i].faceUp << "\t";
+        }
+    }
+    std::cout << "\n";
+    for (int i=0; i<4; i++)
+    {
+        for (int j=0; j<13; j++)
+        {
+            std::cout << ace[i][j].ID << ":" << ace[i][j].faceUp << " ";
+        }
+        std::cout << "\n";
     }
     for (int i=0; i<26; i++)
     {
-        Card* pCard = solitaireDeck.getDeckCardAt(i);
-        if (pCard != nullptr)
-        {
-            Card cCard = *pCard;
-            cardState sCard;
-            sCard.ID = cCard.getID();
-            sCard.faceUp = cCard.getFaceUp();
-            sSolitaireDeck[i] = sCard;
-        }
+        std::cout << deck[i].ID << ":" << deck[i].faceUp << "\n";
     }
-    for (int i=0; i<26; i++)
+        for (int i=0; i<26; i++)
     {
-        Card* pCard = drawPile.getDeckCardAt(i);
-        if (pCard != nullptr)
-        {
-            Card cCard = *pCard;
-            cardState sCard;
-            sCard.ID = cCard.getID();
-            sCard.faceUp = cCard.getFaceUp();
-            sDrawPile[i] = sCard;
-        }
+        std::cout << draw[i].ID << ":" << draw[i].faceUp << "\n";
     }
+
 }

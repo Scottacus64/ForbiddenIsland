@@ -136,17 +136,12 @@ void Deck::printTopCard()
 Card* Deck::getTopDeckCard()
 {
     Card* c = &m_deck[m_deck.size() -1];
-    //Card* c = &m_deck.back();
     return c;
 }
 
 
 Card* Deck::getDeckCardAt(int slot)
 {
-    std::cout << "\ngetDeckCardAt's slot = " << slot << "\n";
-   
-    Card c = m_deck.at(slot);
-    Card* p_c = &c;
-    std::cout << "**Card Adress " << p_c << "\n\n";
+    Card* p_c = &m_deck[slot];
     return p_c;
 }

@@ -30,7 +30,19 @@ public:
     Card* getDrawPileAt(int slot);
     int   getMoves();
     struct cardState {int ID; bool faceUp;};
+    cardState sColumn[7][19];
+    cardState sAces[4][13];
+    cardState sSolitaireDeck[26];
+    cardState sDrawPile[26];
 
+    struct gameData {
+    std::array<std::array<cardState, 19>, 7> sColumn;
+    std::array<std::array<cardState, 13>, 4> sAces;
+    std::array<cardState, 26> sSolitaireDeck;
+    std::array<cardState, 26> sDrawPile;
+    };
+
+    gameData gameSave;
     Card removeColCard(int col, int row, bool lastCard);
     Card removeForAce(int col, int row);
     void aceStackMove(int col, int row, int suit, Card* c, bool lastCard);
@@ -41,6 +53,7 @@ public:
     bool checkAutoFinish();
     bool nextCard();
     void saveState();
+    void printSave();
 
 private:
     Deck solitaireDeck;
