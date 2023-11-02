@@ -16,6 +16,10 @@ public:
     void moveToColumn(int destinationCol, int col, int slot, bool lastUnflipedCard);
     bool checkCanMove(Card* c, int col, int row, bool lastCard, bool lastUnflippedCard);
     void printField();
+    //void undoMove(int version);
+    //void copyState();
+    void saveGameState();
+    void loadGameState();
 
     Hand  getColumn(int col);
     int   getTopAce(int suit);
@@ -25,11 +29,15 @@ public:
     Deck* getDrawPile();
     Deck* getDeck();
     int   getDeckSize();
+    int   getDrawPileFlipped();
+    void  flipThreeDP();
     Hand* getAceStack(int suit);
     int   getDrawPileSize();
     Card* getDrawPileAt(int slot);
     int   getMoves();
-    struct cardState {int ID; bool faceUp;};
+
+
+    struct cardState {Card* p_Card; bool faceUp;};
     cardState sColumn[7][19];
     cardState sAces[4][13];
     cardState sSolitaireDeck[26];
@@ -42,7 +50,15 @@ public:
     std::array<cardState, 26> sDrawPile;
     };
 
-    gameData gameSave;
+    struct GameSaveNode {
+    cardState sColumn[7][19];
+    cardState sAces[4][13];
+    cardState sSolitaireDeck[26];
+    cardState sDrawPile[26];
+    GameSaveNode* next;
+    };
+
+    gameData gameSave[2];
     Card removeColCard(int col, int row, bool lastCard);
     Card removeForAce(int col, int row);
     void aceStackMove(int col, int row, int suit, Card* c, bool lastCard);
@@ -68,8 +84,10 @@ private:
     bool aceFlag = false;
     int  lastCardClicked;
     int  dpSize;
+    int  dpFlipUp;
     int  cardCycle;
     bool win;
     int  moves;
+    GameSaveNode* head;
 };
 #endif // SOLITAIRE_H

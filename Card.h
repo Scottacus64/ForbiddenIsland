@@ -13,6 +13,7 @@ public:
     int  getFaceValue();
     int  getActualValue();
     bool getFaceUp();
+    void setFaceUp(bool fUp);
     char getSuit();
     void flipCard();
     void flipFaceUp();

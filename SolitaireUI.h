@@ -33,6 +33,8 @@ public:
     void paintEvent(QPaintEvent *event);
     void autoFinish();
     void delayTimer(int delay);
+    void undoPressed();
+    void refreshDecks();
 
 public slots:
     void cardClicked();
@@ -46,6 +48,7 @@ private:
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];
     QPushButton* m_newGame;
+    QPushButton* m_undo;
     QTimer elapsedTime;
     QLabel* m_moves;
     QLabel* m_timer;

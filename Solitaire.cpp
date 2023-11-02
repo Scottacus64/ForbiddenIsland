@@ -113,7 +113,7 @@ Card* Solitaire::getTopDrawPileCard()
     cout << "GTCDP deck = " << &drawPile << endl;;
     Card* p_c = drawPile.getTopDeckCard();
     drawPile.printTopCard();
-    cout << "***** GTCDP Card Address = " << &p_c << "\n\n\n";
+    cout << "***** GTCDP Card Address = " << &p_c << "\n\n";
     int id = p_c->getID();
     cout << "****** GTDPC id = " << id << endl;;
     return p_c;
@@ -129,7 +129,14 @@ Deck* Solitaire::getDrawPile()
 
 int Solitaire::getDrawPileSize()
 {
+    int dpSize = drawPile.cardsLeft();
     return dpSize;
+}
+
+
+int Solitaire::getDrawPileFlipped()
+{
+    return dpFlipUp;
 }
 
 
@@ -180,8 +187,20 @@ int Solitaire::cycleDeck()
     if (solitaireDeck.cardsLeft() == 0 && getDrawPileSize() > 0){reuseDeck();}
     int cardsDelt = 0;
     cout << "the drawPile address is: " << &drawPile << endl;;
+    int dpSize = drawPile.cardsLeft();
+    if (dpSize > 0)                             // this flips all draw pile cards face down so that later we can see which
+    {                                           // cards are playable (ie face up)
+        for (int i=0; i<dpSize; i++) 
+        {
+            std::cout << "flipping draw pile card\n";
+            Card* c = drawPile.getDeckCardAt(i);
+            c->setFaceUp(false);
+        }
+    }
+    dpFlipUp = 0;
     for (int i=0; i<3; i++)
     {
+        std::cout << "i = " << i;
         if (solitaireDeck.cardsLeft() > 0)
         {
             Card c = solitaireDeck.deal();          // get and remove the Card object from the solitaireDeck
@@ -189,12 +208,13 @@ int Solitaire::cycleDeck()
             int id = c.getID();
             Card* p_c = &c;
             cout << "\nthe card delt's id is " << id << endl;;
+            cout << "\nthe card delt face up is " << c.getFaceUp() << endl;;
             cout << "the delt cards address is " << &p_c << endl;;
             drawPile.addCard(c);                    // add the Card object to the deck drawPile
-            dpSize ++;                              // increment dpSize and cardsDelt
+            dpFlipUp ++;                            // this shows how many cards in the dp are flipped up and ready to play
             cardsDelt ++;
             c.printCard();
-            cout << " draw pile size: " << dpSize << endl;;
+            cout << " ######## draw pile size: " << dpSize << endl;;
         }
         Card* p_c = drawPile.getTopDeckCard();
         int id = p_c->getID();
@@ -368,8 +388,6 @@ bool Solitaire::checkCanMove(Card* p_c, int col, int row, bool lastCard, bool la
     }
     bool win = checkAutoFinish();
     if (win == true){std::cout << "WIN!!!";}
-    saveState();
-    printSave();
     return canMove;
 }
 
@@ -418,12 +436,34 @@ void Solitaire::moveToColumn(int destinationCol, int col, int slot, bool lastUnf
 void Solitaire::playFromDrawPile(int col)
  { 
     bool canMove;
-    
-    if(dpSize > 0) 
-    {       
+    std::cout << "In playFromDrawPile Draw Pile Size = " << dpFlipUp << "\n"; 
+    if(dpFlipUp > 0) 
+    {      
         Card c = drawPile.deal();
         cardCol[col].addCard(c);
-        dpSize --;
+        dpFlipUp --;
+        int dpSize = drawPile.cardsLeft();
+        std::cout << "dpFlipUp = " << dpFlipUp << " dpSize = " << dpSize << "\n\n"; 
+        if (dpFlipUp == 0 && dpSize >0){flipThreeDP();}
+    }
+}
+
+
+void Solitaire::flipThreeDP()
+{
+    int dpSize = drawPile.cardsLeft();
+    if (dpSize > 0)
+    std::cout << "In flip three\n\n";
+    {
+        for (int i=dpSize-1; i>dpSize-4; i--)
+        {
+            if (i>-1)
+            {
+                dpFlipUp ++;
+                Card* c = drawPile.getDeckCardAt(i);
+                c->setFaceUp(true);
+            }
+        }
     }
 }
 
@@ -455,7 +495,8 @@ void Solitaire::aceStackMove(int col, int row, int suit, Card* p_c, bool lastCar
     else
     {
         c = drawPile.deal();
-        dpSize --;
+        dpFlipUp --;
+        if (dpFlipUp == 0){flipThreeDP();}
     }
     Aces[suit].addCard(c);                              // move the card to the Ace stack
     aceFlag = true;
@@ -510,7 +551,7 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
     {
         Card c = drawPile.deal();
         dpSize --;
-        c.flipCard();
+        c.setFaceUp(false);
         solitaireDeck.addCard(c);
     }
  }
@@ -572,10 +613,10 @@ int Solitaire::getMoves()
 }
 
 
-void Solitaire::saveState()
+/*void Solitaire::saveState()
 {    
     cardState dCard;
-    dCard.ID = 99;
+    dCard.p_Card = nullptr;
     dCard.faceUp = 0;
     for (int i=0; i<7; i++)
     {
@@ -589,7 +630,7 @@ void Solitaire::saveState()
                 {
                     Card cCard = *pCard;
                     cardState sCard;
-                    sCard.ID = cCard.getID();
+                    sCard.p_Card = pCard;
                     sCard.faceUp = cCard.getFaceUp();
                     sColumn[i][j] = sCard;
                 }
@@ -609,7 +650,7 @@ void Solitaire::saveState()
                 {
                     Card cCard = *pCard;
                     cardState sCard;
-                    sCard.ID = cCard.getID();
+                    sCard.p_Card = pCard;
                     sCard.faceUp = cCard.getFaceUp();
                     sAces[i][j] = sCard;
                 }
@@ -627,7 +668,7 @@ void Solitaire::saveState()
             {
                 Card cCard = *pCard;
                 cardState sCard;
-                sCard.ID = cCard.getID();
+                sCard.p_Card = pCard;
                 sCard.faceUp = cCard.getFaceUp();
                 sSolitaireDeck[i] = sCard;
             }
@@ -644,7 +685,7 @@ void Solitaire::saveState()
             {
                 Card cCard = *pCard;
                 cardState sCard;
-                sCard.ID = cCard.getID();
+                sCard.p_Card = pCard;
                 sCard.faceUp = cCard.getFaceUp();
                 sDrawPile[i] = sCard;
             }
@@ -656,7 +697,7 @@ void Solitaire::saveState()
     {
         for (int j=0; j<19; j++)
         {
-            gameSave.sColumn[i][j] = sColumn[i][j]; 
+            gameSave[version].sColumn[i][j] = sColumn[i][j]; 
         }
     }
 
@@ -664,16 +705,16 @@ void Solitaire::saveState()
     {
         for (int j=0; j<19; j++)
         {
-            gameSave.sAces[i][j] = sAces[i][j]; 
+            gameSave[version].sAces[i][j] = sAces[i][j]; 
         }
     }
 
     for (int i = 0; i < 26; ++i) 
     {
-        gameSave.sSolitaireDeck[i] = sSolitaireDeck[i];
-        gameSave.sDrawPile[i]= sDrawPile[i];
+        gameSave[version].sSolitaireDeck[i] = sSolitaireDeck[i];
+        gameSave[version].sDrawPile[i]= sDrawPile[i];
     }
-}
+}*/
 
 void Solitaire::printSave()
 {
@@ -682,8 +723,8 @@ void Solitaire::printSave()
     {
         for (int j=0; j<19; j++)
         {
-            col[i][j].ID = gameSave.sColumn[i][j].ID;
-            col[i][j].faceUp = gameSave.sColumn[i][j].faceUp;
+            col[i][j].p_Card = head->sColumn[i][j].p_Card;
+            col[i][j].faceUp = head->sColumn[i][j].faceUp;
         } 
     }
     cardState ace[4][13];
@@ -691,25 +732,28 @@ void Solitaire::printSave()
     {
         for (int j=0; j<13; j++)
         {
-            ace[i][j] = gameSave.sAces[i][j];
+            ace[i][j] = head->sAces[i][j];
         }
     }
     cardState deck[26];
     for (int i=0; i<26; i++)
     {
-        deck[i] = gameSave.sSolitaireDeck[i];
+        deck[i] = head->sSolitaireDeck[i];
     }
     cardState draw[26];
     for (int i=0; i<26; i++)
     {
-        draw[i] = gameSave.sDrawPile[i];
+        draw[i] = head->sDrawPile[i];
     }
     for (int i=0; i<19; i++)
     {
         std::cout << "\n";
         for (int j=0; j<7; j++)
         {
-            std::cout << col[j][i].ID << ":" << col[j][i].faceUp << "\t";
+            //if (col[i][j].p_Card != nullptr)
+            {std::cout << col[j][i].p_Card << ":" << col[j][i].faceUp << "\t";}
+            //else 
+            //{std::cout << "0:0\t";}
         }
     }
     std::cout << "\n";
@@ -717,17 +761,246 @@ void Solitaire::printSave()
     {
         for (int j=0; j<13; j++)
         {
-            std::cout << ace[i][j].ID << ":" << ace[i][j].faceUp << " ";
+            if (ace[i][j].p_Card != nullptr)
+            {std::cout << ace[i][j].p_Card->getID() << ":" << ace[i][j].faceUp << " ";}
+            else 
+            {std::cout <<"0:0\t";}
         }
         std::cout << "\n";
     }
     for (int i=0; i<26; i++)
     {
-        std::cout << deck[i].ID << ":" << deck[i].faceUp << "\n";
+        if (deck[i].p_Card != nullptr)
+        {std::cout << deck[i].p_Card->getID() << ":" << deck[i].faceUp << "\n";}
+        else 
+        {std::cout <<"0:0";}
     }
+    std::cout << "\n";
         for (int i=0; i<26; i++)
     {
-        std::cout << draw[i].ID << ":" << draw[i].faceUp << "\n";
+        if (draw[i].p_Card != nullptr)
+        {std::cout << draw[i].p_Card->getID() << ":" << draw[i].faceUp << "\n";}
+        else 
+        {std::cout << "0:0";}
     }
 
+}
+
+/*void Solitaire::undoMove()
+{
+    std::cout << "In undoMove";
+    for (int i=0; i<7; i++) {cardCol[i].clearHand();}
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            if(gameSave[version].sColumn[i][j].p_Card != nullptr)
+            {
+                gameSave[version].sColumn[i][j].p_Card->setFaceUp(gameSave[version].sColumn[i][j].faceUp);
+                cardCol[i].addCard(*gameSave[version].sColumn[i][j].p_Card);
+            }
+        } 
+    } 
+    for (int i=0; i<4; i++) {Aces[i].clearHand();}
+    for (int i=0; i<4; i++)
+    {
+        for (int j=0; j<13; j++)
+        {
+            if(gameSave[version].sAces[i][j].p_Card != nullptr)
+            {
+                gameSave[version].sAces[i][j].p_Card->setFaceUp(gameSave[version].sAces[i][j].faceUp);
+                Aces[i].addCard(*gameSave[version].sAces[i][j].p_Card);
+            }
+        }
+        
+    } 
+    solitaireDeck.eraseDeck();
+    for (int i=0; i<26; i++)
+    {
+        if(gameSave[version].sSolitaireDeck[i].p_Card != nullptr)
+        {
+            gameSave[version].sSolitaireDeck[i].p_Card->setFaceUp(gameSave[version].sSolitaireDeck[i].faceUp);
+            solitaireDeck.addCard(*gameSave[version].sSolitaireDeck[i].p_Card);
+        }
+    }  
+    drawPile.eraseDeck();
+    for (int i=0; i<4; i++)
+    {
+        if(gameSave[version].sDrawPile[i].p_Card != nullptr)
+        {
+            gameSave[version].sDrawPile[i].p_Card->setFaceUp(gameSave[version].sDrawPile[i].faceUp);
+            drawPile.addCard(*gameSave[version].sDrawPile[i].p_Card);
+        }
+    }    
+}*/
+
+/*void Solitaire::copyState()
+{
+    gameSave[0] = gameSave[1];
+}*/
+
+
+void Solitaire::saveGameState() {
+    GameSaveNode* newNode = new GameSaveNode;
+    
+    cardState dCard;
+    dCard.p_Card = nullptr;
+    dCard.faceUp = 0;
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            int colLen = cardCol[i].getSize();
+            if (j < colLen)
+            {
+                Card* pCard = cardCol[i].getCard(j);
+                if (pCard != nullptr)
+                {
+                    Card cCard = *pCard;
+                    cardState sCard;
+                    sCard.p_Card = pCard;
+                    sCard.faceUp = cCard.getFaceUp();
+                    sColumn[i][j] = sCard;
+                }
+            }
+            else {sColumn[i][j] = dCard;}
+        }
+    }
+    for (int i=0; i<4; i++)
+    {
+        for (int j=0; j<13; j++)
+        {
+            int aceLen = Aces[i].getSize();
+            if (j < aceLen)
+            {
+                Card* pCard = Aces[i].getCard(j);
+                if (pCard != nullptr)
+                {
+                    Card cCard = *pCard;
+                    cardState sCard;
+                    sCard.p_Card = pCard;
+                    sCard.faceUp = cCard.getFaceUp();
+                    sAces[i][j] = sCard;
+                }
+            }
+            else {sAces[i][j] = dCard;}
+        }
+    }
+    int sdLen = solitaireDeck.cardsLeft();
+    for (int i=0; i<26; i++)
+    {
+        if (i < sdLen)
+        {
+            Card* pCard = solitaireDeck.getDeckCardAt(i);
+            if (pCard != nullptr)
+            {
+                Card cCard = *pCard;
+                cardState sCard;
+                sCard.p_Card = pCard;
+                sCard.faceUp = cCard.getFaceUp();
+                sSolitaireDeck[i] = sCard;
+            }
+        }
+        else {sSolitaireDeck[i] = dCard;}
+    }
+    int dLen = drawPile.cardsLeft();
+    for (int i=0; i<26; i++)
+    {
+        if (i < dLen)
+        {
+            Card* pCard = drawPile.getDeckCardAt(i);
+            if (pCard != nullptr)
+            {
+                Card cCard = *pCard;
+                cardState sCard;
+                sCard.p_Card = pCard;
+                sCard.faceUp = cCard.getFaceUp();
+                sDrawPile[i] = sCard;
+            }
+        }
+        else {sDrawPile[i] = dCard;}
+    }
+
+    
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            newNode->sColumn[i][j] = sColumn[i][j]; 
+        }
+    }
+
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            newNode->sAces[i][j] = sAces[i][j]; 
+        }
+    }
+
+    for (int i = 0; i < 26; ++i) 
+    {
+        newNode->sSolitaireDeck[i] = sSolitaireDeck[i];
+        newNode->sDrawPile[i]= sDrawPile[i];
+    }
+
+
+
+
+    newNode->next = head;
+    head = newNode;
+}
+
+void Solitaire::loadGameState() {
+    if (head) {  // Check if there's at least one saved game state.
+        GameSaveNode* previousNode = head;
+        head = head->next;
+        
+           std::cout << "In undoMove";
+    for (int i=0; i<7; i++) {cardCol[i].clearHand();}
+    for (int i=0; i<7; i++)
+    {
+        for (int j=0; j<19; j++)
+        {
+            if(previousNode->sColumn[i][j].p_Card != nullptr)
+            {
+                previousNode->sColumn[i][j].p_Card->setFaceUp(previousNode->sColumn[i][j].faceUp);
+                cardCol[i].addCard(*previousNode->sColumn[i][j].p_Card);
+            }
+        } 
+    } 
+    for (int i=0; i<4; i++) {Aces[i].clearHand();}
+    for (int i=0; i<4; i++)
+    {
+        for (int j=0; j<13; j++)
+        {
+            if(previousNode->sAces[i][j].p_Card != nullptr)
+            {
+                previousNode->sAces[i][j].p_Card->setFaceUp(previousNode->sAces[i][j].faceUp);
+                Aces[i].addCard(*previousNode->sAces[i][j].p_Card);
+            }
+        }
+        
+    } 
+    solitaireDeck.eraseDeck();
+    for (int i=0; i<26; i++)
+    {
+        if(previousNode->sSolitaireDeck[i].p_Card != nullptr)
+        {
+            previousNode->sSolitaireDeck[i].p_Card->setFaceUp(previousNode->sSolitaireDeck[i].faceUp);
+            solitaireDeck.addCard(*previousNode->sSolitaireDeck[i].p_Card);
+        }
+    }  
+    drawPile.eraseDeck();
+    for (int i=0; i<4; i++)
+    {
+        if(previousNode->sDrawPile[i].p_Card != nullptr)
+        {
+            previousNode->sDrawPile[i].p_Card->setFaceUp(previousNode->sDrawPile[i].faceUp);
+            drawPile.addCard(*previousNode->sDrawPile[i].p_Card);
+        }
+    }    
+        // Don't forget to release the memory allocated for the 'previousNode' if necessary.
+        delete previousNode;
+    } else { }
 }

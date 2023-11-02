@@ -36,6 +36,12 @@ void Card::flipFaceUp()
 }
 
 
+void Card::setFaceUp(bool fUp)
+{
+    faceUp = fUp;
+}
+
+
 int Card::getFaceValue()
 {
     return faceValue;

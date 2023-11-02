@@ -98,6 +98,7 @@ Card Deck::deal()
 int Deck::cardsLeft()
 {
     int remaining = m_deck.size();
+    std::cout << "from Deck Class cards left = " << remaining << " **********\n";
     return remaining;
 }
 
@@ -110,6 +111,14 @@ void Deck::clearDeck(int numberOfDecks)
         makeDeck();
     }
 
+}
+
+
+void Deck::eraseDeck()
+{
+    m_deck.clear();
+    std::cout << "Printing deck after erase\n";
+    printDeck();
 }
 
 

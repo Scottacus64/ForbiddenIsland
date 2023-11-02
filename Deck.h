@@ -18,6 +18,7 @@ public:
     void printDeck();
     int  cardsLeft();
     void clearDeck(int numberOfDecks);
+    void eraseDeck();
     void addCard(Card c);
     void printTopCard();
 
