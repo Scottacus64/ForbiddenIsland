@@ -105,6 +105,8 @@ void Solitaire::printField()
             cout << "\n";
         }
     }
+    gameSaveNode* node = saveGameState();
+    printNode(node);
  }
 
 
@@ -130,6 +132,7 @@ Deck* Solitaire::getDrawPile()
 int Solitaire::getDrawPileSize()
 {
     int dpSize = drawPile.cardsLeft();
+    std::cout << "getDrawPileSize " << dpSize << "\n";
     return dpSize;
 }
 
@@ -612,119 +615,17 @@ int Solitaire::getMoves()
     return moves;
 }
 
-
-/*void Solitaire::saveState()
-{    
-    cardState dCard;
-    dCard.p_Card = nullptr;
-    dCard.faceUp = 0;
-    for (int i=0; i<7; i++)
-    {
-        for (int j=0; j<19; j++)
-        {
-            int colLen = cardCol[i].getSize();
-            if (j < colLen)
-            {
-                Card* pCard = cardCol[i].getCard(j);
-                if (pCard != nullptr)
-                {
-                    Card cCard = *pCard;
-                    cardState sCard;
-                    sCard.p_Card = pCard;
-                    sCard.faceUp = cCard.getFaceUp();
-                    sColumn[i][j] = sCard;
-                }
-            }
-            else {sColumn[i][j] = dCard;}
-        }
-    }
-    for (int i=0; i<4; i++)
-    {
-        for (int j=0; j<13; j++)
-        {
-            int aceLen = Aces[i].getSize();
-            if (j < aceLen)
-            {
-                Card* pCard = Aces[i].getCard(j);
-                if (pCard != nullptr)
-                {
-                    Card cCard = *pCard;
-                    cardState sCard;
-                    sCard.p_Card = pCard;
-                    sCard.faceUp = cCard.getFaceUp();
-                    sAces[i][j] = sCard;
-                }
-            }
-            else {sAces[i][j] = dCard;}
-        }
-    }
-    int sdLen = solitaireDeck.cardsLeft();
-    for (int i=0; i<26; i++)
-    {
-        if (i < sdLen)
-        {
-            Card* pCard = solitaireDeck.getDeckCardAt(i);
-            if (pCard != nullptr)
-            {
-                Card cCard = *pCard;
-                cardState sCard;
-                sCard.p_Card = pCard;
-                sCard.faceUp = cCard.getFaceUp();
-                sSolitaireDeck[i] = sCard;
-            }
-        }
-        else {sSolitaireDeck[i] = dCard;}
-    }
-    int dLen = drawPile.cardsLeft();
-    for (int i=0; i<26; i++)
-    {
-        if (i < dLen)
-        {
-            Card* pCard = drawPile.getDeckCardAt(i);
-            if (pCard != nullptr)
-            {
-                Card cCard = *pCard;
-                cardState sCard;
-                sCard.p_Card = pCard;
-                sCard.faceUp = cCard.getFaceUp();
-                sDrawPile[i] = sCard;
-            }
-        }
-        else {sDrawPile[i] = dCard;}
-    }
-
-    for (int i=0; i<7; i++)
-    {
-        for (int j=0; j<19; j++)
-        {
-            gameSave[version].sColumn[i][j] = sColumn[i][j]; 
-        }
-    }
-
-    for (int i=0; i<7; i++)
-    {
-        for (int j=0; j<19; j++)
-        {
-            gameSave[version].sAces[i][j] = sAces[i][j]; 
-        }
-    }
-
-    for (int i = 0; i < 26; ++i) 
-    {
-        gameSave[version].sSolitaireDeck[i] = sSolitaireDeck[i];
-        gameSave[version].sDrawPile[i]= sDrawPile[i];
-    }
-}*/
-
-void Solitaire::printSave()
+/************************************************************/
+void Solitaire::printNode(gameSaveNode* node)
 {
+    std::cout << node << "\n";
     cardState col[7][19];
     for (int i=0; i<7; i++)
     {
         for (int j=0; j<19; j++)
         {
-            col[i][j].p_Card = head->sColumn[i][j].p_Card;
-            col[i][j].faceUp = head->sColumn[i][j].faceUp;
+            col[i][j].p_Card = node->sColumn[i][j].p_Card;
+            col[i][j].faceUp = node->sColumn[i][j].faceUp;
         } 
     }
     cardState ace[4][13];
@@ -732,138 +633,86 @@ void Solitaire::printSave()
     {
         for (int j=0; j<13; j++)
         {
-            ace[i][j] = head->sAces[i][j];
+            ace[i][j] = node->sAces[i][j];
         }
     }
     cardState deck[26];
     for (int i=0; i<26; i++)
     {
-        deck[i] = head->sSolitaireDeck[i];
+        deck[i] = node->sSolitaireDeck[i];
     }
     cardState draw[26];
     for (int i=0; i<26; i++)
     {
-        draw[i] = head->sDrawPile[i];
+        draw[i] = node->sDrawPile[i];
     }
-    for (int i=0; i<19; i++)
+    std::cout <<"Columns";
+    for (int i=0; i<7; i++)
     {
         std::cout << "\n";
-        for (int j=0; j<7; j++)
+        for (int j=0; j<19; j++)
         {
-            //if (col[i][j].p_Card != nullptr)
-            {std::cout << col[j][i].p_Card << ":" << col[j][i].faceUp << "\t";}
-            //else 
-            //{std::cout << "0:0\t";}
+            if (col[i][j].p_Card != nullptr)
+            {std::cout << col[i][j].p_Card->getID() <<  ":" << col[i][j].faceUp << "\t";}
+            else
+            {std::cout << "0:0\t";}
         }
     }
-    std::cout << "\n";
+    std::cout << "\nAces\n";
     for (int i=0; i<4; i++)
     {
         for (int j=0; j<13; j++)
         {
             if (ace[i][j].p_Card != nullptr)
-            {std::cout << ace[i][j].p_Card->getID() << ":" << ace[i][j].faceUp << " ";}
+            {std::cout << ace[i][j].p_Card->getID() << "/" << ace[i][j].faceUp << " ";}
             else 
-            {std::cout <<"0:0\t";}
+            {std::cout << "0/0\t";}
         }
         std::cout << "\n";
     }
+    std::cout << "Deck\n";
     for (int i=0; i<26; i++)
     {
         if (deck[i].p_Card != nullptr)
         {std::cout << deck[i].p_Card->getID() << ":" << deck[i].faceUp << "\n";}
         else 
-        {std::cout <<"0:0";}
+        {std::cout <<"0:0\n";}
     }
-    std::cout << "\n";
+    std::cout << "Draw Pile\n";
         for (int i=0; i<26; i++)
     {
         if (draw[i].p_Card != nullptr)
         {std::cout << draw[i].p_Card->getID() << ":" << draw[i].faceUp << "\n";}
         else 
-        {std::cout << "0:0";}
+        {std::cout << "0:0\n";}
     }
 
 }
 
-/*void Solitaire::undoMove()
-{
-    std::cout << "In undoMove";
-    for (int i=0; i<7; i++) {cardCol[i].clearHand();}
-    for (int i=0; i<7; i++)
-    {
-        for (int j=0; j<19; j++)
-        {
-            if(gameSave[version].sColumn[i][j].p_Card != nullptr)
-            {
-                gameSave[version].sColumn[i][j].p_Card->setFaceUp(gameSave[version].sColumn[i][j].faceUp);
-                cardCol[i].addCard(*gameSave[version].sColumn[i][j].p_Card);
-            }
-        } 
-    } 
-    for (int i=0; i<4; i++) {Aces[i].clearHand();}
-    for (int i=0; i<4; i++)
-    {
-        for (int j=0; j<13; j++)
-        {
-            if(gameSave[version].sAces[i][j].p_Card != nullptr)
-            {
-                gameSave[version].sAces[i][j].p_Card->setFaceUp(gameSave[version].sAces[i][j].faceUp);
-                Aces[i].addCard(*gameSave[version].sAces[i][j].p_Card);
-            }
-        }
-        
-    } 
-    solitaireDeck.eraseDeck();
-    for (int i=0; i<26; i++)
-    {
-        if(gameSave[version].sSolitaireDeck[i].p_Card != nullptr)
-        {
-            gameSave[version].sSolitaireDeck[i].p_Card->setFaceUp(gameSave[version].sSolitaireDeck[i].faceUp);
-            solitaireDeck.addCard(*gameSave[version].sSolitaireDeck[i].p_Card);
-        }
-    }  
-    drawPile.eraseDeck();
-    for (int i=0; i<4; i++)
-    {
-        if(gameSave[version].sDrawPile[i].p_Card != nullptr)
-        {
-            gameSave[version].sDrawPile[i].p_Card->setFaceUp(gameSave[version].sDrawPile[i].faceUp);
-            drawPile.addCard(*gameSave[version].sDrawPile[i].p_Card);
-        }
-    }    
-}*/
-
-/*void Solitaire::copyState()
-{
-    gameSave[0] = gameSave[1];
-}*/
-
-
-void Solitaire::saveGameState() {
-    GameSaveNode* newNode = new GameSaveNode;
-    
+/************************************************************/
+Solitaire::gameSaveNode* Solitaire::saveGameState() {
+    gameSaveNode* newNode = new gameSaveNode;
     cardState dCard;
-    dCard.p_Card = nullptr;
+    dCard.p_Card = nullptr;                     // default card as place holder for slots with no cards in them
     dCard.faceUp = 0;
     for (int i=0; i<7; i++)
     {
         for (int j=0; j<19; j++)
         {
             int colLen = cardCol[i].getSize();
-            if (j < colLen)
+            if (j < colLen)                     // if the column has a card in this slot then...
             {
                 Card* pCard = cardCol[i].getCard(j);
                 if (pCard != nullptr)
                 {
                     Card cCard = *pCard;
                     cardState sCard;
-                    sCard.p_Card = pCard;
+                    sCard.p_Card = pCard;               // pach the data into an sCard struct
                     sCard.faceUp = cCard.getFaceUp();
-                    sColumn[i][j] = sCard;
+                    sColumn[i][j] = sCard;              // add the struct to the sColumn
                 }
             }
-            else {sColumn[i][j] = dCard;}
+            else {sColumn[i][j] = dCard;}       // use the default card
         }
     }
     for (int i=0; i<4; i++)
@@ -920,8 +769,7 @@ void Solitaire::saveGameState() {
         }
         else {sDrawPile[i] = dCard;}
     }
-
-    
+    /* now save all of the above states to the node*/
     for (int i=0; i<7; i++)
     {
         for (int j=0; j<19; j++)
@@ -929,7 +777,6 @@ void Solitaire::saveGameState() {
             newNode->sColumn[i][j] = sColumn[i][j]; 
         }
     }
-
     for (int i=0; i<7; i++)
     {
         for (int j=0; j<19; j++)
@@ -937,70 +784,87 @@ void Solitaire::saveGameState() {
             newNode->sAces[i][j] = sAces[i][j]; 
         }
     }
-
     for (int i = 0; i < 26; ++i) 
     {
         newNode->sSolitaireDeck[i] = sSolitaireDeck[i];
         newNode->sDrawPile[i]= sDrawPile[i];
     }
 
-
-
-
     newNode->next = head;
     head = newNode;
+    std::cout << "**** PRINTING AFTER SAVE ****";
+    return newNode;
 }
 
+/************************************************************/
 void Solitaire::loadGameState() {
-    if (head) {  // Check if there's at least one saved game state.
-        GameSaveNode* previousNode = head;
-        head = head->next;
-        
-           std::cout << "In undoMove";
-    for (int i=0; i<7; i++) {cardCol[i].clearHand();}
-    for (int i=0; i<7; i++)
-    {
-        for (int j=0; j<19; j++)
+    if (head)                               // Check if there's at least one saved game state.
+    {  
+        gameSaveNode* previousNode = head;  // this makes a node previousNode that points to the current head
+        head = head->next;                  // this pushes head back one node in the list
+        std::cout << "**** PRINTING AFTER LOAD ****";
+        printNode(head);
+        for (int i=0; i<7; i++) {cardCol[i].clearHand();}   //clear out the data in the seven card columns
+        std::cout << "column undo\n";
+
+        for (int i=0; i<7; i++)
         {
-            if(previousNode->sColumn[i][j].p_Card != nullptr)
+            for (int j=0; j<19; j++)
             {
-                previousNode->sColumn[i][j].p_Card->setFaceUp(previousNode->sColumn[i][j].faceUp);
-                cardCol[i].addCard(*previousNode->sColumn[i][j].p_Card);
-            }
+                if(head->sColumn[i][j].p_Card != nullptr)
+                {
+                    head->sColumn[i][j].p_Card->setFaceUp(head->sColumn[i][j].faceUp);
+                    cardCol[i].addCard(*head->sColumn[i][j].p_Card);
+                }
+                else
+                {j=19;}
+            } 
         } 
-    } 
-    for (int i=0; i<4; i++) {Aces[i].clearHand();}
-    for (int i=0; i<4; i++)
-    {
-        for (int j=0; j<13; j++)
+        for (int i=0; i<4; i++) {Aces[i].clearHand();}
+        std::cout << "aces undo\n";
+        for (int i=0; i<4; i++)
         {
-            if(previousNode->sAces[i][j].p_Card != nullptr)
+            for (int j=0; j<13; j++)
             {
-                previousNode->sAces[i][j].p_Card->setFaceUp(previousNode->sAces[i][j].faceUp);
-                Aces[i].addCard(*previousNode->sAces[i][j].p_Card);
+                if(head->sAces[i][j].p_Card != nullptr)
+                {
+                    head->sAces[i][j].p_Card->setFaceUp(head->sAces[i][j].faceUp);
+                    Aces[i].addCard(*head->sAces[i][j].p_Card);
+                }
+                else
+                {j=13;}
             }
-        }
-        
+
+        } 
+        solitaireDeck.eraseDeck();
+        std::cout << "main deck undo\n";
+        for (int i=0; i<26; i++)
+        {
+            if(head->sSolitaireDeck[i].p_Card != nullptr)
+            {
+                head->sSolitaireDeck[i].p_Card->setFaceUp(head->sSolitaireDeck[i].faceUp);
+                solitaireDeck.addCard(*head->sSolitaireDeck[i].p_Card);
+            }
+            else
+            {i=26;}
+        }  
+        drawPile.eraseDeck();
+        std::cout << "draw undo\n";
+        for (int i=0; i<26; i++)
+        {
+            if(head->sDrawPile[i].p_Card != nullptr)
+            {
+                head->sDrawPile[i].p_Card->setFaceUp(head->sDrawPile[i].faceUp);
+                drawPile.addCard(*head->sDrawPile[i].p_Card);
+            }
+            else
+            {i=26;}
+        }    
+            // Don't forget to release the memory allocated for the 'previousNode' if necessary.
+            delete previousNode;
     } 
-    solitaireDeck.eraseDeck();
-    for (int i=0; i<26; i++)
+    else 
     {
-        if(previousNode->sSolitaireDeck[i].p_Card != nullptr)
-        {
-            previousNode->sSolitaireDeck[i].p_Card->setFaceUp(previousNode->sSolitaireDeck[i].faceUp);
-            solitaireDeck.addCard(*previousNode->sSolitaireDeck[i].p_Card);
-        }
-    }  
-    drawPile.eraseDeck();
-    for (int i=0; i<4; i++)
-    {
-        if(previousNode->sDrawPile[i].p_Card != nullptr)
-        {
-            previousNode->sDrawPile[i].p_Card->setFaceUp(previousNode->sDrawPile[i].faceUp);
-            drawPile.addCard(*previousNode->sDrawPile[i].p_Card);
-        }
-    }    
-        // Don't forget to release the memory allocated for the 'previousNode' if necessary.
-        delete previousNode;
-    } else { }
+        std::cout << "No Head\n";
+    }
 }

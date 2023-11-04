@@ -117,8 +117,8 @@ void Deck::clearDeck(int numberOfDecks)
 void Deck::eraseDeck()
 {
     m_deck.clear();
-    std::cout << "Printing deck after erase\n";
-    printDeck();
+    //std::cout << "Printing deck after erase\n";
+    //printDeck();
 }
 
 
