@@ -17,7 +17,6 @@ public:
     bool checkCanMove(Card* c, int col, int row, bool lastCard, bool lastUnflippedCard);
     void printField();
     void loadGameState();
-
     struct cardState {Card* p_Card; bool faceUp;};
     cardState sColumn[7][19];
     cardState sAces[4][13];
@@ -25,7 +24,8 @@ public:
     cardState sDrawPile[26];
 
     struct gameSaveNode {cardState sColumn[7][19]; cardState sAces[4][13];cardState sSolitaireDeck[26];cardState sDrawPile[26];gameSaveNode* next;};
-
+    void clearLinkedList(gameSaveNode*& head);
+    
     Hand  getColumn(int col);
     int   getTopAce(int suit);
     Card* getColCardAt(int col, int row);

@@ -14,7 +14,7 @@ Card::Card(int fv, int av, int idn, char s, string pv)
     actualValue = av;
     suit = s;
     printValue = pv;
-    faceUp = true;
+    faceUp = false;
     id = idn;
 }
 

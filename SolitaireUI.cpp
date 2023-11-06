@@ -448,7 +448,7 @@ void SolitaireUI::updateDecks(int deck, int cDelt)
 void SolitaireUI::refreshDecks()
 {
     int deckSize = m_pSolitaire->getDeckSize();
-    if (deckSize > 0)
+    if (deckSize > 0)                                       // This is the main solitaire deck
     {
         m_pD[0]->setEnabled(true);
         m_pD[0]->setIcon(QPixmap(cardImage[0]));
@@ -459,8 +459,10 @@ void SolitaireUI::refreshDecks()
         m_pD[0]->setIcon(QPixmap());
         m_pD[0]->setText("Again?");  
     }
-    int dpSize = m_pSolitaire->getDrawPileSize();
+    int dpSize = m_pSolitaire->getDrawPileSize();           // this is for the draw pile and the flipped cards
     int dpfSize = m_pSolitaire->getDrawPileFlipped();
+    std::cout << "DP size = " << dpSize << "\n";
+    std::cout << "Flipped DP = " << dpfSize << "\n";
     for (int i=1; i<4; i++){disableDrawPile(i);}            // disable each draw pile to clear everything
     if (dpSize > 0)                                         // if there are cards in the draw pile
     { 
@@ -468,6 +470,7 @@ void SolitaireUI::refreshDecks()
         for (int i=0; i<dpfSize; i++)                       // cycle through any flipped cards as they are active
         {
             Card* pC = m_pSolitaire->getDrawPileAt(dpSize-1-i); // the piles from left to right are populated from the top of the deck
+            std::cout << i <<  ":" << pC->getFaceUp() <<"\n";
             if (pC->getFaceUp() == true)                        // down so start at the last element of the draw pile and work down the pile
             {
                 enableDrawPile(pileSlot,pC->getID());
@@ -478,7 +481,6 @@ void SolitaireUI::refreshDecks()
     else
     {
         std::cout << "Disable Draw Piles\n" ;
-       for (int i=1; i<4; i++)
-       {disableDrawPile(i);} 
+       for (int i=1; i<4; i++) {disableDrawPile(i);} 
     }
 }

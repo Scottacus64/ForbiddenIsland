@@ -21,6 +21,7 @@ void Solitaire::playGame()
 {
     solitaireDeck = Deck();
     solitaireDeck.shuffle();
+    clearLinkedList(head);
 }
 
 
@@ -36,12 +37,12 @@ void Solitaire::dealGame()
             {
                 Card c = solitaireDeck.deal();
                 int id = c.getID();
+                c.flipCard();                       // flip the card over to show its top side
                 cardCol[col].addCard(c);
             }
             else if (col > row)                     // if it is not the last card in a cardCol
             {
                 Card c = solitaireDeck.deal();
-                c.flipCard();                       // flip the card over to show its back side
                 cardCol[col].addCard(c);
             }
         }
@@ -664,7 +665,7 @@ void Solitaire::printNode(gameSaveNode* node)
         for (int j=0; j<13; j++)
         {
             if (ace[i][j].p_Card != nullptr)
-            {std::cout << ace[i][j].p_Card->getID() << "/" << ace[i][j].faceUp << " ";}
+            {std::cout << ace[i][j].p_Card->getID() << "/" << ace[i][j].faceUp << "\t";}
             else 
             {std::cout << "0/0\t";}
         }
@@ -801,70 +802,95 @@ void Solitaire::loadGameState() {
     if (head)                               // Check if there's at least one saved game state.
     {  
         gameSaveNode* previousNode = head;  // this makes a node previousNode that points to the current head
-        head = head->next;                  // this pushes head back one node in the list
-        std::cout << "**** PRINTING AFTER LOAD ****";
-        printNode(head);
-        for (int i=0; i<7; i++) {cardCol[i].clearHand();}   //clear out the data in the seven card columns
-        std::cout << "column undo\n";
-
-        for (int i=0; i<7; i++)
+        if (head->next != nullptr)          // make sure you are not at the very first node
         {
-            for (int j=0; j<19; j++)
+            head = head->next;                  // this pushes head back one node in the list
+            std::cout << "**** PRINTING AFTER LOAD ****\n";
+            printNode(head);
+            for (int i=0; i<7; i++) {cardCol[i].clearHand();}   //clear out the data in the seven card columns
+            std::cout << "column undo\n";
+            for (int i=0; i<7; i++)
             {
-                if(head->sColumn[i][j].p_Card != nullptr)
+                for (int j=0; j<19; j++)
                 {
-                    head->sColumn[i][j].p_Card->setFaceUp(head->sColumn[i][j].faceUp);
-                    cardCol[i].addCard(*head->sColumn[i][j].p_Card);
-                }
-                else
-                {j=19;}
+                    if(head->sColumn[i][j].p_Card != nullptr)
+                    {
+                        head->sColumn[i][j].p_Card->setFaceUp(head->sColumn[i][j].faceUp);  // set the face up of the struct 
+                        std::cout << head->sColumn[i][j].p_Card->getID() << "\t";
+                        cardCol[i].addCard(*head->sColumn[i][j].p_Card);    // add the Card to cardCol[i]
+                    }
+                    else
+                    {j=19;}
+                } 
+                std::cout << "\n";
             } 
-        } 
-        for (int i=0; i<4; i++) {Aces[i].clearHand();}
-        std::cout << "aces undo\n";
-        for (int i=0; i<4; i++)
-        {
-            for (int j=0; j<13; j++)
+        
+            for (int i=0; i<4; i++) {Aces[i].clearHand();}
+            std::cout << "aces undo\n";
+            for (int i=0; i<4; i++)
             {
-                if(head->sAces[i][j].p_Card != nullptr)
+                for (int j=0; j<13; j++)
                 {
-                    head->sAces[i][j].p_Card->setFaceUp(head->sAces[i][j].faceUp);
-                    Aces[i].addCard(*head->sAces[i][j].p_Card);
+                    if(head->sAces[i][j].p_Card != nullptr)
+                    {
+                        head->sAces[i][j].p_Card->setFaceUp(head->sAces[i][j].faceUp);
+                        Aces[i].addCard(*head->sAces[i][j].p_Card);
+                    }
+                    else
+                    {j=13;}
+                }
+
+            } 
+            solitaireDeck.eraseDeck();
+            std::cout << "main deck undo\n";
+            for (int i=0; i<26; i++)
+            {
+                if(head->sSolitaireDeck[i].p_Card != nullptr)
+                {
+                    head->sSolitaireDeck[i].p_Card->setFaceUp(head->sSolitaireDeck[i].faceUp);
+                    solitaireDeck.addCard(*head->sSolitaireDeck[i].p_Card);
                 }
                 else
-                {j=13;}
-            }
-
-        } 
-        solitaireDeck.eraseDeck();
-        std::cout << "main deck undo\n";
-        for (int i=0; i<26; i++)
-        {
-            if(head->sSolitaireDeck[i].p_Card != nullptr)
+                {i=26;}
+            }  
+            drawPile.eraseDeck();
+            std::cout << "draw undo\n";
+            for (int i=0; i<26; i++)
             {
-                head->sSolitaireDeck[i].p_Card->setFaceUp(head->sSolitaireDeck[i].faceUp);
-                solitaireDeck.addCard(*head->sSolitaireDeck[i].p_Card);
-            }
-            else
-            {i=26;}
-        }  
-        drawPile.eraseDeck();
-        std::cout << "draw undo\n";
-        for (int i=0; i<26; i++)
-        {
-            if(head->sDrawPile[i].p_Card != nullptr)
-            {
-                head->sDrawPile[i].p_Card->setFaceUp(head->sDrawPile[i].faceUp);
-                drawPile.addCard(*head->sDrawPile[i].p_Card);
-            }
-            else
-            {i=26;}
-        }    
+                if(head->sDrawPile[i].p_Card != nullptr)
+                {
+                    Card temp;
+                    temp = *head->sDrawPile[i].p_Card;
+                    temp.setFaceUp(head->sDrawPile[i].faceUp);
+                   // head->sDrawPile[i].p_Card->setFaceUp(head->sDrawPile[i].faceUp);
+                    //drawPile.addCard(*head->sDrawPile[i].p_Card);
+                    drawPile.addCard(temp);
+                }
+                else
+                {i=26;}
+            }    
             // Don't forget to release the memory allocated for the 'previousNode' if necessary.
             delete previousNode;
-    } 
+            std::cout << "**** PRINTING AFTER LOAD ****";
+           // printNode(head);
+        } 
+        else
+        {
+            std::cout << "No other node\n";
+        }
+    }    
     else 
     {
         std::cout << "No Head\n";
+    }
+}
+
+void Solitaire::clearLinkedList(gameSaveNode*& head) 
+{
+    while (head) 
+    {
+        gameSaveNode* temp = head;
+        head = head->next;
+        delete temp;
     }
 }
