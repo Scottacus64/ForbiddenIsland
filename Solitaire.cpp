@@ -106,7 +106,7 @@ void Solitaire::printField()
             cout << "\n";
         }
     }
-    Solitaire::GameNode* node = saveGameState();
+    saveGameState();
  }
 
 
@@ -618,7 +618,7 @@ int Solitaire::getMoves()
 /************************************************************/
 void Solitaire::printNode(Solitaire::GameNode* node)
 {
-    std::cout << "\n\n Node pointer: " << node << "\n";
+    std::cout << "\n\n     Node pointer: " << node << "\n";
     for (int i=0; i<52;  i++)
     {
         Card* p_Card = node->gameState[i].pCard;
@@ -640,34 +640,34 @@ void Solitaire::printNode(Solitaire::GameNode* node)
     std::cout << "**************************************************************************\n";
 }
 
-Solitaire::GameNode* Solitaire::saveGameState()
+void Solitaire::saveGameState()
 {
-    Solitaire::GameNode* newNode = new Solitaire::GameNode;
+    Solitaire::GameNode* newNode = new Solitaire::GameNode; // make a GameNode* called newNode
     int cardSlot;
     cardSlot = 0;
-    for (int i=0; i<4; i++)
+    for (int i=0; i<4; i++)                             // for each of the Ace stacks
     {
-        for (int j=0; j<13; j++)
+        for (int j=0; j<13; j++)    
         {
-            int aceLen = Aces[i].getSize();
+            int aceLen = Aces[i].getSize();             // see if there are any cards there
             if (j < aceLen)
             {
-                Card* pCard = Aces[i].getCard(j);
+                Card* pCard = Aces[i].getCard(j);       // get the Card objecrt
                 if (pCard != nullptr)
                 {
                     Card cCard = *pCard;
                     CardState sCard;
-                    sCard.pCard = pCard;
+                    sCard.pCard = pCard;                // set the struct's pointer, faceUp and locations
                     sCard.faceUp = cCard.getFaceUp();
                     sCard.slot = j + (i * 13);
-                    newNode->gameState[cardSlot] = sCard;
+                    newNode->gameState[cardSlot] = sCard;   // put the struct in the node being built
                     cardSlot ++;
                 }
             }
         }
     }
 
-    for (int i=0; i<7; i++)
+    for (int i=0; i<7; i++)                             // next check each card column 
     {
         for (int j=0; j<19; j++)
         {
@@ -679,7 +679,7 @@ Solitaire::GameNode* Solitaire::saveGameState()
                 {
                     Card cCard = *pCard;
                     CardState sCard;
-                    sCard.pCard = pCard;                // pass the data into an sCard struct
+                    sCard.pCard = pCard;                
                     sCard.faceUp = cCard.getFaceUp();
                     sCard.slot = 52 + j + (i*19);       
                     newNode->gameState[cardSlot] = sCard;
@@ -689,7 +689,7 @@ Solitaire::GameNode* Solitaire::saveGameState()
         }
     }  
 
-    int sdLen = solitaireDeck.cardsLeft();
+    int sdLen = solitaireDeck.cardsLeft();              // check the Deal Deck called solitaireDeck
     for (int i=0; i<26; i++)
     {
         if (i < sdLen)
@@ -708,7 +708,7 @@ Solitaire::GameNode* Solitaire::saveGameState()
         }
     }
 
-    int dLen = drawPile.cardsLeft();
+    int dLen = drawPile.cardsLeft();                    // last check the Draw Pile
     for (int i=0; i<26; i++)
     {
         if (i < dLen)
@@ -726,49 +726,49 @@ Solitaire::GameNode* Solitaire::saveGameState()
             }
         }
     }
-    newNode->next = head;
-    head = newNode;
+    newNode->next = head;                           // assign the current head to newNode's next value
+    head = newNode;                                 // make newNode the Head
     std::cout << "**** PRINTING AFTER SAVE ****";
     printNode(newNode);
-    return newNode;
 }
 
 
 void Solitaire::loadGameState()
 {
-    if (head)                               // Check if there's at least one saved game state.
+    if (head)                                           // Check if there's at least one saved game state.
     {  
-        Solitaire::GameNode* previousNode = head;  // this makes a node previousNode that points to the current head
-        if (head->next != nullptr)          // make sure you are not at the very first node
+        Solitaire::GameNode* previousNode = head;       // this makes a node previousNode that points to the current head
+        if (head->next != nullptr)                      // make sure you are not at the very first node
         {
-            head = head->next;                  // this pushes head back one node in the list
+            head = head->next;                           // this pushes head back one node in the list
             std::cout << "**** PRINTING AFTER LOAD ****\n";
-            printNode(head);
-            for (int i=0; i<4; i++){Aces[i].clearHand();}
+
+            printNode(head);                                    // print what we think is the head
+            for (int i=0; i<4; i++){Aces[i].clearHand();}       // clear the hands and Decks
             for (int i=0; i<7; i++){cardCol[i].clearHand();}
             solitaireDeck.eraseDeck();
             drawPile.eraseDeck();
             Card* p_Card;
             Card  cCard;
-            for (int i=0; i<52; i++)
+            for (int i=0; i<52; i++)                            // go through all 52 cards in the game
             {
-                p_Card = head->gameState[i].pCard;
+                p_Card = head->gameState[i].pCard;              // get the Card
                 cCard = *p_Card;
-                cCard.setFaceUp(head->gameState[i].faceUp);
-                int cSlot = head->gameState[i].slot;            
-                if (cSlot<52)
+                cCard.setFaceUp(head->gameState[i].faceUp);     // its faceUp value
+                int cSlot = head->gameState[i].slot;            // where it is located       
+                if (cSlot<52)                                                   // check if it's in the Aces stacks
                     {
                         Aces[cSlot/13].addCardAt(cCard, cSlot%13);
                     }
-                else if (cSlot < 185)
+                else if (cSlot < 185)                                           // or card calumns
                     {
                         cardCol[(cSlot-52)/19].addCardAt(cCard, (cSlot-52)%19);
                     }
-                else if (cSlot < 211)
-                    {
+                else if (cSlot < 211)                                           // or Dealing Deck
+                    {   
                         solitaireDeck.addCardAt(cCard, (cSlot-185)%26);
                     }
-                else
+                else                                                            // or Draw Pile
                     {
                         drawPile.addCardAt(cCard, (cSlot-211)%26);
                     }

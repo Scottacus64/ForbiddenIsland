@@ -41,10 +41,10 @@ public:
     } GameNode;
 
     GameNode* head = NULL;          // Head of the linked list
-    GameNode* saveGameState();
+    void  saveGameState();
     void  loadGameState();
     void  printNode(GameNode* node);
-    void clearLinkedList(GameNode*& head);
+    void  clearLinkedList(GameNode*& head);
     
     Hand  getColumn(int col);
     int   getTopAce(int suit);
