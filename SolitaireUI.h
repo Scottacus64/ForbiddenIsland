@@ -36,6 +36,7 @@ public:
     void undoPressed();
     void refreshDecks();
 
+
 public slots:
     void cardClicked();
 
@@ -43,7 +44,6 @@ private:
     Ui::SolitaireUI *ui;
     QPixmap cardImage[53];
     QPixmap green;
-
     QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

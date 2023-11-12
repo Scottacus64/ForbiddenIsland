@@ -16,15 +16,35 @@ public:
     void moveToColumn(int destinationCol, int col, int slot, bool lastUnflipedCard);
     bool checkCanMove(Card* c, int col, int row, bool lastCard, bool lastUnflippedCard);
     void printField();
-    void loadGameState();
-    struct cardState {Card* p_Card; bool faceUp;};
-    cardState sColumn[7][19];
-    cardState sAces[4][13];
-    cardState sSolitaireDeck[26];
-    cardState sDrawPile[26];
+    //struct cardState {Card* p_Card; bool faceUp;};
+    //cardState sColumn[7][19];
+    //cardState sAces[4][13];
+    //cardState sSolitaireDeck[26];
+    //cardState sDrawPile[26];
+    //struct gameSaveNode {cardState sColumn[7][19]; cardState sAces[4][13];cardState sSolitaireDeck[26];cardState sDrawPile[26];gameSaveNode* next;};
 
-    struct gameSaveNode {cardState sColumn[7][19]; cardState sAces[4][13];cardState sSolitaireDeck[26];cardState sDrawPile[26];gameSaveNode* next;};
-    void clearLinkedList(gameSaveNode*& head);
+    typedef struct CardState {      
+        Card* pCard;
+        bool faceUp; 
+        int slot; 
+    }    CardState;
+
+    /********************  slot decoding  ***********************
+    Aces:    C = 0-12   S = 13-25   H = 26-38   D = 39-51
+    Columns 1(52-70)    2(71-89)   3(90-108)    4(109-127)  5(128-146)  6(147-165)  7(166-184)
+    Decks   Base Deck(185-210)  Draw Pile(211-236) 
+    *************************************************************/  
+
+    typedef struct GameNode {
+        CardState gameState[52];    // A node consists of 52 CardStates, one for each card in the deck
+        struct GameNode* next;      // Pointer to the next game state in the linked list
+    } GameNode;
+
+    GameNode* head = NULL;          // Head of the linked list
+    GameNode* saveGameState();
+    void  loadGameState();
+    void  printNode(GameNode* node);
+    void clearLinkedList(GameNode*& head);
     
     Hand  getColumn(int col);
     int   getTopAce(int suit);
@@ -49,8 +69,7 @@ public:
     bool getWin();
     bool checkAutoFinish();
     bool nextCard();
-    gameSaveNode* saveGameState();
-    void printNode(gameSaveNode* node);
+    
 
 private:
     Deck solitaireDeck;
@@ -69,6 +88,5 @@ private:
     int  cardCycle;
     bool win;
     int  moves;
-    gameSaveNode* head;
 };
 #endif // SOLITAIRE_H

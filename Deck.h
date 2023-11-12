@@ -21,6 +21,7 @@ public:
     void eraseDeck();
     void addCard(Card c);
     void printTopCard();
+    void addCardAt(Card card, int slot);
 
     Card* getTopDeckCard();
     Card* getDeckCardAt(int slot);

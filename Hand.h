@@ -11,12 +11,13 @@ public:
     void printHand();
     Card removeCard(int position);
     void addCard(Card card);
+    void addCardAt (Card card, int slot);
     void clearHand();
 
     Card* getCard(int position);
-    int getSize();
-    int getLastCardID();
-    int getLastCardValue();
+    int  getSize();
+    int  getLastCardID();
+    int  getLastCardValue();
     char getLastCardSuit();
 
     void sortHandValue();

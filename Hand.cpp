@@ -28,6 +28,12 @@ void Hand::addCard(Card card)
 }
 
 
+void Hand::addCardAt(Card card, int slot)
+{
+    m_hand.insert(m_hand.begin() + slot, card);
+}
+
+
 Card* Hand::getCard(int position)
 {
     Card* c = &m_hand.at(position);

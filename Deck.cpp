@@ -129,6 +129,12 @@ void Deck::addCard(Card c)
 }
 
 
+void Deck::addCardAt(Card card, int slot)
+{
+    m_deck.insert(m_deck.begin() + slot, card);
+}
+
+
 void Deck::printTopCard()
 {
     if (m_deck.size()>0)
