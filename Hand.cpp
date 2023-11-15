@@ -28,9 +28,9 @@ void Hand::addCard(Card card)
 }
 
 
-void Hand::addCardAt(Card card, int slot)
+void Hand::addCardAt(Card* pCard, int slot)
 {
-    m_hand.insert(m_hand.begin() + slot, card);
+    m_hand.insert(m_hand.begin() + slot, *pCard);
 }
 
 

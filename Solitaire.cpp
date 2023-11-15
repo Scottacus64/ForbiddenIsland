@@ -567,8 +567,7 @@ Card Solitaire::removeColCard(int col, int row, bool lastCard)
         for (int j=0; j<cardCol[i].getSize(); j++)
         {
             Card* pTestCard = cardCol[i].getCard(j);
-            Card testCard = *pTestCard;
-            if (testCard.getFaceUp() == false){autoFinish = false;}
+            if (pTestCard->getFaceUp() == false){autoFinish = false;}
         }
     }
     if (getDeckSize() > 0) {autoFinish = false;}
@@ -622,9 +621,8 @@ void Solitaire::printNode(Solitaire::GameNode* node)
     for (int i=0; i<52;  i++)
     {
         Card* p_Card = node->gameState[i].pCard;
-        Card card = *p_Card;
         std::cout << "Pointer: " << p_Card << " *****************\n";
-        std::cout << "Card " << i << ":" << card.getID() <<"\n";
+        std::cout << "Card " << i << ":" << p_Card -> getID() <<"\n";
         std::cout << "faceUp: " << node->gameState[i].faceUp << "\n";
         int cSlot = node->gameState[i].slot;
         std::cout << "location: " << cSlot << "\n";
@@ -655,10 +653,9 @@ void Solitaire::saveGameState()
                 Card* pCard = Aces[i].getCard(j);       // get the Card objecrt
                 if (pCard != nullptr)
                 {
-                    Card cCard = *pCard;
                     CardState sCard;
                     sCard.pCard = pCard;                // set the struct's pointer, faceUp and locations
-                    sCard.faceUp = cCard.getFaceUp();
+                    sCard.faceUp = pCard->getFaceUp();
                     sCard.slot = j + (i * 13);
                     newNode->gameState[cardSlot] = sCard;   // put the struct in the node being built
                     cardSlot ++;
@@ -677,10 +674,9 @@ void Solitaire::saveGameState()
                 Card* pCard = cardCol[i].getCard(j);
                 if (pCard != nullptr)
                 {
-                    Card cCard = *pCard;
                     CardState sCard;
                     sCard.pCard = pCard;                
-                    sCard.faceUp = cCard.getFaceUp();
+                    sCard.faceUp = pCard->getFaceUp();
                     sCard.slot = 52 + j + (i*19);       
                     newNode->gameState[cardSlot] = sCard;
                     cardSlot ++;
@@ -697,10 +693,9 @@ void Solitaire::saveGameState()
             Card* pCard = solitaireDeck.getDeckCardAt(i);
             if (pCard != nullptr)
             {
-                Card cCard = *pCard;
                 CardState sCard;
                 sCard.pCard = pCard;
-                sCard.faceUp = cCard.getFaceUp();
+                sCard.faceUp = pCard->getFaceUp();
                 sCard.slot = 185 + i;
                 newNode->gameState[cardSlot] = sCard;
                 cardSlot ++;
@@ -716,10 +711,9 @@ void Solitaire::saveGameState()
             Card* pCard = drawPile.getDeckCardAt(i);
             if (pCard != nullptr)
             {
-                Card cCard = *pCard;
                 CardState sCard;
                 sCard.pCard = pCard;
-                sCard.faceUp = cCard.getFaceUp();
+                sCard.faceUp = pCard->getFaceUp();
                 sCard.slot = 211 + i;
                 newNode->gameState[cardSlot] = sCard;
                 cardSlot ++;
@@ -748,29 +742,28 @@ void Solitaire::loadGameState()
             for (int i=0; i<7; i++){cardCol[i].clearHand();}
             solitaireDeck.eraseDeck();
             drawPile.eraseDeck();
-            Card* p_Card;
-            Card  cCard;
+            Card* pCard;
+
             for (int i=0; i<52; i++)                            // go through all 52 cards in the game
             {
-                p_Card = head->gameState[i].pCard;              // get the Card
-                cCard = *p_Card;
-                cCard.setFaceUp(head->gameState[i].faceUp);     // its faceUp value
-                int cSlot = head->gameState[i].slot;            // where it is located       
-                if (cSlot<52)                                                   // check if it's in the Aces stacks
+                pCard = head->gameState[i].pCard;                   // get the Card
+                pCard->setFaceUp(head->gameState[i].faceUp);        // its faceUp value
+                int cSlot = head->gameState[i].slot;                // where it is located       
+                if (cSlot<52)                                       // check if it's in the Aces stacks
                     {
-                        Aces[cSlot/13].addCardAt(cCard, cSlot%13);
+                        Aces[cSlot/13].addCardAt(pCard, cSlot%13);
                     }
                 else if (cSlot < 185)                                           // or card calumns
                     {
-                        cardCol[(cSlot-52)/19].addCardAt(cCard, (cSlot-52)%19);
+                        cardCol[(cSlot-52)/19].addCardAt(pCard, (cSlot-52)%19);
                     }
                 else if (cSlot < 211)                                           // or Dealing Deck
                     {   
-                        solitaireDeck.addCardAt(cCard, (cSlot-185)%26);
+                        solitaireDeck.addCardAt(pCard, (cSlot-185)%26);
                     }
                 else                                                            // or Draw Pile
                     {
-                        drawPile.addCardAt(cCard, (cSlot-211)%26);
+                        drawPile.addCardAt(pCard, (cSlot-211)%26);
                     }
             }
         }

@@ -11,7 +11,7 @@ public:
     void printHand();
     Card removeCard(int position);
     void addCard(Card card);
-    void addCardAt (Card card, int slot);
+    void addCardAt (Card* pCard, int slot);
     void clearHand();
 
     Card* getCard(int position);

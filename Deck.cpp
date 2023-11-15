@@ -129,9 +129,9 @@ void Deck::addCard(Card c)
 }
 
 
-void Deck::addCardAt(Card card, int slot)
+void Deck::addCardAt(Card* pCard, int slot)
 {
-    m_deck.insert(m_deck.begin() + slot, card);
+    m_deck.insert(m_deck.begin() + slot, *pCard);
 }
 
 
