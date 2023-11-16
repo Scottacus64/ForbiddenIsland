@@ -9,8 +9,8 @@ public:
     Hand();
     ~Hand();
     void printHand();
-    Card removeCard(int position);
-    void addCard(Card card);
+    Card* removeCard(int position);
+    void addCard(Card* pCard);
     void addCardAt (Card* pCard, int slot);
     void clearHand();
 
@@ -25,15 +25,15 @@ public:
     void sortHandSuit();
     void sortHandSuitAndValue();
 
-    static bool compareByCardValue(Card& card1, Card& card2);
-    static bool compareByCardActualValue(Card& card1, Card& card2);
-    static bool compareBySuit(Card& card1, Card& card2);
-    static bool compareBySuitAndCardValue(Card& card1, Card& card2);
+    static bool compareByCardValue(Card* pCard1, Card* pCard2);
+    static bool compareByCardActualValue(Card* pCard1, Card* pCard2);
+    static bool compareBySuit(Card* pCard1, Card* pCard2);
+    static bool compareBySuitAndCardValue(Card* pCard1, Card* pCard2);
 
 
 
 private:
-    std::vector<Card> m_hand;
+    std::vector<Card*> m_hand;
 };
 
 #endif // HAND_H

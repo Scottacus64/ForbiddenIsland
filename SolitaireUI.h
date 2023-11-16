@@ -26,7 +26,7 @@ public:
     ~SolitaireUI();
     void refreshScreen();
     void dealCards();
-    void updateDecks(int deck, int cardsDelt);
+    void updateDecks(int deck, int dCards);
     void checkForWin();
     void enableDrawPile(int pile, int id);
     void disableDrawPile(int pile);
@@ -56,7 +56,6 @@ private:
     QElapsedTimer elapsedTimer;
     Solitaire* m_pSolitaire;
     int cardsDelt = 0;
-    bool drawPileFlag;
     bool gameStarted;
     qint64 elapsedMilliseconds;
 };
