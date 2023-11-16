@@ -24,10 +24,10 @@ class SolitaireUI : public QWidget
 public:
     SolitaireUI(QWidget *parent = nullptr);
     ~SolitaireUI();
-    void refreshScreen();
+    void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);
-    void checkForWin();
+    void postWin();
     void enableDrawPile(int pile, int id);
     void disableDrawPile(int pile);
     void paintEvent(QPaintEvent *event);

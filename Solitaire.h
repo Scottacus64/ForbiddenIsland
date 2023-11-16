@@ -45,7 +45,6 @@ public:
     void  loadGameState();
     void  printNode(GameNode* node);
     void  clearLinkedList(GameNode*& head);
-    
     Hand* getColumn(int col);
     int   getTopAce(int suit);
     Card* getColCardAt(int col, int row);
@@ -65,7 +64,7 @@ public:
     void playFromAces(int col, int suit);
     void reuseDeck();
     bool getWin();
-    bool checkAutoFinish();
+    bool checkForWin();
     bool nextCard();
     
 
@@ -84,7 +83,7 @@ private:
     int  dpSize;
     int  dpFlipUp;
     int  cardCycle;
-    bool win;
     int  moves;
+    bool win;
 };
 #endif // SOLITAIRE_H

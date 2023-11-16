@@ -215,7 +215,7 @@ int Solitaire::cycleDeck()
         
     int remaining = solitaireDeck.cardsLeft();
     cout << "Cycle deck cards remaining = " << remaining << "\n\n";
-    if (remaining == 0){bool win = checkAutoFinish();}
+    if (remaining == 0){bool win = checkForWin();}
     if (win == true){std::cout << "WIN!!!";}
     moves ++;
     return cardsDelt;                               // this let's the calling function know how many cards were delt
@@ -373,7 +373,7 @@ bool Solitaire::checkCanMove(Card* pCard, int col, int row, bool lastCard, bool 
             }             
         }
     }
-    bool win = checkAutoFinish();
+    bool win = checkForWin();
     if (win == true){std::cout << "WIN!!!";}
     return canMove;
 }
@@ -516,7 +516,7 @@ Card* Solitaire::removeColCard(int col, int row, bool lastCard)
     }
  }
 
- bool Solitaire::checkAutoFinish()
+ bool Solitaire::checkForWin()
  {
     bool autoFinish = true;
     for (int i=0; i<7; i++)
@@ -524,11 +524,11 @@ Card* Solitaire::removeColCard(int col, int row, bool lastCard)
         for (int j=0; j<cardCol[i].getSize(); j++)
         {
             Card* pTestCard = cardCol[i].getCard(j);
-            if (pTestCard->getFaceUp() == false){autoFinish = false;}
+            if (pTestCard->getFaceUp() == false){std::cout << "Column Fail At " << i << "\n"; autoFinish = false;}
         }
     }
-    if (getDeckSize() > 0) {autoFinish = false;}
-    if (getDrawPileSize() > 0) {autoFinish = false;}
+    if (getDeckSize() > 0) {std::cout << "D0 Fail"; autoFinish = false;}
+    if (getDrawPileSize() > 0) {std::cout << "DP Fail"; autoFinish = false;}
     return autoFinish;
  }
 

@@ -111,13 +111,13 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     palette.setColor(QPalette::WindowText, Qt::white);
 
     m_moves = new QLabel("moves", this);
-    m_moves->setGeometry(QRect(600,830,200,100));
+    m_moves->setGeometry(QRect(600,900,200,50));
     m_moves->setFont(font);
     m_moves->setPalette(palette);
     m_moves->setText(QString("Moves = "));
 
     m_timer = new QLabel("Time: ", this);           
-    m_timer->setGeometry(QRect(600, 860, 300, 100));
+    m_timer->setGeometry(QRect(600, 930, 300, 50));
     m_timer->setFont(font);
     m_timer->setPalette(palette);
     //elapsedTimer.start();
@@ -146,7 +146,7 @@ SolitaireUI::~SolitaireUI()
 void SolitaireUI::dealCards()
 {
     m_pSolitaire->dealGame();
-    refreshScreen();
+    refreshUpperSection();
     m_pD[0]->setEnabled(true);
     m_pD[0]->setIcon(QPixmap(cardImage[0]));
     m_pD[0]->setText(QString());
@@ -164,7 +164,7 @@ void SolitaireUI::dealCards()
 }
 
 
-void SolitaireUI::refreshScreen()
+void SolitaireUI::refreshUpperSection()
 {
     for (int i=0; i<133; i++) 
     {
@@ -276,8 +276,10 @@ void SolitaireUI::cardClicked()
             else 
             {
                 int drawPileSize = m_pSolitaire->getDrawPileSize();
+                int activePile = drawPileSize;
+                if (drawPileSize >2){activePile = 3;}
                 int dPiles = secondChar.digitValue();               // get the number of the pile clicked
-                if (dPiles == cardsDelt)                            // if the pile clicked is the active pile
+                if (dPiles == activePile)                            // if the pile clicked is the active pile
                 {
                     if (drawPileSize > 0) 
                     {
@@ -300,9 +302,9 @@ void SolitaireUI::cardClicked()
             m_pSolitaire->playGame();
             dealCards();
         }
-        checkForWin();
-        refreshScreen();
-        bool aFinish = m_pSolitaire->checkAutoFinish();
+
+        refreshUpperSection();
+        bool aFinish = m_pSolitaire->checkForWin();
         if (aFinish == true){autoFinish();}
         m_pSolitaire->printField();
     }
@@ -313,27 +315,27 @@ void SolitaireUI::autoFinish()
 {
     std::cout << "In autoFinish \n";
     bool gameDone = false;
-    while (gameDone == false)
+    bool win = false;
+    while (gameDone == false)                       // cycle through all remaining cards and play them to the Aces
     {
         gameDone = m_pSolitaire->nextCard();
-        refreshScreen();
+        refreshUpperSection();
         delayTimer(200);
     }
+    win = m_pSolitaire->checkForWin();
+    std::cout << "******* In UI AutoFinish win = " << win << "\n";
+    if (win == true) {postWin();}
 }
 
 
-void SolitaireUI::checkForWin()
+void SolitaireUI::postWin()
 {
-    bool win = m_pSolitaire->getWin();
-    std::cout << "Win = " << win << endl;;
-    if (win == true)
-    {
-        m_pD[0]->setEnabled(false);
-        m_pD[0]->setText("WIN!!");
-        m_pD[1]->setEnabled(false);
-        m_pD[1]->setIcon(QPixmap()); 
-        m_pD[1]->setText("WIN!!");
-    } 
+    timer.stop();
+    m_pD[0]->setEnabled(false);
+    m_pD[0]->setText("WIN!!");
+    m_pD[1]->setEnabled(false);
+    m_pD[1]->setIcon(QPixmap()); 
+    m_pD[1]->setText("WIN!!");
 }
 
 
@@ -382,7 +384,7 @@ void SolitaireUI::undoPressed()
 {
     std::cout << "Undo button pressed\n";
     m_pSolitaire->loadGameState();
-    refreshScreen(); 
+    refreshUpperSection(); 
     refreshDecks();
 }
 
