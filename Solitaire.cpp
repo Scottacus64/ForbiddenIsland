@@ -754,12 +754,14 @@ bool Solitaire::checkCanPlay()
 {
     // first check the bottom cards of the seven columns
     bool canPlay = false;
+    bool test = false;
+    Card* pCard;
     for (int i=0; i<7; i++)
     {
         if (cardCol[i].getSize()>0)
         {
-            Card* pCard = cardCol[i].getLastCard();
-            bool test = testCardMove(pCard, false);
+            pCard = cardCol[i].getLastCard();
+            test = testCardMove(pCard, false);
             if (test == true){canPlay = true;}
         }
     }
@@ -768,19 +770,58 @@ bool Solitaire::checkCanPlay()
     {
         if (cardCol[i].getSize()>0)
         {
-            Card* pCard = cardCol[i].getFirstFlippedUp();
-            bool test = testCardMove(pCard, true);
+            pCard = cardCol[i].getFirstFlippedUp();
+            test = testCardMove(pCard, true);
             if (test == true){canPlay = true;}
         }
     }
-    // check the top of the draw pile
-    if (drawPile.cardsLeft()>0)
+    // check the top card of the draw pile
+    if (drawPile.cardsLeft() > 0)
     {
-        Card* pCard = drawPile.getTopDeckCard();
-        bool test = testCardMove(pCard, true);
+        pCard = drawPile.getTopDeckCard();
+        test = testCardMove(pCard, false);
         if (test == true){canPlay = true;}
     }
+    // check through all of the remaining play pile
+    int deckSize = solitaireDeck.cardsLeft();
+    if (deckSize > 0)
+    {
+        if (deckSize > 2)
+            {
+                for (int i=deckSize-3; i>-1; i-=3)
+                {
+                    pCard = solitaireDeck.getDeckCardAt(i);
+                    test = testCardMove(pCard, true);
+                    if (test == true)
+                    {
+                        std::cout << pCard->getFaceValue() << pCard->getSuit() << "\n";
+                        canPlay = true;
+                    }
+                }
+            }
+        // check the last card in the draw pile
+        pCard = solitaireDeck.getDeckCardAt(0);
+        test = testCardMove(pCard, true);
+        if (test == true){canPlay = true;}
+    }
+    // check through the play and draw piles each three cards
+    /*Deck tmpDrawPile = drawPile;        //make temp decks
+    Deck tmpDeck = solitaireDeck;
+    for (int i=0; i<dpSize; i++)
+    {
+        pCard = tmpDrawPile.deal();     // pop each card off of the top of the temp draw pile
+        tmpDeck.addCard(pCard);         // add it to the temp deck
+    }
+    int tmpDeckSize = tmpDeck.cardsLeft();
+    for (int i=tmpDeckSize; i>0; i-=3)
+    {
+        pCard = drawPile.getDeckCardAt(i-1);
+        bool test = testCardMove(pCard, true);
+        if (test == true){canPlay = true;}
+    }*/
+
     return canPlay;
+
 }
 
 bool Solitaire::testCardMove(Card* pCard, bool lastCard)
@@ -805,7 +846,7 @@ bool Solitaire::testCardMove(Card* pCard, bool lastCard)
     for (int j=0; j<4; j++)                     // check if a card can play on an ace stack at the top of the table
     {
         // if the array is not empty, a card has not been moved to aces and it is the last card in the cardCol
-        cout << "aceStack" << j << " size = " << Aces[j].getSize()<< " LC = " << lastCard << " AM = " << aceMatch << endl;;
+        //cout << "aceStack" << j << " size = " << Aces[j].getSize()<< " LC = " << lastCard << " AM = " << aceMatch << endl;;
         if (Aces[j].getSize() > 0 && lastCard == true && aceMatch == false)  
         {
             int aceID = Aces[j].getLastCardID();             // get the id of the last card in the Aces stack
@@ -813,7 +854,7 @@ bool Solitaire::testCardMove(Card* pCard, bool lastCard)
             char aceSuit = Aces[j].getLastCardSuit();        // as well as its suit
             int cardID = id%13;
             if (cardID == 0) {cardID = 13;}
-            cout << "aceStack last card= " << aceStackValue << " incoming card = " << cardID << endl;;
+            //cout << "aceStack last card= " << aceStackValue << " incoming card = " << cardID << endl;;
             if (cardID == aceStackValue+1 && suit == aceSuit)      // if the clicked card's id is one more than the last one in the ace stack
             {
                 canPlay = true;          // set it as a possible move 
@@ -845,7 +886,6 @@ bool Solitaire::testCardMove(Card* pCard, bool lastCard)
         else {cardRed = true;}
 
         // if the card is one less in value than the last card in a cardCol and the color of the card is opposite
-
         if (colVal == cardValue+1 && columnRed != cardRed && lastCard == true)    
         {
             canPlay = true;             // set this as a possible move
