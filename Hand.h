@@ -10,15 +10,19 @@ public:
     ~Hand();
     void printHand();
     Card* removeCard(int position);
-    void addCard(Card* pCard);
-    void addCardAt (Card* pCard, int slot);
-    void clearHand();
+    void  addCard(Card* pCard);
+    void  addCardAt (Card* pCard, int slot);
+    void  clearHand();
 
     Card* getCard(int position);
-    int  getSize();
-    int  getLastCardID();
-    int  getLastCardValue();
-    char getLastCardSuit();
+    Card* getFirstFlippedUp();
+    int   getFirstFlippedUpPosition();
+    int   getSize();
+    Card* getLastCard ();
+    int   getLastCardID();
+    int   getLastCardValue();
+    char  getLastCardSuit();
+    Card* getCardAt(int location);
 
     void sortHandValue();
     void sortActualValue();

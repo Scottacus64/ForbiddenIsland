@@ -59,13 +59,15 @@ public:
     int   getMoves();
     Card* removeColCard(int col, int row, bool lastCard);
     Card* removeForAce(int col, int row);
-    void aceStackMove(int col, int row, int suit, Card* pCard, bool lastCard);
-    void playFromDrawPile(int col);
-    void playFromAces(int col, int suit);
-    void reuseDeck();
-    bool getWin();
-    bool checkForWin();
-    bool nextCard();
+    void  aceStackMove(int col, int row, int suit, Card* pCard, bool lastCard);
+    void  playFromDrawPile(int col);
+    void  playFromAces(int col, int suit);
+    void  reuseDeck();
+    bool  getWin();
+    bool  checkForWin();
+    bool  nextCard();
+    bool  checkCanPlay();
+    bool  testCardMove(Card* pCard, bool lastCard);
     
 
 private:

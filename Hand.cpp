@@ -148,3 +148,56 @@ char Hand::getLastCardSuit()
     return suit; 
 }
 
+Card* Hand::getLastCard()
+{
+    Card* pCard;
+    if (m_hand.size() > 0)
+    {
+        pCard = m_hand[m_hand.size()-1];
+    }
+    return pCard;
+}
+
+Card* Hand::getFirstFlippedUp()
+{
+    Card* pCard;
+    if (m_hand.size() > 0)
+    {
+        for (int i=0; i<m_hand.size(); i++)
+        {
+            pCard = m_hand[i];
+            if (pCard->getFaceUp() == true)
+            {
+                break;
+            }
+        }
+    }
+    return pCard;
+}
+
+int Hand::getFirstFlippedUpPosition()
+{
+    Card* pCard;
+    int location;
+    if (m_hand.size() > 0)
+    {
+        for (int i=0; i<m_hand.size(); i++)
+        {
+            pCard = m_hand[i];
+            if (pCard->getFaceUp() == true)
+            {
+                location = i;
+                break;
+            }
+        }
+    }
+    return location;  
+}
+
+Card* Hand::getCardAt(int location)
+{
+    Card* pCard;
+    if (location < m_hand.size()){pCard = m_hand[location];}
+    return pCard;
+
+}

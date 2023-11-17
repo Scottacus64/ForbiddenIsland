@@ -225,7 +225,8 @@ int Solitaire::cycleDeck()
 
 /*******************************************************************************************
  *          This is the setion that looks over the ID number and suit of a card sent to it         
- *          to check if that card can be played on either a column or the aces above         
+ *          to check if that card can be played on either a column or the aces above.  
+ *          It will also move that card to the highest priority location       
 ********************************************************************************************/
 bool Solitaire::checkCanMove(Card* pCard, int col, int row, bool lastCard, bool lastUnflippedCard)
 {
@@ -271,7 +272,7 @@ bool Solitaire::checkCanMove(Card* pCard, int col, int row, bool lastCard, bool 
         int cardValue = pCard->getFaceValue();         
         char suit = pCard->getSuit();
 
-        cout << "IN CheckPossMoves CardValue = " << cardValue << " suit = " << suit << endl;;
+        cout << "In CheckPossMoves CardValue = " << cardValue << " suit = " << suit << endl;;
 
         /************ check each of the four aceStacks at the top to see if the card can move here ***********/
         for (int j=0; j<4; j++)                     // check if a card can play on an ace stack at the top of the table
@@ -524,7 +525,7 @@ Card* Solitaire::removeColCard(int col, int row, bool lastCard)
         for (int j=0; j<cardCol[i].getSize(); j++)
         {
             Card* pTestCard = cardCol[i].getCard(j);
-            if (pTestCard->getFaceUp() == false){std::cout << "Column Fail At " << i << "\n"; autoFinish = false;}
+            if (pTestCard->getFaceUp() == false){autoFinish = false;}
         }
     }
     if (getDeckSize() > 0) {std::cout << "D0 Fail"; autoFinish = false;}
@@ -747,4 +748,118 @@ void Solitaire::clearLinkedList(Solitaire::GameNode*& head)
         head = head->next;
         delete temp;
     }
+}
+
+bool Solitaire::checkCanPlay()
+{
+    // first check the bottom cards of the seven columns
+    bool canPlay = false;
+    for (int i=0; i<7; i++)
+    {
+        if (cardCol[i].getSize()>0)
+        {
+            Card* pCard = cardCol[i].getLastCard();
+            bool test = testCardMove(pCard, false);
+            if (test == true){canPlay = true;}
+        }
+    }
+    // next check the top flipped card in each column
+    for (int i=0; i<7; i++)
+    {
+        if (cardCol[i].getSize()>0)
+        {
+            Card* pCard = cardCol[i].getFirstFlippedUp();
+            bool test = testCardMove(pCard, true);
+            if (test == true){canPlay = true;}
+        }
+    }
+    // check the top of the draw pile
+    if (drawPile.cardsLeft()>0)
+    {
+        Card* pCard = drawPile.getTopDeckCard();
+        bool test = testCardMove(pCard, true);
+        if (test == true){canPlay = true;}
+    }
+    return canPlay;
+}
+
+bool Solitaire::testCardMove(Card* pCard, bool lastCard)
+{
+    bool canPlay = false;
+    bool aceMatch = false;
+    bool cardRed;
+    bool columnRed;
+    bool sameCardClicked = false;
+    bool canMove = false;
+    char suits[4] = {'C', 'S', 'H', 'D'};
+    int moveSize;
+    int id = pCard->getID();
+    int cardValue = pCard->getFaceValue(); 
+    bool topCard = false;
+    for (int i=0; i<7; i++) 
+    {
+        if (pCard == cardCol[i].getCardAt(0)){topCard = true;}
+    }       
+    char suit = pCard->getSuit();
+    /************ check each of the four aceStacks at the top to see if the card can move here ***********/
+    for (int j=0; j<4; j++)                     // check if a card can play on an ace stack at the top of the table
+    {
+        // if the array is not empty, a card has not been moved to aces and it is the last card in the cardCol
+        cout << "aceStack" << j << " size = " << Aces[j].getSize()<< " LC = " << lastCard << " AM = " << aceMatch << endl;;
+        if (Aces[j].getSize() > 0 && lastCard == true && aceMatch == false)  
+        {
+            int aceID = Aces[j].getLastCardID();             // get the id of the last card in the Aces stack
+            int aceStackValue = aceID%13;
+            char aceSuit = Aces[j].getLastCardSuit();        // as well as its suit
+            int cardID = id%13;
+            if (cardID == 0) {cardID = 13;}
+            cout << "aceStack last card= " << aceStackValue << " incoming card = " << cardID << endl;;
+            if (cardID == aceStackValue+1 && suit == aceSuit)      // if the clicked card's id is one more than the last one in the ace stack
+            {
+                canPlay = true;          // set it as a possible move 
+                aceMatch = true;
+            }
+        }
+        else                                   // if the array is empty, the card is an ace and matches the slot suit
+        {
+            if (id % 13 == 1 && suit == suits[j] && aceMatch == false)  // if it is an Ace card in play
+            {
+                canPlay = true;  // use a multiple of ten to show this special situation  
+                aceMatch = true;                                        
+            }
+        }
+    }  
+
+    /********** Check each of the seven card columns to see if the card can move to one of these ***********/
+    for (int i=0; i<7; i++)                         // go through each cardCol
+    {
+        int colID = cardCol[i].getLastCardID();     // get the last card in the column's ID
+        int colVal = colID % 13;
+        if (colVal == 0) {colVal = 13;}             // set Kings to 13
+        char colSuit = cardCol[i].getLastCardSuit();
+
+        if (colID < 27) {columnRed = false;}        // set cardCol card as red or black
+        else {columnRed = true;}
+
+        if (id < 27) {cardRed = false;}             // set the clicked card as red or black
+        else {cardRed = true;}
+
+        // if the card is one less in value than the last card in a cardCol and the color of the card is opposite
+
+        if (colVal == cardValue+1 && columnRed != cardRed && lastCard == true)    
+        {
+            canPlay = true;             // set this as a possible move
+        }
+    }
+
+    /*********  check if the card is a king and there is an empty cardColumn  **********/
+    for (int i=0; i<7; i++)
+    {
+        int size =cardCol[i].getSize();
+        if (size == 0 && cardValue == 13 && topCard == false)
+        {
+            canPlay = true;
+        }
+    } 
+    return canPlay;
 }

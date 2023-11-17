@@ -14,9 +14,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
 {
     QString appDir = QCoreApplication::applicationDirPath();
     QString assetPath = QDir::cleanPath(appDir + QDir::separator() + "pngs") + QDir::separator();
-
     ui->setupUi(this);
-
     green = QPixmap(assetPath + "green.png");
     // set up all of the card image QPixmaps
     cardImage[0] = QPixmap(assetPath + "0B.png");
@@ -30,7 +28,6 @@ SolitaireUI::SolitaireUI(QWidget *parent)
             cardImage[slot] = QPixmap(assetPath + QString::number(i) + suits[s]+ ".png");
         }
     }
-
     // set up the four Ace piles at the top
     for (int i = 0; i < 4; i++) 
     {
@@ -45,7 +42,6 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         m_pA[i]->setIconSize(iconSize);
         connect(m_pA[i], &QPushButton::clicked, this, &SolitaireUI::cardClicked);
     }
-
     // set up all of the columns of cards in the playfield area
     for (int k=0; k<7; k++) 
     {
@@ -64,7 +60,6 @@ SolitaireUI::SolitaireUI(QWidget *parent)
             connect(m_pC[j+(k*19)], &QPushButton::clicked, this, &SolitaireUI::cardClicked);
         }
     }
-
         // set up the deck and draw piles at the bottom
     int j=0;
     int k=10;    
@@ -89,14 +84,12 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         m_pD[i]->setEnabled(false);
         m_pD[i]->hide();
     }
-
-    std::string name = "NewGame";
-    m_newGame = new QPushButton(QString::fromStdString(name), this);
-    m_newGame->setObjectName(QString::fromStdString(name));
+    // set up the buttons
+    m_newGame = new QPushButton("newGame", this);
+    m_newGame->setObjectName(QString::fromStdString("newGame"));
     m_newGame->setGeometry(QRect(600, 740, 140, 50));
     m_newGame->setText(QString("New Game?"));
     connect(m_newGame, &QPushButton::clicked, this, &SolitaireUI::cardClicked);
-
 
     m_undo = new QPushButton("undo", this);
     m_undo->setObjectName("undo");
@@ -104,7 +97,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_undo->setText(QString("Undo"));
     connect(m_undo, &QPushButton::clicked, this, &SolitaireUI::undoPressed);
 
-
+    // set up the labels
     QFont font;
     font.setPointSize(28);
     QPalette palette;
@@ -307,6 +300,14 @@ void SolitaireUI::cardClicked()
         bool aFinish = m_pSolitaire->checkForWin();
         if (aFinish == true){autoFinish();}
         m_pSolitaire->printField();
+        bool canPlay = m_pSolitaire->checkCanPlay();
+        if (canPlay == true)
+            {
+                m_newGame->setText(QString("True"));
+            }
+        else{
+                m_newGame->setText(QString("False"));
+            }
     }
 }
 
