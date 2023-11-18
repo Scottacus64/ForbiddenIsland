@@ -805,21 +805,51 @@ bool Solitaire::checkCanPlay()
         if (test == true){canPlay = true;}
     }
     // check through the play and draw piles each three cards
-    /*Deck tmpDrawPile = drawPile;        //make temp decks
+    std::cout <<"TmpDrawPile\n";
+    Deck tmpDrawPile = drawPile;        //make temp decks
+    tmpDrawPile.printDeck();
+    std::cout << "\nTmpDeck\n";
     Deck tmpDeck = solitaireDeck;
-    for (int i=0; i<dpSize; i++)
+    tmpDeck.printDeck();
+    std::cout << "\n";
+    int tdpSize = tmpDrawPile.cardsLeft();
+    if (tdpSize > 0)
+    std::cout << "In last section\n";
     {
-        pCard = tmpDrawPile.deal();     // pop each card off of the top of the temp draw pile
-        tmpDeck.addCard(pCard);         // add it to the temp deck
+        for (int i=0; i<tdpSize; i++)
+        {
+            std::cout << i;
+            pCard = tmpDrawPile.deal();     // pop each card off of the top of the temp draw pile
+            tmpDeck.addCard(pCard);         // add it to the temp deck
+        }
+        std::cout << "TmpDrawPile\n";
+        tmpDrawPile.printDeck();
+        std::cout << "TmpDeck\n";
+        tmpDeck.printDeck();
+        std::cout << "\n";
+        int tmpDS = tmpDeck.cardsLeft();
+        std::cout << "testing" ;
+        std::cout << tmpDS ;
+        if (tmpDS > 0)
+        {
+            if (tmpDS > 2)
+            {
+                std::cout << "tmpDS > 2";
+                for (int i=tmpDS-3; i>-1; i-=3)
+                {
+                    pCard = tmpDeck.getDeckCardAt(i);
+                    bool test = testCardMove(pCard, true);
+                    std::cout << "In next Deck: " << pCard->getFaceValue() << pCard->getSuit() << "\n";
+                    if (test == true){canPlay = true;}
+                }
+                std::cout << "tmpDS > 0";
+                // check the last card in the draw pile
+                pCard = tmpDeck.getDeckCardAt(0);
+                test = testCardMove(pCard, true);
+                if (test == true){canPlay = true;}
+            }
+        }
     }
-    int tmpDeckSize = tmpDeck.cardsLeft();
-    for (int i=tmpDeckSize; i>0; i-=3)
-    {
-        pCard = drawPile.getDeckCardAt(i-1);
-        bool test = testCardMove(pCard, true);
-        if (test == true){canPlay = true;}
-    }*/
-
     return canPlay;
 
 }
