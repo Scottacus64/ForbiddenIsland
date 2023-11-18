@@ -98,7 +98,7 @@ Card* Deck::deal()
 int Deck::cardsLeft()
 {
     int remaining = m_deck.size();
-    std::cout << "from Deck Class cards left = " << remaining << " **********\n\n";
+    //std::cout << "from Deck Class cards left = " << remaining << " **********\n\n";
     return remaining;
 }
 

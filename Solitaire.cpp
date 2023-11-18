@@ -756,34 +756,61 @@ bool Solitaire::checkCanPlay()
     bool canPlay = false;
     bool test = false;
     Card* pCard;
+    std::cout<< "From Column Bottom:\n";
     for (int i=0; i<7; i++)
     {
-        if (cardCol[i].getSize()>0)
+        int colSize = cardCol[i].getSize();
+        if (colSize>0)
         {
-            pCard = cardCol[i].getLastCard();
-            test = testCardMove(pCard, false);
-            if (test == true){canPlay = true;}
+            bool nextDown;
+            pCard = cardCol[i].getLastCard();                       // get the last card in the column
+            if (colSize>1)
+            {
+                Card* pNextCard = cardCol[i].getCardAt(colSize-2);  // if 2 or more cards get the one above last
+                if (pNextCard->getFaceUp() == false)                // check to see if it is face down
+                {nextDown = true;}                                  // if down then the last card is the bottom card
+                else
+                {nextDown = false;}
+            }
+            test = testCardMove(pCard, nextDown);
+            if (test == true)
+            {
+                canPlay = true;
+                std::cout << pCard->getPrintValue() << pCard->getSuit() << " : ";
+            }
         }
     }
+    std::cout << "\n";
+    std::cout<< "From Column Top:\n";
     // next check the top flipped card in each column
     for (int i=0; i<7; i++)
     {
         if (cardCol[i].getSize()>0)
         {
-            pCard = cardCol[i].getFirstFlippedUp();
+            pCard = cardCol[i].getFirstFlippedUp();     // find the first card from the top of the column that is face up
             test = testCardMove(pCard, true);
-            if (test == true){canPlay = true;}
+            if (test == true)
+            {
+                canPlay = true;
+                std::cout << pCard->getPrintValue() << pCard->getSuit() << " : ";
+            }
         }
     }
+    std::cout << "\n";
     // check the top card of the draw pile
     if (drawPile.cardsLeft() > 0)
     {
         pCard = drawPile.getTopDeckCard();
-        test = testCardMove(pCard, false);
-        if (test == true){canPlay = true;}
+        test = testCardMove(pCard, true);
+        if (test == true)
+        {
+            canPlay = true;
+            std::cout << "Draw Pile Top\n" << pCard->getPrintValue() << pCard->getSuit() << "\n";
+        }
     }
     // check through all of the remaining play pile
     int deckSize = solitaireDeck.cardsLeft();
+    std::cout<< "From Deck This Time:\n";
     if (deckSize > 0)
     {
         if (deckSize > 2)
@@ -794,59 +821,57 @@ bool Solitaire::checkCanPlay()
                     test = testCardMove(pCard, true);
                     if (test == true)
                     {
-                        std::cout << pCard->getFaceValue() << pCard->getSuit() << "\n";
+                        std::cout << pCard->getPrintValue() << pCard->getSuit() << " : ";
                         canPlay = true;
                     }
                 }
             }
+            std::cout << "\n";
         // check the last card in the draw pile
         pCard = solitaireDeck.getDeckCardAt(0);
         test = testCardMove(pCard, true);
-        if (test == true){canPlay = true;}
+        if (test == true)
+        {
+            canPlay = true;
+            std::cout << pCard->getPrintValue() << pCard->getSuit();
+        }
     }
     // check through the play and draw piles each three cards
-    std::cout <<"TmpDrawPile\n";
     Deck tmpDrawPile = drawPile;        //make temp decks
-    tmpDrawPile.printDeck();
-    std::cout << "\nTmpDeck\n";
     Deck tmpDeck = solitaireDeck;
-    tmpDeck.printDeck();
-    std::cout << "\n";
     int tdpSize = tmpDrawPile.cardsLeft();
     if (tdpSize > 0)
-    std::cout << "In last section\n";
     {
         for (int i=0; i<tdpSize; i++)
         {
-            std::cout << i;
             pCard = tmpDrawPile.deal();     // pop each card off of the top of the temp draw pile
             tmpDeck.addCard(pCard);         // add it to the temp deck
         }
-        std::cout << "TmpDrawPile\n";
-        tmpDrawPile.printDeck();
-        std::cout << "TmpDeck\n";
-        tmpDeck.printDeck();
-        std::cout << "\n";
         int tmpDS = tmpDeck.cardsLeft();
-        std::cout << "testing" ;
-        std::cout << tmpDS ;
+        std::cout<< "From Deck Next Time:\n";
         if (tmpDS > 0)
         {
             if (tmpDS > 2)
             {
-                std::cout << "tmpDS > 2";
                 for (int i=tmpDS-3; i>-1; i-=3)
                 {
                     pCard = tmpDeck.getDeckCardAt(i);
                     bool test = testCardMove(pCard, true);
-                    std::cout << "In next Deck: " << pCard->getFaceValue() << pCard->getSuit() << "\n";
-                    if (test == true){canPlay = true;}
+                    if (test == true)
+                    {
+                        canPlay = true;
+                        std::cout << pCard->getPrintValue() <<pCard->getSuit() << " : ";
+                    }
                 }
-                std::cout << "tmpDS > 0";
+                std::cout << "\n";
                 // check the last card in the draw pile
                 pCard = tmpDeck.getDeckCardAt(0);
                 test = testCardMove(pCard, true);
-                if (test == true){canPlay = true;}
+                if (test == true)
+                {
+                    canPlay = true;
+                    std::cout << pCard->getPrintValue() << pCard->getSuit();
+                }
             }
         }
     }
@@ -869,14 +894,13 @@ bool Solitaire::testCardMove(Card* pCard, bool lastCard)
     bool topCard = false;
     for (int i=0; i<7; i++) 
     {
-        if (pCard == cardCol[i].getCardAt(0)){topCard = true;}
+        if (pCard == cardCol[i].getCardAt(0)){topCard = true;}  // lets up know that the card has no cards under it
     }       
     char suit = pCard->getSuit();
     /************ check each of the four aceStacks at the top to see if the card can move here ***********/
     for (int j=0; j<4; j++)                     // check if a card can play on an ace stack at the top of the table
     {
         // if the array is not empty, a card has not been moved to aces and it is the last card in the cardCol
-        //cout << "aceStack" << j << " size = " << Aces[j].getSize()<< " LC = " << lastCard << " AM = " << aceMatch << endl;;
         if (Aces[j].getSize() > 0 && lastCard == true && aceMatch == false)  
         {
             int aceID = Aces[j].getLastCardID();             // get the id of the last card in the Aces stack
@@ -884,7 +908,6 @@ bool Solitaire::testCardMove(Card* pCard, bool lastCard)
             char aceSuit = Aces[j].getLastCardSuit();        // as well as its suit
             int cardID = id%13;
             if (cardID == 0) {cardID = 13;}
-            //cout << "aceStack last card= " << aceStackValue << " incoming card = " << cardID << endl;;
             if (cardID == aceStackValue+1 && suit == aceSuit)      // if the clicked card's id is one more than the last one in the ace stack
             {
                 canPlay = true;          // set it as a possible move 
