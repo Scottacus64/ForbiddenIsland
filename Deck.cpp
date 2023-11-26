@@ -95,6 +95,23 @@ Card* Deck::deal()
 }
 
 
+
+Card* Deck::dealCardAt(int position)
+{
+    if (position >= 0 && static_cast<size_t>(position) < m_deck.size())
+    {
+        auto cardToDeal = m_deck.begin() + position;
+        Card* pCard = *cardToDeal;
+        m_deck.erase(cardToDeal);
+        return pCard;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
 int Deck::cardsLeft()
 {
     int remaining = m_deck.size();

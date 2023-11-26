@@ -39,6 +39,9 @@ public:
 
 public slots:
     void cardClicked();
+    void easyClicked();
+    void mediumClicked();
+    void hardClicked();
 
 private:
     Ui::SolitaireUI *ui;
@@ -49,6 +52,9 @@ private:
     QPushButton* m_pD[4];
     QPushButton* m_newGame;
     QPushButton* m_undo;
+    QPushButton* m_easy;
+    QPushButton* m_medium;
+    QPushButton* m_hard;
     QTimer elapsedTime;
     QLabel* m_moves;
     QLabel* m_timer;

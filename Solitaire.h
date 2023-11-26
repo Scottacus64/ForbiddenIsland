@@ -16,12 +16,6 @@ public:
     void moveToColumn(int destinationCol, int col, int slot, bool lastUnflipedCard);
     bool checkCanMove(Card* c, int col, int row, bool lastCard, bool lastUnflippedCard);
     void printField();
-    //struct cardState {Card* pCard; bool faceUp;};
-    //cardState sColumn[7][19];
-    //cardState sAces[4][13];
-    //cardState sSolitaireDeck[26];
-    //cardState sDrawPile[26];
-    //struct gameSaveNode {cardState sColumn[7][19]; cardState sAces[4][13];cardState sSolitaireDeck[26];cardState sDrawPile[26];gameSaveNode* next;};
 
     typedef struct CardState {      
         Card* pCard;
@@ -68,7 +62,9 @@ public:
     bool  nextCard();
     bool  checkCanPlay();
     bool  testCardMove(Card* pCard, bool lastCard);
-    
+    void  makeWinnableDeck();
+    void  buildColumns();
+    void  buildAceStacks();
 
 private:
     Deck solitaireDeck;

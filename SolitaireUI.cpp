@@ -97,6 +97,24 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_undo->setText(QString("Undo"));
     connect(m_undo, &QPushButton::clicked, this, &SolitaireUI::undoPressed);
 
+    m_easy = new QPushButton("easy", this);
+    m_easy->setObjectName(QString::fromStdString("easy"));
+    m_easy->setGeometry(QRect(800, 740, 140, 50));
+    m_easy->setText(QString("Easy"));
+    connect(m_easy, &QPushButton::clicked, this, &SolitaireUI::easyClicked);
+
+    m_medium = new QPushButton("medium", this);
+    m_medium->setObjectName(QString::fromStdString("medium"));
+    m_medium->setGeometry(QRect(800, 800, 140, 50));
+    m_medium->setText(QString("Medium"));
+    connect(m_medium, &QPushButton::clicked, this, &SolitaireUI::mediumClicked);
+
+    m_hard = new QPushButton("hard", this);
+    m_hard->setObjectName(QString::fromStdString("hard"));
+    m_hard->setGeometry(QRect(800, 860, 140, 50));
+    m_hard->setText(QString("Hard"));
+    connect(m_hard, &QPushButton::clicked, this, &SolitaireUI::hardClicked);
+
     // set up the labels
     QFont font;
     font.setPointSize(28);
@@ -463,4 +481,21 @@ void SolitaireUI::refreshDecks()
             enableDrawPile(i+1,pCard->getID());
         }
     }
+}
+
+void SolitaireUI::easyClicked()
+{
+    m_pSolitaire->makeWinnableDeck();
+    refreshUpperSection();
+    refreshUpperSection();
+}
+
+
+void SolitaireUI::mediumClicked()
+{
+}
+
+
+void SolitaireUI::hardClicked()
+{
 }

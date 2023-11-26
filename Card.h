@@ -15,12 +15,14 @@ public:
     bool getFaceUp();
     void setFaceUp(bool fUp);
     char getSuit();
+    int  getSuitInt();
     void flipCard();
     void flipFaceUp();
     void printCard();
     void printAV();
     int  getID();
     string getPrintValue();
+    int  getBlackRed();
 
 private:
     int actualValue;

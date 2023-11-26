@@ -15,6 +15,7 @@ public:
     void makeDeck();
     void shuffle();
     Card* deal();
+    Card* dealCardAt(int position);
     void printDeck();
     int  cardsLeft();
     void clearDeck(int numberOfDecks);
