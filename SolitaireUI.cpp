@@ -243,9 +243,9 @@ void SolitaireUI::cardClicked()
             int slot = std::stoi(card);
             int col = slot/19;
             int row = slot%19;
-            Card* pCard = m_pSolitaire->getColCardAt(col, row);                   //find the solitaire card at this location
-            int cardID = pCard->getID();                                             //get the card's ID
-            int colLastCardID = m_pSolitaire->getColumn(col)->getLastCardID();   //get the ID of the last card in the column
+            Card* pCard = m_pSolitaire->getColCardAt(col, row);                 //find the solitaire card at this location
+            int cardID = pCard->getID();                                        //get the card's ID
+            int colLastCardID = m_pSolitaire->getColumn(col)->getLastCardID();  //get the ID of the last card in the column
             if (cardID == colLastCardID) {lastCard = true;}                     //if they are equal then we have found the last card
             if (row > 0)
             {
@@ -487,12 +487,15 @@ void SolitaireUI::easyClicked()
 {
     m_pSolitaire->makeWinnableDeck();
     refreshUpperSection();
-    refreshUpperSection();
+    refreshDecks();
 }
 
 
 void SolitaireUI::mediumClicked()
 {
+    m_pSolitaire->finishDeck();
+    refreshUpperSection();
+    refreshDecks();
 }
 
 

@@ -17,6 +17,7 @@ public:
     Card* getCard(int position);
     Card* getFirstFlippedUp();
     int   getFirstFlippedUpPosition();
+    bool  allFaceDown();
     int   getSize();
     Card* getLastCard ();
     int   getLastCardID();

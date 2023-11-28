@@ -65,6 +65,11 @@ public:
     void  makeWinnableDeck();
     void  buildColumns();
     void  buildAceStacks();
+    void  finishDeck();
+    bool  drawPileFull();
+    void  moveToActiveColumn(Card* mCard);
+    void  moveToDrawPile(Card* mCard);
+    int   findSmallestColumn();
 
 private:
     Deck solitaireDeck;

@@ -178,7 +178,7 @@ Card* Hand::getFirstFlippedUp()
 int Hand::getFirstFlippedUpPosition()
 {
     Card* pCard;
-    int location;
+    int location = -1;      // return -1 if no cards are flipped up because zero is the first slot for a column
     if (m_hand.size() > 0)
     {
         for (int i=0; i<m_hand.size(); i++)
@@ -192,6 +192,24 @@ int Hand::getFirstFlippedUpPosition()
         }
     }
     return location;  
+}
+
+bool Hand::allFaceDown()
+{
+    Card* pCard;
+    bool allDown = true;
+    if (m_hand.size() > 0)
+    {
+        for (int i=0; i<m_hand.size(); i++)
+        {
+            pCard = m_hand[i];
+            if (pCard->getFaceUp() == true)
+            {
+                allDown = false;
+            }
+        }
+    }
+    return allDown;
 }
 
 Card* Hand::getCardAt(int location)
