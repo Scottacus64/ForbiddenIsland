@@ -1118,22 +1118,24 @@ void Solitaire::finishDeck()
                     std:: cout << "Single Column\n";
                     int lowestCol = findSmallestColumn();
                     int colSize = cardCol[lowestCol].getSize();
-                    mCard = cardCol[lowestCol].removeCard(colSize-1);   // get the card to be moved
-                    int dpOrCol = randHundred(gen);
-                    if (dpOrCol < 80)                           // 80% chance to move to a Column
+                    if (colSize > 1) // if no column can play then it will choose col 0, don't take the only card here
                     {
-                        moveToActiveColumn(mCard);              // move the card to a Column    
-                    }
-                    else                                        // 20% chance to move to Draw Pile
-                    {
-                        moveToDrawPile(mCard) ;                // move the card to the Draw Pile
+                        mCard = cardCol[lowestCol].removeCard(colSize-1);   // get the card to be moved
+                        int dpOrCol = randHundred(gen);
+                        if (dpOrCol < 80)                           // 80% chance to move to a Column
+                        {
+                            moveToActiveColumn(mCard);              // move the card to a Column    
+                        }
+                        else                                        // 20% chance to move to Draw Pile
+                        {
+                            moveToDrawPile(mCard) ;                // move the card to the Draw Pile
+                        }
                     }
                 }
                 /************* Move Multiple Cards ***************/
                 else                                            // 40% chance to move multiple cards
                 {   
-                    std::cout << "Multiple Column \n";
-                    //int colActive[7];                           // make an array to hold active columns
+                    std::cout << "Multiple Column \n";                     
                     for (int i=0; i<7; i++){colActive[i] = 10;} // set them all to invalid values
                     int counter = 0;                            // counts the number of active columns
                     for (int i=0; i<7; i++)                     // go through the columns
@@ -1145,62 +1147,71 @@ void Solitaire::finishDeck()
                             counter ++; // Note counter increments after the colActive is set so counter is 1 greater than the number of cols
                         }
                     }
-                    std::uniform_int_distribution<int> randCol(0, counter-1);   // generate a number for choosing which col to move to 
-                    int destination = randCol(gen);                             // generate a number for a column
-                    int destinationCol = colActive[destination];                // find the actual column to transfer to
-                    /****** find the columns with more than one face up card ******/
-                    int colCardsUp[7];
-                    int upCards;
-                    for (int i=0; i<7; i++){colCardsUp[i] = 0;}
-                    for (int i=0; i<7; i++)                 
+                    if (counter > 0)
                     {
-                        int firstUpSlot = cardCol[i].getFirstFlippedUpPosition();
-                        if (firstUpSlot > -1)
-                        {upCards = cardCol[i].getSize() - firstUpSlot;}
-                        else
-                        {upCards = 0;}
-                        if (upCards > 1)
+                        std::uniform_int_distribution<int> randCol(0, counter-1);   // generate a number for choosing which col to move to 
+                        int destination = randCol(gen);                             // generate a number for a column
+                        int destinationCol = colActive[destination];                // find the actual column to transfer to
+                        /****** find the columns with more than one face up card ******/
+                        int colCardsUp[7];
+                        int upCards;
+                        for (int i=0; i<7; i++){colCardsUp[i] = 0;}
+                        for (int i=0; i<7; i++)                 
                         {
-                            colCardsUp[i] = upCards;    // add the number of face up cards to the array
+                            int firstUpSlot = cardCol[i].getFirstFlippedUpPosition();
+                            if (firstUpSlot > -1)
+                            {upCards = cardCol[i].getSize() - firstUpSlot;}
+                            else
+                            {upCards = 0;}
+                            if (upCards > 1)
+                            {
+                                colCardsUp[i] = upCards;    // add the number of face up cards to the array
+                            }
                         }
-                    }
-                    int largestCol = 0;                 // this will be the slot of the column with the most face up cards
-                    int firstCol = 0;
-                    for (int i=0; i<7; i++)
-                    {
-                        if (colCardsUp[i]>0 &&  firstCol == 0)  // if there are no lowest columns yet then get the first one
+                        int largestCol = 0;                 // this will be the slot of the column with the most face up cards
+                        int firstCol = 0;
+                        bool colFound = false;
+                        for (int i=0; i<7; i++)
                         {
-                            largestCol = i;
-                            firstCol = 1;
+                            if (colCardsUp[i]>0 &&  firstCol == 0)  // if there are no lowest columns yet then get the first one
+                            {
+                                largestCol = i;
+                                firstCol = 1;
+                                colFound = true;
+                            }
+                            if (i>0 && firstCol == 1 && colCardsUp[i]>largestCol) // if we are past the zero slot and have at least
+                            {                                                     // one largest column then see if the next one is 
+                                largestCol = i;                                   // larger to find the biggest one
+                            }
+                        } 
+                        if (colFound == true)
+                        {
+                            std::uniform_int_distribution<int> randColSplit(1, colCardsUp[largestCol]);   
+                            int splitPoint = randColSplit(gen);     // generate a random point to split the up cards for moving them
+                            int colSize = cardCol[largestCol].getSize();
+                            splitPoint = colSize-splitPoint;   
+                            std::cout << "SplitPoint = " << splitPoint << " Col to move from = " << largestCol << " Destination = " << destinationCol << "\n";   
+                            //NOTE because the col size is decreasing with each iteration, the point of removal Always is splitPoint
+                            for (int i= splitPoint; i<colSize; i++)                    // iterate through the number of cards
+                            {
+                                Card* pCard = cardCol[largestCol].removeCard(splitPoint);    // remove it from the sorce and..
+                                cardCol[destinationCol].addCard(pCard);                      // add it to the destination
+                            }
+                            int colLength = cardCol[largestCol].getSize();
+                            if (colLength > 0)                                          // if there are still cards in the col, flip one
+                            {
+                                Card* pCard = cardCol[largestCol].getCard(colLength-1);
+                                bool lastUnflippedCard = pCard->getFaceUp();
+                                if (lastUnflippedCard == true) {pCard->flipFaceUp();}
+                            }
                         }
-                        if (i>0 && firstCol == 1 && colCardsUp[i]>largestCol) // if we are past the zero slot and have at least
-                        {                                                     // one largest column then see if the next one is 
-                            largestCol = i;                                   // larger to find the biggest one
-                        }
-                    } 
-                    std::uniform_int_distribution<int> randColSplit(1, colCardsUp[largestCol]);   
-                    int splitPoint = randColSplit(gen);     // generate a random point to split the up cards for moving them
-                    int colSize = cardCol[largestCol].getSize();
-                    splitPoint = colSize-splitPoint;   
-                    std::cout << "SplitPoint = " << splitPoint << " Col to move from = " << largestCol << " Destination = " << destinationCol << "\n";   
-                    //NOTE because the col size is decreasing with each iteration, the point of removal Always is splitPoint
-                    for (int i= splitPoint; i<colSize; i++)                    // iterate through the number of cards
-                    {
-                        Card* pCard = cardCol[largestCol].removeCard(splitPoint);    // remove it from the sorce and..
-                        cardCol[destinationCol].addCard(pCard);                      // add it to the destination
-                    }
-                    int colLength = cardCol[largestCol].getSize();
-                    if (colLength > 0)                                          // if there are still cards in the col, flip one
-                    {
-                        Card* pCard = cardCol[largestCol].getCard(colLength-1);
-                        bool lastUnflippedCard = pCard->getFaceUp();
-                        if (lastUnflippedCard == true) {pCard->flipFaceUp();}
                     }
                 }
             }
             /******* There are no active Columns so move a single card to the draw pile from a column *******/
             else                                                
             {
+                std::cout << "In no active cols so just move a card to the draw pile \n";
                 int lowestCol = findSmallestColumn();
                 int colSize = cardCol[lowestCol].getSize();
                 mCard = cardCol[lowestCol].removeCard(colSize-1);   // get the card to be moved 
