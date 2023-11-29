@@ -500,4 +500,7 @@ void SolitaireUI::mediumClicked()
 
 void SolitaireUI::hardClicked()
 {
+    m_pSolitaire->dealGame();
+    refreshUpperSection();
+    refreshDecks();
 }
