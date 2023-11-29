@@ -917,6 +917,7 @@ void Solitaire::makeWinnableDeck()
     for (int i=0; i<7; i++) {cardCol[i].clearHand();}
     buildColumns();
     buildAceStacks();
+    for (int i=0; i<4; i++){firstFour[i] = false;}
 }
 
 
@@ -1023,7 +1024,9 @@ void Solitaire::finishDeck()
 {
     int aceCards;
     bool acesGone = false;
-    //while (acesGone == false)
+    bool dpFull = false;
+    bool allDone = false;
+    //while (allDone == false)
     {
         int activeColumns = 0;
         int aceCards = 0;
@@ -1040,8 +1043,11 @@ void Solitaire::finishDeck()
             // this flips the last card in a column down if there are no other face up cards and the column is not complete
             if (colSz-firstUp == 1 && firstUp<i && firstUp>-1) // colSz-firstUp will show if last card, firstUp<i will show noncompleted column                  
             {
-                Card* pCard = cardCol[i].getCardAt(firstUp);
-                pCard->setFaceUp(false);
+                if (i>3 || firstFour[i]== true)     // flip down if col 4-6 or 0-4 already cleared
+                {
+                    Card* pCard = cardCol[i].getCardAt(firstUp);
+                    pCard->setFaceUp(false);
+                }
             }
             // first up will be -1 if there are no face up cards, needed because position 0 is the first slot
             if (firstUp>-1)
@@ -1118,9 +1124,15 @@ void Solitaire::finishDeck()
                     std:: cout << "Single Column\n";
                     int lowestCol = findSmallestColumn();
                     int colSize = cardCol[lowestCol].getSize();
-                    if (colSize > 1) // if no column can play then it will choose col 0, don't take the only card here
+                    std::cout << "***** Col:" << lowestCol << " firstFour:" << firstFour[lowestCol]<< "\n";
+                    if (colSize > 1 || (lowestCol<4 && firstFour[lowestCol]==false)) // col of 2 face up or first 4 col have not been fully cycled to clear kings
                     {
                         mCard = cardCol[lowestCol].removeCard(colSize-1);   // get the card to be moved
+                        if (lowestCol < 4 && colSize-1==0)          //first 4 col need to fully turn over
+                        {
+                            firstFour[lowestCol] = true;
+                            std::cout << "firstFour " << lowestCol << " is " << firstFour[lowestCol] << "\n";
+                        }
                         int dpOrCol = randHundred(gen);
                         if (dpOrCol < 80)                           // 80% chance to move to a Column
                         {
@@ -1128,7 +1140,8 @@ void Solitaire::finishDeck()
                         }
                         else                                        // 20% chance to move to Draw Pile
                         {
-                            moveToDrawPile(mCard) ;                // move the card to the Draw Pile
+                            if (drawPileFull() == false)
+                                {moveToDrawPile(mCard);}            // move the card to the Draw Pile
                         }
                     }
                 }
@@ -1189,7 +1202,7 @@ void Solitaire::finishDeck()
                             std::uniform_int_distribution<int> randColSplit(1, colCardsUp[largestCol]);   
                             int splitPoint = randColSplit(gen);     // generate a random point to split the up cards for moving them
                             int colSize = cardCol[largestCol].getSize();
-                            splitPoint = colSize-splitPoint;   
+                            splitPoint = colSize-splitPoint+1;   
                             std::cout << "SplitPoint = " << splitPoint << " Col to move from = " << largestCol << " Destination = " << destinationCol << "\n";   
                             //NOTE because the col size is decreasing with each iteration, the point of removal Always is splitPoint
                             for (int i= splitPoint; i<colSize; i++)                    // iterate through the number of cards
@@ -1198,12 +1211,17 @@ void Solitaire::finishDeck()
                                 cardCol[destinationCol].addCard(pCard);                      // add it to the destination
                             }
                             int colLength = cardCol[largestCol].getSize();
-                            if (colLength > 0)                                          // if there are still cards in the col, flip one
+                            if (colLength==0 && largestCol < 4)
+                            {
+                                firstFour[largestCol]= true;
+                                std::cout << "firstFour " << largestCol << " is " << firstFour[largestCol] << "\n";
+                            }
+                            /*if (colLength > 0)                                          // if there are still cards in the col, flip one
                             {
                                 Card* pCard = cardCol[largestCol].getCard(colLength-1);
                                 bool lastUnflippedCard = pCard->getFaceUp();
                                 if (lastUnflippedCard == true) {pCard->flipFaceUp();}
-                            }
+                            }*/
                         }
                     }
                 }
@@ -1212,10 +1230,35 @@ void Solitaire::finishDeck()
             else                                                
             {
                 std::cout << "In no active cols so just move a card to the draw pile \n";
-                int lowestCol = findSmallestColumn();
-                int colSize = cardCol[lowestCol].getSize();
-                mCard = cardCol[lowestCol].removeCard(colSize-1);   // get the card to be moved 
-                moveToDrawPile(mCard);
+                bool canMove = false;
+                while (canMove == false)
+                {
+                    std::uniform_int_distribution<int> randCol(0, 6);   // generate a number for choosing which col to move to 
+                    int destination = randCol(gen); 
+                    int colSize = cardCol[destination].getSize();   
+                    int firstUp = cardCol[destination].getFirstFlippedUpPosition();
+                    int colFinished = colSize-firstUp;
+                    if (drawPileFull() == false && ((destination < 4 && firstFour[destination]==false)||(destination>3 && colFinished>1 && colSize-1==destination)))
+                    {
+                        mCard = cardCol[destination].removeCard(colSize-1);   // get the card to be moved 
+                        if (destination<4 && colSize-1==0)
+                        {
+                            firstFour[destination] = true;
+                            std::cout << "Col 0-4 " << destination << " is " << firstFour[destination] << "\n";
+                        }
+                        moveToDrawPile(mCard);
+                        canMove = true;
+                    }
+                    int colTotal;
+                    for (int i=0; i<7; i++)
+                    {
+                        colTotal = cardCol[i].getSize()-cardCol->getFirstFlippedUpPosition()+colTotal;
+                    }
+                    if (colTotal == 7)
+                    {
+                        canMove = true;
+                    }
+                }
             }
         }
         /*aceCards = 0;
@@ -1223,14 +1266,48 @@ void Solitaire::finishDeck()
         {
             aceCards = Aces[i].getSize() + aceCards;
         }
-        if (aceCards == 0){acesGone= true;}*/
+        if (aceCards == 0){acesGone= true;}
+        if (drawPile.cardsLeft()>23){dpFull = true;}
+        if (dpFull == true && acesGone == true){allDone=true;}
+        std::cout << "AcesGone " << acesGone << " DP Full " << dpFull << drawPile.cardsLeft() <<"\n";
+        printField();*/
     }
+    /*std::cout<< "\ndraw pile:\n";
+    drawPile.printDeck();
+    std::cout << "\n";
+    int counter = 5;
+    for (int i=0; i<7; i++)
+    {
+        for (int j=6; j>counter; j--)
+        {
+            Card* pCard = cardCol[j].removeCard(counter+1);
+            pCard->setFaceUp(true);
+            drawPile.addCard(pCard);
+        }
+        counter --;
+    }
+    std::cout << "\nNew DrawPile\n";
+    drawPile.printDeck();
+    std::cout << "\n";
+    clearLinkedList(head);
+    std::cout << "\n........\n";
+    solitaireDeck.printDeck();
+    std::cout << "\n........\n";
+    solitaireDeck.eraseDeck();
+    for (int i=0; i<52; i++)
+    {
+        Card* pCard = drawPile.dealCardAt(0);
+        solitaireDeck.addCard(pCard);
+    }
+    solitaireDeck.printDeck();*/
+   // clearLinkedList(head);
+   // dealGame();
 }
 
 
 bool Solitaire::drawPileFull()
 {
-    if (drawPile.cardsLeft() == 24)
+    if (drawPile.cardsLeft() + solitaireDeck.cardsLeft() == 24)
     {
         return true;
     }
@@ -1281,10 +1358,13 @@ void Solitaire::moveToDrawPile(Card* mCard)
     std::random_device rd;                                          
     std::mt19937 gen(rd()); 
     std::uniform_int_distribution<int> randFlip(0, 3);
-    int upDown= randFlip(gen);
-    if (upDown < 3 && drawPile.cardsLeft() > 0)
+    int upDown = randFlip(gen);
+    if (drawPile.cardsLeft() > 3)
     {
-        cycleDeck();
+        for (int i=0; i<upDown; i++)
+        {
+            cycleDeck();
+        }
     }
     mCard->setFaceUp(true);
     drawPile.addCard(mCard);
@@ -1304,7 +1384,7 @@ int Solitaire::findSmallestColumn()
         {upCards = cardCol[i].getSize() - upCardSlot;}
         else
         {upCards = 0;}
-        if (upCards > 1)
+        if (upCards > 1 || (i<4 && upCards>0))
         {
             colCardsUp[i] = upCards;        // add the number of face up cards to the array
         }
