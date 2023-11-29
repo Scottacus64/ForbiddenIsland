@@ -95,7 +95,6 @@ Card* Deck::deal()
 }
 
 
-
 Card* Deck::dealCardAt(int position)
 {
     if (position >= 0 && static_cast<size_t>(position) < m_deck.size())
@@ -115,7 +114,6 @@ Card* Deck::dealCardAt(int position)
 int Deck::cardsLeft()
 {
     int remaining = m_deck.size();
-    //std::cout << "from Deck Class cards left = " << remaining << " **********\n\n";
     return remaining;
 }
 

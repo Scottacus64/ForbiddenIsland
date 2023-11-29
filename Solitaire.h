@@ -89,5 +89,6 @@ private:
     int  moves;
     bool win;
     bool firstFour[4];
+    int cycleCount;
 };
 #endif // SOLITAIRE_H

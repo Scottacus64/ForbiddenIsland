@@ -469,7 +469,6 @@ void SolitaireUI::refreshDecks()
         m_pD[0]->setText("Again?");  
     }
     int drawPileSize = m_pSolitaire->getDrawPileSize();           // this is for the draw pile and the flipped cards
-    std::cout << "DP size = " << drawPileSize << "\n";
     for (int i=1; i<4; i++){disableDrawPile(i);}                  // disable each draw pile to clear everything
     int drawPiles = drawPileSize;
     if (drawPiles > 3) {drawPiles = 3;}
