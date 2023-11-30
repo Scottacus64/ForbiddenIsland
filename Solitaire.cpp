@@ -204,13 +204,10 @@ int Solitaire::cycleDeck()
         int id = pCard->getID();
     }
     
-    //cout << "\033[0m" << "\ntop card: ";
-    
-    drawPile.printTopCard();
-    //cout << "\033[0m" <<endl;;
+    cout << "\033[0m" << "\ntop card: ";
         
     int remaining = solitaireDeck.cardsLeft();
-    cout << "Cycle deck cards remaining = " << remaining << "\n\n";
+    cout << " Cycle deck cards remaining = " << remaining << "\n\n";
     if (remaining == 0){bool win = checkForWin();}
     moves ++;
     return cardsDelt;                               // this let's the calling function know how many cards were delt
@@ -913,7 +910,9 @@ bool Solitaire::testCardMove(Card* pCard, bool lastCard)
 
 void Solitaire::makeWinnableDeck()
 {
-    playGame();
+    solitaireDeck = Deck();
+    solitaireDeck.shuffle();
+    clearLinkedList(head);
     for (int i=0; i<4; i++) {Aces[i].clearHand();}
     for (int i=0; i<7; i++) {cardCol[i].clearHand();}
     buildColumns();
@@ -1037,7 +1036,7 @@ void Solitaire::finishDeck()
     bool dpFull = false;
     bool allDone = false;
 
-    //while (allDone == false)
+    while (allDone == false)
     {
         int activeColumns = 0;
         int aceCards = 0;
@@ -1095,7 +1094,7 @@ void Solitaire::finishDeck()
         if (rndAceCol < aceCards)                                   // if that number falls in the ace moves
         {
             int colOrDeck = randHundred(gen);
-            if (colOrDeck < 80)                                     // 70% chance to move to a column
+            if (colOrDeck < 90)                                     // 70% chance to move to a column
             {
                 std::cout << "IN ACE MOVE COL\n";
                 if (activeColumns > 0)                              // if there is a column that can accept cards
@@ -1141,7 +1140,7 @@ void Solitaire::finishDeck()
             if (activeColumns > 0)                              // if there are open columns to play to
             {   
                 int multOrSingle = randHundred(gen);
-                if (multOrSingle < 30)                          // 60% chance to move a single card
+                if (multOrSingle < 40)                          // 60% chance to move a single card
                 {
                     std::cout << "IN COL MOVE COL\n";
                     int lowestCol = findSmallestColumn();
@@ -1308,20 +1307,18 @@ void Solitaire::finishDeck()
         int pileCards = drawPile.cardsLeft() + solitaireDeck.cardsLeft();
         if (pileCards > 23){dpFull = true;}
         if (dpFull == true && acesGone == true){allDone=true;}
-        std::cout << "AcesGone " << acesGone << " DP Full " << dpFull << pileCards <<"\n";
-    }
-    std::cout<< "\ndraw pile:\n";
-    if (drawPile.cardsLeft()>0)
-    {
-        drawPile.printDeck();
-        std::cout << "\n";
+        std::cout << "AcesGone " << acesGone << " DP Full " <<  pileCards <<"\n";
+
+        int pileTotal = drawPile.cardsLeft() + solitaireDeck.cardsLeft();
+        if(pileTotal > 23 && acesGone == false)    // draw pile is full but deck is not built so start over
+        {
+            std::cout << "Setting allDone to true\n";
+            allDone = true;
+            makeWinnableDeck();
+        }
     }
     int pileTotal = drawPile.cardsLeft() + solitaireDeck.cardsLeft();
-    if(pileTotal == 24 && acesGone == false)    // draw pile is full but deck is not built so start over
-    {
-        makeWinnableDeck();
-    }
-    if (pileTotal == 24)
+    if (pileTotal == 24 && acesGone == true)
     {
         while (drawPile.cardsLeft() < 24)
         {cycleDeck();}
@@ -1404,10 +1401,11 @@ void Solitaire::moveToDrawPile(Card* mCard)
     std::mt19937 gen(rd()); 
     std::uniform_int_distribution<int> randFlip(0, 3);
     int upDown = randFlip(gen);
-    if (drawPile.cardsLeft() > 4)
+    if (drawPile.cardsLeft() > 3)
     {
         for (int i=0; i<upDown; i++)
         {
+            std::cout << "Loop number: " << i << "\n";
             cycleDeck();
         }
     }
