@@ -88,7 +88,5 @@ private:
     int  cardCycle;
     int  moves;
     bool win;
-    bool lastFour[4];
-    int cycleCount;
 };
 #endif // SOLITAIRE_H

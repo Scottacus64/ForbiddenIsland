@@ -500,7 +500,8 @@ void SolitaireUI::mediumClicked()
 
 void SolitaireUI::hardClicked()
 {
-    m_pSolitaire->dealGame();
+    m_pSolitaire->makeWinnableDeck();
+    dealCards();
     refreshUpperSection();
     refreshDecks();
 }

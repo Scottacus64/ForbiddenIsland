@@ -916,17 +916,6 @@ void Solitaire::makeWinnableDeck()
     for (int i=0; i<4; i++) {Aces[i].clearHand();}
     for (int i=0; i<7; i++) {cardCol[i].clearHand();}
     buildColumns();
-    buildAceStacks();
-    std::random_device rd;                                          
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> randHundred(1, 100);     // generate a generic 1 to 100 for percentage moves 
-    for (int i=0; i<4; i++)
-    {
-        lastFour[i] = false;
-        int rndFour= randHundred(gen);
-        if (rndFour<10){lastFour[i]= true;}
-    }
-    cycleCount = 0;
 }
 
 
@@ -982,6 +971,7 @@ void Solitaire::buildColumns()
             }
         }
     }
+    buildAceStacks();
 }
 
 
@@ -992,6 +982,7 @@ void Solitaire::buildAceStacks()
     std::uniform_int_distribution<int> aceMoves(22, 28);        // Define the range [22, 28]
     std::uniform_int_distribution<int> checkCol(3, 6);          // Define the range [22, 28]
     int numberToAces = aceMoves(gen);                           // Generate a random number
+    std::cout << "Number for Aces = " << numberToAces << "\n";
     for (int i=0; i<numberToAces; i++)
     {
         bool canMove = false;
@@ -1027,6 +1018,10 @@ void Solitaire::buildAceStacks()
         }
 
     }
+    std::cout << "Done with Aces\n\n";
+    solitaireDeck.eraseDeck();
+    drawPile.eraseDeck();
+    finishDeck();
 }
 
 void Solitaire::finishDeck()
@@ -1035,6 +1030,18 @@ void Solitaire::finishDeck()
     bool acesGone = false;
     bool dpFull = false;
     bool allDone = false;
+    bool lastFour[7];
+    int cycleCount;
+    std::random_device rd;                                          
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> randHundred(1, 100);     // generate a generic 1 to 100 for percentage moves 
+    for (int i=0; i<4; i++)
+    {
+        lastFour[i] = false;
+        int rndFour= randHundred(gen);
+        if (rndFour<10){lastFour[i]= true;}
+    }
+    cycleCount = 0;
 
     while (allDone == false)
     {
@@ -1310,6 +1317,7 @@ void Solitaire::finishDeck()
         std::cout << "AcesGone " << acesGone << " DP Full " <<  pileCards <<"\n";
 
         int pileTotal = drawPile.cardsLeft() + solitaireDeck.cardsLeft();
+        std::cout << "PileTotal = " << pileTotal << "acesGone =  " << acesGone << "\n";
         if(pileTotal > 23 && acesGone == false)    // draw pile is full but deck is not built so start over
         {
             std::cout << "Setting allDone to true\n";
