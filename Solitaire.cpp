@@ -913,8 +913,8 @@ void Solitaire::makeWinnableDeck()
     solitaireDeck = Deck();
     solitaireDeck.shuffle();
     clearLinkedList(head);
-    for (int i=0; i<4; i++) {Aces[i].clearHand();}
-    for (int i=0; i<7; i++) {cardCol[i].clearHand();}
+    //for (int i=0; i<4; i++) {Aces[i].clearHand();}
+    //for (int i=0; i<7; i++) {cardCol[i].clearHand();}
     buildColumns();
 }
 
@@ -1026,12 +1026,12 @@ void Solitaire::buildAceStacks()
 
 void Solitaire::finishDeck()
 {
-    int aceCards;
+    int  aceCards;
     bool acesGone = false;
     bool dpFull = false;
     bool allDone = false;
     bool lastFour[7];
-    int cycleCount;
+    int  cycleCount;
     std::random_device rd;                                          
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> randHundred(1, 100);     // generate a generic 1 to 100 for percentage moves 

@@ -485,6 +485,7 @@ void SolitaireUI::refreshDecks()
 void SolitaireUI::easyClicked()
 {
     m_pSolitaire->makeWinnableDeck();
+    dealCards();
     refreshUpperSection();
     refreshDecks();
 }
@@ -492,7 +493,8 @@ void SolitaireUI::easyClicked()
 
 void SolitaireUI::mediumClicked()
 {
-    m_pSolitaire->finishDeck();
+    m_pSolitaire->makeWinnableDeck();
+    dealCards();
     refreshUpperSection();
     refreshDecks();
 }
@@ -500,7 +502,7 @@ void SolitaireUI::mediumClicked()
 
 void SolitaireUI::hardClicked()
 {
-    m_pSolitaire->makeWinnableDeck();
+    m_pSolitaire->playGame();
     dealCards();
     refreshUpperSection();
     refreshDecks();
