@@ -78,6 +78,44 @@ char Card::getSuit()
 }
 
 
+int Card::getSuitInt()
+{
+    int suitInt;
+    if (suit==67)
+    {
+        suitInt = 0;
+    }
+    else if(suit==83)
+    {
+        suitInt = 1;
+    }
+    else if(suit==72)
+    {
+        suitInt = 2;
+    }
+    else
+    {
+        suitInt = 3;
+    }
+    return suitInt;
+}
+
+
+int Card::getBlackRed()
+{
+    int blackRed;
+    if (id <= 26)
+    {
+        blackRed = 0;
+    }
+    else
+    {   
+        blackRed = 1;
+    }
+    return blackRed;
+}
+
+
 void Card::printCard()
 {
     if (faceUp == true)

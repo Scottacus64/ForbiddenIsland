@@ -24,10 +24,10 @@ class SolitaireUI : public QWidget
 public:
     SolitaireUI(QWidget *parent = nullptr);
     ~SolitaireUI();
-    void refreshScreen();
+    void refreshUpperSection();
     void dealCards();
-    void updateDecks(int deck, int cardsDelt);
-    void checkForWin();
+    void updateDecks(int deck, int dCards);
+    void postWin();
     void enableDrawPile(int pile, int id);
     void disableDrawPile(int pile);
     void paintEvent(QPaintEvent *event);
@@ -36,19 +36,25 @@ public:
     void undoPressed();
     void refreshDecks();
 
+
 public slots:
     void cardClicked();
+    void easyClicked();
+    void mediumClicked();
+    void hardClicked();
 
 private:
     Ui::SolitaireUI *ui;
     QPixmap cardImage[53];
     QPixmap green;
-
     QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];
     QPushButton* m_newGame;
     QPushButton* m_undo;
+    QPushButton* m_easy;
+    QPushButton* m_medium;
+    QPushButton* m_hard;
     QTimer elapsedTime;
     QLabel* m_moves;
     QLabel* m_timer;
@@ -56,7 +62,6 @@ private:
     QElapsedTimer elapsedTimer;
     Solitaire* m_pSolitaire;
     int cardsDelt = 0;
-    bool drawPileFlag;
     bool gameStarted;
     qint64 elapsedMilliseconds;
 };

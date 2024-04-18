@@ -14,18 +14,20 @@ public:
     ~Deck();
     void makeDeck();
     void shuffle();
-    Card deal();
+    Card* deal();
+    Card* dealCardAt(int position);
     void printDeck();
     int  cardsLeft();
     void clearDeck(int numberOfDecks);
     void eraseDeck();
-    void addCard(Card c);
+    void addCard(Card* pCard);
     void printTopCard();
+    void addCardAt(Card* pCard, int slot);
 
     Card* getTopDeckCard();
     Card* getDeckCardAt(int slot);
 
 private:
-    std::vector<Card> m_deck;  //this is the vector that will hold the deck
+    std::vector<Card*> m_deck;  //this is the vector that will hold the deck
 };
 #endif // DECK_H
