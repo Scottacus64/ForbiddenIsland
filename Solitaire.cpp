@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 Solitaire::Solitaire()
 {
     playGame();
@@ -28,7 +27,6 @@ void Solitaire::playGame()
 
 void Solitaire::dealGame()
 {
-
     for (int i=0; i<4; i++) {Aces[i].clearHand();}
     for (int i=0; i<7; i++) {cardCol[i].clearHand();}
     for (int row=0; row<7; row++)
