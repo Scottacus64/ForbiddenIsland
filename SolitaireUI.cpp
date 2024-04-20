@@ -319,12 +319,21 @@ void SolitaireUI::cardClicked()
         if (aFinish == true){autoFinish();}
         m_pSolitaire->printField();
         bool canPlay = m_pSolitaire->checkCanPlay();
+        bool win = false;
+        win = m_pSolitaire->checkForWin();
         if (canPlay == true)
             {
-                m_newGame->setText(QString("True"));
+                m_newGame->setText(QString("Moves Available"));
             }
         else{
-                m_newGame->setText(QString("False"));
+                if (win == false)
+                {
+                    m_newGame->setText(QString("No Moves"));
+                }
+                else
+                {
+                    m_newGame->setText(QString("Win!"));
+                }
             }
     }
 }
@@ -335,6 +344,7 @@ void SolitaireUI::autoFinish()
     std::cout << "In autoFinish \n";
     bool gameDone = false;
     bool win = false;
+    m_newGame->setText(QString("Auto Finish!"));
     while (gameDone == false)                       // cycle through all remaining cards and play them to the Aces
     {
         gameDone = m_pSolitaire->nextCard();
@@ -380,11 +390,8 @@ void SolitaireUI::disableDrawPile(int pile)
 
 void SolitaireUI::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
-
     // Paint the green background image
     painter.drawPixmap(0, 0, width(), height(), green);
-
-    // ... your existing painting code
 }
 
 
@@ -421,8 +428,15 @@ void SolitaireUI::updateDecks(int deck, int dCards)
         }
         else
         {
+            int remaining = m_pSolitaire->getDrawPileSize();
             m_pD[0]->setIcon(QPixmap());
-            m_pD[0]->setText("Again?");  
+            if (remaining > 0)
+            {
+                m_pD[0]->setText("Flip Deck?");  
+            }
+            else{
+                m_pD[0]->setText("No Cards");
+            }
         }
     }
     else
@@ -457,6 +471,7 @@ void SolitaireUI::updateDecks(int deck, int dCards)
 void SolitaireUI::refreshDecks()
 {
     int deckSize = m_pSolitaire->getDeckSize();
+    int drawPileSize = m_pSolitaire->getDrawPileSize();     // this is for the draw pile and the flipped cards
     if (deckSize > 0)                                       // This is the main solitaire deck
     {
         m_pD[0]->setEnabled(true);
@@ -466,9 +481,16 @@ void SolitaireUI::refreshDecks()
     else
     {
         m_pD[0]->setIcon(QPixmap());
-        m_pD[0]->setText("Again?");  
+        if (drawPileSize > 0)
+        {
+            m_pD[0]->setText("Flip Deck?");  
+        } 
+        else
+        {
+            m_pD[0]->setText("No Cards");
+        }
     }
-    int drawPileSize = m_pSolitaire->getDrawPileSize();           // this is for the draw pile and the flipped cards
+
     for (int i=1; i<4; i++){disableDrawPile(i);}                  // disable each draw pile to clear everything
     int drawPiles = drawPileSize;
     if (drawPiles > 3) {drawPiles = 3;}
