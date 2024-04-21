@@ -13,11 +13,11 @@ Hand::~Hand()
 
 Card* Hand::removeCard(int position)
 {
-    std::cout << "** H remove card, pos = " << position << "\n";
+    //std::cout << "** H remove card, pos = " << position << "\n";
     Card* pCard = m_hand[position];
     m_hand.erase(m_hand.begin() + position);
     int size = m_hand.size();
-    std::cout <<"Hand size is: " << size << "\n";
+    //std::cout <<"Hand size is: " << size << "\n";
     return pCard;
 }
 

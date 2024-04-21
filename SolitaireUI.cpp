@@ -85,35 +85,23 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         m_pD[i]->hide();
     }
     // set up the buttons
-    m_newGame = new QPushButton("newGame", this);
-    m_newGame->setObjectName(QString::fromStdString("newGame"));
-    m_newGame->setGeometry(QRect(600, 740, 140, 50));
-    m_newGame->setText(QString("New Game?"));
-    connect(m_newGame, &QPushButton::clicked, this, &SolitaireUI::cardClicked);
-
     m_undo = new QPushButton("undo", this);
     m_undo->setObjectName("undo");
     m_undo->setGeometry(QRect(600, 800, 140, 50));
     m_undo->setText(QString("Undo"));
     connect(m_undo, &QPushButton::clicked, this, &SolitaireUI::undoPressed);
 
-    m_easy = new QPushButton("easy", this);
-    m_easy->setObjectName(QString::fromStdString("easy"));
-    m_easy->setGeometry(QRect(800, 740, 140, 50));
-    m_easy->setText(QString("Easy"));
-    connect(m_easy, &QPushButton::clicked, this, &SolitaireUI::easyClicked);
+    m_winnable = new QPushButton("winnable", this);
+    m_winnable->setObjectName(QString::fromStdString("winnable"));
+    m_winnable->setGeometry(QRect(800, 740, 140, 50));
+    m_winnable->setText(QString("winnable deck"));
+    connect(m_winnable, &QPushButton::clicked, this, &SolitaireUI::winnableClicked);
 
-    m_medium = new QPushButton("medium", this);
-    m_medium->setObjectName(QString::fromStdString("medium"));
-    m_medium->setGeometry(QRect(800, 800, 140, 50));
-    m_medium->setText(QString("Medium"));
-    connect(m_medium, &QPushButton::clicked, this, &SolitaireUI::mediumClicked);
-
-    m_hard = new QPushButton("hard", this);
-    m_hard->setObjectName(QString::fromStdString("hard"));
-    m_hard->setGeometry(QRect(800, 860, 140, 50));
-    m_hard->setText(QString("Hard"));
-    connect(m_hard, &QPushButton::clicked, this, &SolitaireUI::hardClicked);
+    m_random = new QPushButton("random", this);
+    m_random->setObjectName(QString::fromStdString("random"));
+    m_random->setGeometry(QRect(800, 800, 140, 50));
+    m_random->setText(QString("random deck"));
+    connect(m_random, &QPushButton::clicked, this, &SolitaireUI::randomClicked);
 
     // set up the labels
     QFont font;
@@ -131,7 +119,12 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_timer->setGeometry(QRect(600, 930, 300, 50));
     m_timer->setFont(font);
     m_timer->setPalette(palette);
-    //elapsedTimer.start();
+
+    m_noMovesLeft = new QLabel("noMovesLeft", this);
+    m_noMovesLeft->setGeometry(QRect(600,740,200,50));
+    m_noMovesLeft->setFont(font);
+    m_noMovesLeft->setPalette(palette);
+    m_noMovesLeft->setText(QString(""));
 
     QObject::connect(&timer, &QTimer::timeout, [&]() {
         elapsedMilliseconds = elapsedTimer.elapsed();
@@ -307,12 +300,6 @@ void SolitaireUI::cardClicked()
                 }
             }
         }
-        else            // must be in newGame
-        {
-            std::cout << "New Game\n";
-            m_pSolitaire->playGame();
-            dealCards();
-        }
 
         refreshUpperSection();
         bool aFinish = m_pSolitaire->checkForWin();
@@ -321,20 +308,17 @@ void SolitaireUI::cardClicked()
         bool canPlay = m_pSolitaire->checkCanPlay();
         bool win = false;
         win = m_pSolitaire->checkForWin();
-        if (canPlay == true)
+        if (canPlay == false)
+        {
+            if (win == false)
             {
-                m_newGame->setText(QString("Moves Available"));
+                m_noMovesLeft->setText(QString("No Moves"));
             }
-        else{
-                if (win == false)
-                {
-                    m_newGame->setText(QString("No Moves"));
-                }
-                else
-                {
-                    m_newGame->setText(QString("Win!"));
-                }
+            else
+            {
+                m_noMovesLeft->setText(QString("Win!"));
             }
+        }
     }
 }
 
@@ -344,7 +328,7 @@ void SolitaireUI::autoFinish()
     std::cout << "In autoFinish \n";
     bool gameDone = false;
     bool win = false;
-    m_newGame->setText(QString("Auto Finish!"));
+    m_noMovesLeft->setText(QString("Auto Finish!"));
     while (gameDone == false)                       // cycle through all remaining cards and play them to the Aces
     {
         gameDone = m_pSolitaire->nextCard();
@@ -504,28 +488,23 @@ void SolitaireUI::refreshDecks()
     }
 }
 
-void SolitaireUI::easyClicked()
+void SolitaireUI::winnableClicked()
 {
     m_pSolitaire->makeWinnableDeck();
     dealCards();
     refreshUpperSection();
+    m_noMovesLeft->setText("");
     refreshDecks();
 }
 
 
-void SolitaireUI::mediumClicked()
+void SolitaireUI::randomClicked()
 {
-    m_pSolitaire->makeWinnableDeck();
+    m_pSolitaire->playGame();               // makes a random deck
     dealCards();
     refreshUpperSection();
+    m_noMovesLeft->setText("");
     refreshDecks();
 }
 
 
-void SolitaireUI::hardClicked()
-{
-    m_pSolitaire->playGame();
-    dealCards();
-    refreshUpperSection();
-    refreshDecks();
-}
