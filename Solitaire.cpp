@@ -7,7 +7,7 @@ using namespace std;
 
 Solitaire::Solitaire()
 {
-    playGame();
+   //playGame();
 } 
 
 
@@ -80,6 +80,7 @@ Deck* Solitaire::getDeck()
 void Solitaire::printField()
  {
     Card* cardArray[7];
+    std::cout<<"\n";
     for (int row=0; row<19; row++)
     {
         bool emptyRow = true;
@@ -103,6 +104,7 @@ void Solitaire::printField()
                 Card* pCard = cardArray[i];
                 if (pCard)
                 {
+                   // pCard->flipFaceUp();
                     pCard->printCard();
                 }
                 cout << "\t";

@@ -94,13 +94,13 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_winnable = new QPushButton("winnable", this);
     m_winnable->setObjectName(QString::fromStdString("winnable"));
     m_winnable->setGeometry(QRect(800, 740, 140, 50));
-    m_winnable->setText(QString("winnable deck"));
+    m_winnable->setText(QString("deal winnable deck"));
     connect(m_winnable, &QPushButton::clicked, this, &SolitaireUI::winnableClicked);
 
     m_random = new QPushButton("random", this);
     m_random->setObjectName(QString::fromStdString("random"));
     m_random->setGeometry(QRect(800, 800, 140, 50));
-    m_random->setText(QString("random deck"));
+    m_random->setText(QString("deal random deck"));
     connect(m_random, &QPushButton::clicked, this, &SolitaireUI::randomClicked);
 
     // set up the labels
@@ -137,7 +137,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
 
     m_pSolitaire = new Solitaire();
 
-    dealCards();
+   // dealCards();
 }
 
 
