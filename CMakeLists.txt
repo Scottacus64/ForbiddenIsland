@@ -27,7 +27,6 @@ set(PROJECT_SOURCES
         Hand.cpp 
         Card.h 
         Card.cpp 
-        ui_solitaire.ui
         Solitaire.icns
 )
 

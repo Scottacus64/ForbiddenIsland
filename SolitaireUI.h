@@ -5,7 +5,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
-#include "ui_solitaire.h"
+//#include "ui_solitaire.h"
 #include "Solitaire.h"
 #include <QLabel>
 #include <QTimer>

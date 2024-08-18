@@ -7,14 +7,31 @@
 #include <QPalette>
 #include <QCoreApplication>
 #include <QDir>
+#include <QScreen>
 
 SolitaireUI::SolitaireUI(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::SolitaireUI)
+
 {
     QString appDir = QCoreApplication::applicationDirPath();
     QString assetPath = QDir::cleanPath(appDir + QDir::separator() + "pngs") + QDir::separator();
-    ui->setupUi(this);
+
+    //ui->setupUi(this);
+    this->setObjectName("SolitaireUI");
+    QScreen *primaryScreen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = primaryScreen->geometry();
+    int screenWidth = screenGeometry.width();
+    this->resize(1087, 1000);
+    this->move(((screenWidth/2) -(1087/2)), 0);
+
+    // Create QLabel and QPushButton instances
+    QLabel *c0 = new QLabel(this);
+    QLabel *c1 = new QLabel(this);
+    QLabel *a0 = new QLabel(this);
+    QPushButton* m_pC[133];
+    QPushButton* m_pA[4];
+    QPushButton* m_pD[2];
+    
     green = QPixmap(assetPath + "green.png");
     // set up all of the card image QPixmaps
     cardImage[0] = QPixmap(assetPath + "0B.png");
@@ -143,7 +160,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
 
 SolitaireUI::~SolitaireUI()
 {
-    delete ui;
+    //delete ui;
 }
 
 
