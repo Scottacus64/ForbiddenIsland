@@ -35,8 +35,7 @@ public:
     void delayTimer(int delay);
     void undoPressed();
     void refreshDecks();
-
-
+    
 public slots:
     void cardClicked();
     void winnableClicked();
