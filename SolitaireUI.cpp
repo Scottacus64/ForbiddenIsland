@@ -28,9 +28,9 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     QLabel *c0 = new QLabel(this);
     QLabel *c1 = new QLabel(this);
     QLabel *a0 = new QLabel(this);
-    QPushButton* m_pC[133];
-    QPushButton* m_pA[4];
-    QPushButton* m_pD[2];
+    QPushButton* m_pC[134];
+    QPushButton* m_pA[5];
+    QPushButton* m_pD[5];
     
     green = QPixmap(assetPath + "green.png");
     // set up all of the card image QPixmaps
