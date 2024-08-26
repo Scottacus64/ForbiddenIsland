@@ -145,6 +145,14 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_noMovesLeft->setPalette(palette);
     m_noMovesLeft->setText(QString(""));
 
+    m_winScreen = new QLabel("winScreen", this);
+    m_winScreen->setGeometry(QRect(300,200,500,500));
+    m_winScreen->setFont(font);
+    m_winScreen->setVisible(false);
+    m_winScreen->setAlignment(Qt::AlignCenter);
+    m_winScreen->setStyleSheet("background-color: rgb(152, 251, 152); color: black;");
+    m_winScreen->setText(QString("Tesing 123"));
+
     QObject::connect(&timer, &QTimer::timeout, [&]() {
         elapsedMilliseconds = elapsedTimer.elapsed();
         qint64 elapsedSeconds = elapsedMilliseconds / 1000;
@@ -184,6 +192,7 @@ void SolitaireUI::dealCards()
     timer.stop();
     elapsedMilliseconds = 0;
     m_timer->setText("Time:");
+    m_winScreen->setVisible(false);
 }
 
 
@@ -373,9 +382,21 @@ void SolitaireUI::postWin()
     m_pD[1]->setIcon(QPixmap()); 
     m_pD[1]->setText("WIN!!");
     std::cout << "seconds = " << seconds << std::endl;
+    std::vector<int> winOutput(8);
     int moves = m_pSolitaire->getMoves();
     std::cout << "moves = " << moves << endl;
-    m_pSolitaire-> qFileWin(seconds, moves);
+    winOutput = m_pSolitaire-> qFileWin(seconds, moves);
+    m_winScreen->setVisible(true);
+    QString outputText = "";
+    m_winScreen->setVisible(true);
+    QString outputArray[8] = {"Number of Games Played: ", "Current Win Streak: ","Total Number of Wins: ","Win percentage: ",
+    "Winning Time: ","Which Ranks Number: ","Winning Moves: ","Which Ranks Number: " };
+
+    for (int i=0; i<8; i++)
+    {
+        outputText = outputText + outputArray[i] + QString::number(winOutput[i]) + "\n";
+    }
+    m_winScreen->setText(outputText);
 }
 
 

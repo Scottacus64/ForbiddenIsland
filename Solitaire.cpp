@@ -1477,150 +1477,12 @@ std::vector<int> Solitaire::bubbleSort(std::vector<int> vec)
     return vec;
 }
 
-/*void Solitaire::fileIOWin(int seconds, int moves)
+
+std::vector<int> Solitaire::qFileWin(int seconds, int moves)
 {
-    int currentWins = 0;
-    int totalGames = 0;
-    int totalWins = 0;
-    std::string filePath = "solitaire.txt";
-    std::ifstream inFile(filePath);
-    std::size_t moveSize, timeSize;
-    if (inFile.is_open())
-    {     
-        inFile >> totalGames;
-        inFile >> currentWins;
-        inFile >> moveSize;
-        moveVec.resize(moveSize);
-        for (std::size_t i=0; i<moveSize; i++)
-        {
-            inFile >> moveVec[i];
-        }
-        inFile >> timeSize;
-        totalWins = moveSize + 1;
-        timeVec.resize(timeSize);
-        for (std::size_t i=0; i<timeSize; i++)
-        {
-            inFile >> timeVec[i];
-        }
-        inFile.close();
-    }
-    else
-    {
-        std::cerr << "Unable to open file" << std::endl;
-    }
-
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != nullptr) {
-        std::cout << "Current working directory: " << cwd << std::endl;
-    } else {
-        std::cerr << "Error getting current working directory" << std::endl;
-    }
-
-    currentWins +=1;
-    totalGames +=1;
-
-    std::cout << "total games = " << totalGames << " number of wins = " << moveSize << " win percentage = " << (static_cast<double>(moveSize)/totalGames) << std::endl;
-    for (std::size_t i=0; i<moveSize; i++ )
-    {
-        if(moves < moveVec[i])
-        {
-            moveVec.insert(moveVec.begin()+ i, moves);
-            std::cout << "Won in " << moves << " moves which is ranked number " << i+1 << " out of " << moveSize+1 << " games" << endl;
-            break;
-        }
-    }
-    if(moves > moveVec[moveSize-1])
-        {
-            moveVec.push_back(moves);
-            std::cout << "Won in " << moves << " moves which is ranked number " << moveSize+1 << " out of " << moveSize+1 << " games" << endl;      
-        }
-    for (std::size_t i=0; i<timeSize; i++)
-    {
-        if(seconds < timeVec[i])
-        {
-            timeVec.insert(timeVec.begin()+i, seconds);
-            std::cout << "This game took " << seconds << " seconds which is ranked number " << i+1 << " out of " << timeSize+1 << " games" << endl;
-            break;
-        }
-    }
-    if(seconds > timeVec[timeSize-1])
-        {
-            timeVec.push_back(seconds);
-            std::cout << "This game took " << seconds << " seconds which is ranked number " << timeSize+1 << " out of " << timeSize+1 << " games" << endl;
-        }
-    std::cout << "current win streak is at " << currentWins << endl;
-
-    std::ofstream outFile(filePath);
-    if (outFile.is_open())
-    {
-        outFile << totalGames << " ";
-        std::cout << "total gmaes " << totalGames;
-        outFile << currentWins << " ";
-        std::cout << " current wins " << currentWins;
-        outFile << moveVec.size() << " ";
-        for (int move : moveVec)
-        {
-            outFile << move << " ";
-            std::cout << " " << move;
-        }
-        outFile << timeVec.size() << " ";
-        for (int time : timeVec)
-        {
-            outFile << time << " ";
-            std::cout << " " << time;
-        }
-        std::cout << endl;
-        outFile << std::endl;
-        outFile.close();
-    }
-    else
-    {
-        std::cerr << "Unable to open file for writing" << std::endl;
-    }
-}
-
-int Solitaire::fileIOLoss()
-{
-    int totalGames;
-    std::string filePath = "solitaire.txt";
-    std::ifstream inFile(filePath);
-    if(!inFile)
-    {
-        std::cerr << "could not open file" << endl;
-        return 1;
-    }
-    std::vector <int> vec;
-    int number;
-    while(inFile >> number)
-    {
-        vec.push_back(number);
-    }
-    inFile.close();
-    totalGames = vec[0];
-    totalGames +=1;
-    if(vec.size() > 1)
-    {
-        vec[0] = totalGames;
-        vec[1] = 0;
-    }
-    else
-    {
-        std::cerr << "not big enough of a vector" << std::endl;
-        return 1;
-    }
-    std::ofstream outFile(filePath);
-    for(int i=0; i<vec.size(); i++)
-    {
-        outFile << vec[i] << " ";
-    }
-    outFile << std::endl;
-    outFile.close();
-    return 0;
-}*/
-
-
-void Solitaire::qFileWin(int seconds, int moves)
-{
+    std::vector<int> winReturn(8);
+    int moveRank;
+    int timeRank;
     QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     QString fileContent;
     if (!configDir.endsWith("Solitaire")) 
@@ -1681,6 +1543,7 @@ void Solitaire::qFileWin(int seconds, int moves)
         {
             timeVec.insert(timeVec.begin()+i, seconds);
             std::cout << "This game took " << seconds << " seconds which is ranked number " << i+1 << " out of " << secondsLength << " games" << endl;
+            timeRank = i+1;
             break;
         }
     }
@@ -1688,6 +1551,7 @@ void Solitaire::qFileWin(int seconds, int moves)
     {
         timeVec.insert(timeVec.begin(), seconds);
         std::cout << "This game took " << seconds << "which is the only win thus far" << endl;
+        timeRank = 1;
     }
     else
     {
@@ -1695,6 +1559,7 @@ void Solitaire::qFileWin(int seconds, int moves)
         {
             timeVec.push_back(seconds);
             std::cout << "This game took " << seconds << " seconds which is ranked number " << secondsLength << " out of " << secondsLength << " games" << endl;
+            timeRank = secondsLength;
         } 
     }
     for (std::size_t i=0; i<movesLength; i++ )
@@ -1703,6 +1568,7 @@ void Solitaire::qFileWin(int seconds, int moves)
         {
             moveVec.insert(moveVec.begin()+ i, moves);
             std::cout << "Won in " << moves << " moves which is ranked number " << i+1 << " out of " << movesLength << " games" << endl;
+            moveRank = i+1;
             break;
         }
     }
@@ -1710,6 +1576,7 @@ void Solitaire::qFileWin(int seconds, int moves)
     {
         moveVec.insert(moveVec.begin(), moves);
         std::cout << "Won in " << moves << " moves which is the only win thus far" << std::endl;
+        moveRank = 1;
     }
     else
     {
@@ -1717,10 +1584,21 @@ void Solitaire::qFileWin(int seconds, int moves)
         {
             moveVec.push_back(moves);
             std::cout << "Won in " << moves << " moves which is ranked number " << movesLength << " out of " << movesLength << " games" << endl;      
+            moveRank = movesLength;
         }
     } 
     std::cout << "Current Win Streak at " << currentWins;
-    std::cout << " : Win percentage = " << (static_cast<double>(movesLength)/totalGames) << std::endl;
+    int winRate = static_cast<int>((static_cast<double>(movesLength) / totalGames) * 100);
+    std::cout << " : Win percentage = " << winRate << std::endl;
+
+    winReturn[0]=totalGames;
+    winReturn[1]=currentWins;
+    winReturn[2]=movesLength;   // total number of wins
+    winReturn[3]=winRate;
+    winReturn[4]=seconds;
+    winReturn[5]=timeRank;
+    winReturn[6]=moves;
+    winReturn[7]=moveRank;
 
     QString outputString = QString::number(totalGames) + " " + QString::number(currentWins) + " " + QString::number(timeVec.size()) + " ";
     for(int i=0; i<timeVec.size(); i++)
@@ -1743,6 +1621,7 @@ void Solitaire::qFileWin(int seconds, int moves)
     } else {
         qWarning() << "Failed to write to file" << filePath;
     }
+    return winReturn;
 }
 
 void Solitaire::qFileLoss()

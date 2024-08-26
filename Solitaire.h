@@ -71,7 +71,7 @@ public:
     void  moveToActiveColumn(Card* mCard);
     void  moveToDrawPile(Card* mCard);
     int   findSmallestColumn();
-    void  qFileWin(int seconds, int moves);
+    std::vector <int>  qFileWin(int seconds, int moves);
     void  qFileLoss();
     
     std::vector<int>   bubbleSort(std::vector<int> vec);
