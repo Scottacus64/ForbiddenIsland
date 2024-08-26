@@ -59,7 +59,11 @@ private:
     QElapsedTimer elapsedTimer;
     Solitaire* m_pSolitaire;
     int cardsDelt = 0;
-    bool gameStarted;
+    bool gameStarted = false;
     qint64 elapsedMilliseconds;
+    int seconds;
+    std::vector<int> timeVec;
+    std::vector<int> moveVec;
+    bool win = false;
 };
 #endif // SOLITAIREUI_H

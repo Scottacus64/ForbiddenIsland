@@ -8,6 +8,11 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QScreen>
+#include <fstream>
+#include <unistd.h>
+#include <QStandardPaths>
+
+
 
 SolitaireUI::SolitaireUI(QWidget *parent)
     : QWidget(parent)
@@ -28,9 +33,6 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     QLabel *c0 = new QLabel(this);
     QLabel *c1 = new QLabel(this);
     QLabel *a0 = new QLabel(this);
-    //QPushButton* m_pC[134];
-    //QPushButton* m_pA[5];
-    //QPushButton* m_pD[5];
     
     green = QPixmap(assetPath + "green.png");
     // set up all of the card image QPixmaps
@@ -150,11 +152,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         m_timer->setText(elapsedTimeStr);
     });
 
-    //timer.start(1000);
-
     m_pSolitaire = new Solitaire();
-
-   // dealCards();
 }
 
 
@@ -166,6 +164,10 @@ SolitaireUI::~SolitaireUI()
 
 void SolitaireUI::dealCards()
 {
+    if(gameStarted == true and win == false)
+    {
+        m_pSolitaire->qFileLoss();
+    }
     m_pSolitaire->dealGame();
     refreshUpperSection();
     m_pD[0]->setEnabled(true);
@@ -349,6 +351,7 @@ void SolitaireUI::autoFinish()
     while (gameDone == false)                       // cycle through all remaining cards and play them to the Aces
     {
         gameDone = m_pSolitaire->nextCard();
+        m_pSolitaire->incrementMoves();
         refreshUpperSection();
         delayTimer(200);
     }
@@ -361,11 +364,18 @@ void SolitaireUI::autoFinish()
 void SolitaireUI::postWin()
 {
     timer.stop();
+    elapsedMilliseconds = elapsedTimer.elapsed();
+    qint64 elapsedSeconds = elapsedMilliseconds / 1000;
+    int seconds = static_cast<int>(elapsedMilliseconds / 1000);
     m_pD[0]->setEnabled(false);
     m_pD[0]->setText("WIN!!");
     m_pD[1]->setEnabled(false);
     m_pD[1]->setIcon(QPixmap()); 
     m_pD[1]->setText("WIN!!");
+    std::cout << "seconds = " << seconds << std::endl;
+    int moves = m_pSolitaire->getMoves();
+    std::cout << "moves = " << moves << endl;
+    m_pSolitaire-> qFileWin(seconds, moves);
 }
 
 

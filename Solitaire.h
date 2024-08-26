@@ -51,6 +51,7 @@ public:
     int   getDrawPileSize();
     Card* getDrawPileAt(int slot);
     int   getMoves();
+    void  incrementMoves();
     Card* removeColCard(int col, int row, bool lastCard);
     Card* removeForAce(int col, int row);
     void  aceStackMove(int col, int row, int suit, Card* pCard, bool lastCard);
@@ -70,17 +71,18 @@ public:
     void  moveToActiveColumn(Card* mCard);
     void  moveToDrawPile(Card* mCard);
     int   findSmallestColumn();
+    void  qFileWin(int seconds, int moves);
+    void  qFileLoss();
+    
+    std::vector<int>   bubbleSort(std::vector<int> vec);
 
 private:
     Deck solitaireDeck;
     Deck drawPile;
-
     Hand cardCol[7];
     Hand suit[4];
     Hand Aces[4]; // = {clubs, spades, hearts, diamonds};
-
     std::vector<int> possibleMoves;
-
     bool aceFlag = false;
     int  lastCardClicked;
     int  dpSize;
@@ -88,5 +90,7 @@ private:
     int  cardCycle;
     int  moves;
     bool win;
+    std::vector<int> timeVec;
+    std::vector<int> moveVec;
 };
 #endif // SOLITAIRE_H

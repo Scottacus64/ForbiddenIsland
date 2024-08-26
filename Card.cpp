@@ -12,10 +12,10 @@ Card::Card(int fv, int av, int idn, char s, string pv)
 {
     faceValue = fv;
     actualValue = av;
+    id = idn;
     suit = s;
     printValue = pv;
     faceUp = false;
-    id = idn;
 }
 
 

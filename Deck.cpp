@@ -89,6 +89,10 @@ void Deck::shuffle()
 
 Card* Deck::deal()
 {
+    if(m_deck.empty())
+    {
+        return nullptr;
+    }
     Card* pCard = m_deck.back();
     m_deck.pop_back();
     return pCard;
