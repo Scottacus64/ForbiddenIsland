@@ -122,45 +122,60 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_random->setText(QString("deal random deck"));
     connect(m_random, &QPushButton::clicked, this, &SolitaireUI::randomClicked);
 
-    // set up the labels
-    QFont font;
-    font.setPointSize(28);
-    QPalette palette;
-    palette.setColor(QPalette::WindowText, Qt::white);
 
-    m_moves = new QLabel("moves", this);
-    m_moves->setGeometry(QRect(600,900,200,50));
+    // set up the labels
+    QFont font("Franklin Gothic Medium");
+    font.setPointSize(42);
+    QPalette palette;
+    palette.setColor(QPalette::WindowText, QColor(255, 215, 0));
+
+    m_moves = new QLabel(this);
+    m_moves->setGeometry(QRect(300,930,200,50));
     m_moves->setFont(font);
     m_moves->setPalette(palette);
-    m_moves->setText(QString("Moves = "));
+    m_moves->setText(QString("Moves: "));
 
-    m_timer = new QLabel("Time: ", this);           
+    m_timer = new QLabel(this);           
     m_timer->setGeometry(QRect(600, 930, 300, 50));
     m_timer->setFont(font);
     m_timer->setPalette(palette);
+    m_timer->setText(QString("Time: "));
 
-    m_noMovesLeft = new QLabel("noMovesLeft", this);
+    m_noMovesLeft = new QLabel(this);
     m_noMovesLeft->setGeometry(QRect(600,740,200,50));
     m_noMovesLeft->setFont(font);
     m_noMovesLeft->setPalette(palette);
     m_noMovesLeft->setText(QString(""));
 
-    m_winScreen = new QLabel("winScreen", this);
-    m_winScreen->setGeometry(QRect(300,200,500,500));
-    m_winScreen->setFont(font);
-    m_winScreen->setVisible(false);
-    m_winScreen->setAlignment(Qt::AlignCenter);
-    m_winScreen->setStyleSheet("background-color: rgb(152, 251, 152); color: black;");
-    m_winScreen->setText(QString("Tesing 123"));
+    int alignment[4][4] = {{300,200,500,100},{300,300,166,400},{466,300,166,400},{632,300,166,400}};
+    for(int i=0; i<4; i++)
+    {
+        m_winScreen[i] = new QLabel(this);
+        m_winScreen[i]->setGeometry(QRect(alignment[i][0],alignment[i][1],alignment[i][2],alignment[i][3]));
+        m_winScreen[i]->setFont(font);
+        m_winScreen[i]->setPalette(palette);
+        m_winScreen[i]->setVisible(false);
+        m_winScreen[i]->setAlignment(Qt::AlignLeft);
+        m_winScreen[i]->setText(QString("1234"));
+    }
 
     QObject::connect(&timer, &QTimer::timeout, [&]() {
         elapsedMilliseconds = elapsedTimer.elapsed();
         qint64 elapsedSeconds = elapsedMilliseconds / 1000;
-        QString elapsedTimeStr = QString("Time: %1 seconds").arg(elapsedSeconds);
-        m_timer->setText(elapsedTimeStr);
+        qint64 minutes = elapsedSeconds / 60;
+        qint64 seconds = elapsedSeconds % 60;
+        QString elapsedTimeStr = QString("%1:%2")
+        .arg(minutes, 1, 10, QLatin1Char('0'))  
+        .arg(seconds, 2, 10, QLatin1Char('0')); 
+        m_timer->setText("Time: " + elapsedTimeStr);
     });
 
     m_pSolitaire = new Solitaire();
+    for(int i=0; i<4; i++)
+    {
+        m_winScreen[i]->setVisible(true);
+        m_winScreen[i]->setText("1234");
+    }
 }
 
 
@@ -192,9 +207,12 @@ void SolitaireUI::dealCards()
     timer.stop();
     elapsedMilliseconds = 0;
     m_timer->setText("Time:");
-    m_winScreen->setVisible(false);
+    for(int i=0; i<4; i++)
+    {
+        m_winScreen[i]->setVisible(false);
+        m_winScreen[i]->setText("1234");
+    }
 }
-
 
 void SolitaireUI::refreshUpperSection()
 {
@@ -240,7 +258,7 @@ void SolitaireUI::refreshUpperSection()
         }
     }
     int moves = m_pSolitaire->getMoves();
-    m_moves->setText(QString("Moves = ") + QString::number(moves));
+    m_moves->setText(QString("Moves: ") + QString::number(moves));
 }
 
 
@@ -386,17 +404,11 @@ void SolitaireUI::postWin()
     int moves = m_pSolitaire->getMoves();
     std::cout << "moves = " << moves << endl;
     winOutput = m_pSolitaire-> qFileWin(seconds, moves);
-    m_winScreen->setVisible(true);
-    QString outputText = "";
-    m_winScreen->setVisible(true);
-    QString outputArray[8] = {"Number of Games Played: ", "Current Win Streak: ","Total Number of Wins: ","Win percentage: ",
-    "Winning Time: ","Which Ranks Number: ","Winning Moves: ","Which Ranks Number: " };
-
-    for (int i=0; i<8; i++)
+    for(int i=0; i<4; i++)
     {
-        outputText = outputText + outputArray[i] + QString::number(winOutput[i]) + "\n";
+        m_winScreen[i]->setVisible(true);
+
     }
-    m_winScreen->setText(outputText);
 }
 
 
