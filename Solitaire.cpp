@@ -989,7 +989,7 @@ void Solitaire::buildColumns()
 }
 
 
-// Step 2 move a randfom number of cards from the columns to the ace stacks
+// Step 2 move a random number of cards from the columns to the ace stacks
 void Solitaire::buildAceStacks()
 {
     std::random_device rd;                                      // Seed the random number generator
@@ -1032,13 +1032,13 @@ void Solitaire::buildAceStacks()
         }
 
     }
-    solitaireDeck.eraseDeck();      // are these needed?
+    solitaireDeck.eraseDeck();
     drawPile.eraseDeck();
     finishDeck();
 }
 
 
-// Step 3 move the columns and ace stacks to a starting position
+// Step 3 move the columns (30-24 face up cards) and ace stacks (22-28 cards) to a starting position
 void Solitaire::finishDeck()
 {
     int  aceCards;
@@ -1050,16 +1050,17 @@ void Solitaire::finishDeck()
     std::random_device rd;                                          
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> randHundred(1, 100);     // generate generic 1 to 100 for percentage moves 
+
     for (int i=0; i<7; i++)
     {
         lastFour[i] = false;    // looks at the last four columns (3-6) and tries to make sure they are fully cycled 90% of the time
-        int rndFour= randHundred(gen);
+        int rndFour = randHundred(gen);
         if (rndFour<10 && i<4){lastFour[i]= true;}     // 10% chance lastFour[0-3] will start out as true
     }
 
     while (allDone == false)
     {
-        int activeColumns = 0;      // this is the number of column that still can take face down cards
+        int activeColumns = 0;      // this is the number of columns that still can take face down cards
         int aceCards = 0;           // this is the number of cards in ace stacks
         int colCards = 0;           // this is the number of cards in columns that are face down
         int colActive[7];           // this is a column that a card can legally be moved to 
@@ -1312,10 +1313,32 @@ void Solitaire::finishDeck()
         }
         if (aceCards == 0){acesGone = true;}
         int pileCards = drawPile.cardsLeft() + solitaireDeck.cardsLeft();
-        if (pileCards > 23){dpFull = true;}
-        if (dpFull == true && acesGone == true){allDone=true;}  // we are done building a winnable deck!
+        if (pileCards > 23){dpFull = true;}         // 24 cards in draw pile
+        if (dpFull == true && acesGone == true)     // means 24 deck and 28 tableau cards so good to start
+        {
+            for(int i=3; i<7; i++)
+            {
+                for(int j=0; j<i-2; j++)
+                {
+                    Card* pCard0 = cardCol[i].getCardAt(j);
+                    Card* pCard1 = cardCol[i].getCardAt(j+1);
+                    Card* pCard2 = cardCol[i].getCardAt(j+2);
+                    int pCardID0 = pCard0->getID();
+                    int pCardID1 = pCard1->getID();
+                    int pCardID2 = pCard2->getID();
+                    if((pCardID0-1==pCardID1) && (pCardID1-1==pCardID2))
+                    {
+                        std::cout << "*******************************\nFace Down Column Cards are in sequnce\n***************************" << endl;
+                        allDone = true;
+                        makeWinnableDeck();
+                        break;
+                    }
+                }
+            }
+            allDone = true;                         // we are done building a winnable deck!
+        }  
         int pileTotal = drawPile.cardsLeft() + solitaireDeck.cardsLeft();
-        if(pileTotal > 23 && acesGone == false)    // draw pile is full but deck is not built so start over
+        if(pileTotal > 23 && acesGone == false)     // draw pile is full but deck is not built so start over
         {
             std::cout << "Deck Build Failed, try again!\n";
             allDone = true;
@@ -1452,35 +1475,10 @@ int Solitaire::findSmallestColumn()
     return lowestCol;
 }
 
-std::vector<int> Solitaire::bubbleSort(std::vector<int> vec)
-{
-    int vSize = vec.size();
-    for (int i=0; i<vSize; i++)
-    {
-        std::cout << vec[i] << ", ";
-    }
-    for (int i=0; i<vSize; i++)
-    {
-        for (int j=0; j<vSize-i-1; j++)
-        {
-            if (vec[j] > vec[j+1])
-            {
-                std::swap(vec[j],vec[j+1]);
-            }
-        }
-    }
-    for (int i=0; i<vSize; i++)
-    {
-        std::cout << vec[i] << ", ";
-    }
-    std::cout << endl;
-    return vec;
-}
-
 
 std::vector<int> Solitaire::qFileWin(int seconds, int moves)
 {
-    std::vector<int> winReturn(8);
+    std::vector<int> winReturn(9);
     int moveRank;
     int timeRank;
     QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
@@ -1496,10 +1494,10 @@ std::vector<int> Solitaire::qFileWin(int seconds, int moves)
     // if there is no file but the player won on his first game then do this
     if (!file.exists()) 
     {
-        // If the file doesn't exist, create it with "0 0 0 0" as the content
+        // If the file doesn't exist, create it with "0 0 0 0 0" as the content
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
-            out << "0 0 0 0";
+            out << "0 0 0 0 0";
             file.close();
         } else {
             qWarning() << "Failed to create file" << filePath;
@@ -1520,54 +1518,61 @@ std::vector<int> Solitaire::qFileWin(int seconds, int moves)
     // update the data
     int totalGames = stringList.at(0).toInt();
     int currentWins = stringList.at(1).toInt();
-    int secondsLength = stringList.at(2).toInt();
+    int bestWins = stringList.at(2).toInt();
+
+    int secondsLength = stringList.at(3).toInt();
     std::vector<int> timeVec(secondsLength);
     for(int i=0; i<secondsLength; i++)
     {
-        timeVec[i] = stringList.at(i+3).toInt();\
+        timeVec[i] = stringList.at(i+4).toInt();\
     }
-
-    int movesLength = stringList.at(secondsLength+3).toInt();
+ 
+    int movesLength = stringList.at(secondsLength+4).toInt();
     std::vector<int> moveVec(movesLength);
     for(int i=0; i<movesLength; i++)
     {
-        moveVec[i] = stringList.at(i+secondsLength+4).toInt();\
+        moveVec[i] = stringList.at(i+secondsLength+5).toInt();\
     }
 
     currentWins +=1;
     totalGames +=1;
-
-    for (std::size_t i=0; i<secondsLength; i++)
+    if(currentWins > bestWins)
+    {
+        bestWins = currentWins;
+    }
+    else
+    {
+        currentWins = bestWins;
+    }
+    // put seconds into the right slot in timeVec
+    for (std::size_t i=0; i<secondsLength; i++)         // this tries to place seconds into the right slot
     {
         if(seconds <= timeVec[i])
         {
             timeVec.insert(timeVec.begin()+i, seconds);
-            std::cout << "This game took " << seconds << " seconds which is ranked number " << i+1 << " out of " << secondsLength << " games" << endl;
             timeRank = i+1;
             break;
         }
     }
-    if (secondsLength == 0)
+    if (secondsLength == 0)                             // if there are no slots then make seconds the #0 slot
     {
         timeVec.insert(timeVec.begin(), seconds);
-        std::cout << "This game took " << seconds << "which is the only win thus far" << endl;
         timeRank = 1;
     }
-    else
-    {
-        if(seconds > timeVec[secondsLength-1])
-        {
-            timeVec.push_back(seconds);
-            std::cout << "This game took " << seconds << " seconds which is ranked number " << secondsLength << " out of " << secondsLength << " games" << endl;
-            timeRank = secondsLength;
+    else                                                // if timeVec exists and seconds is in the last slot then
+    {                                                   // it would not be caught by the top loop so put it here
+        if(seconds > timeVec[secondsLength-1])          // because the if scrondsLenght == 0 will prevent this from
+        {                                               // running should there not be a timeVec with a secondsLength - 1
+            timeVec.push_back(seconds);                 // slot to check
+            timeRank = secondsLength+1;
         } 
     }
+    // put moves into the right slot in moveVec
     for (std::size_t i=0; i<movesLength; i++ )
     {
         if(moves <= moveVec[i])
         {
             moveVec.insert(moveVec.begin()+ i, moves);
-            std::cout << "Won in " << moves << " moves which is ranked number " << i+1 << " out of " << movesLength << " games" << endl;
             moveRank = i+1;
             break;
         }
@@ -1575,32 +1580,34 @@ std::vector<int> Solitaire::qFileWin(int seconds, int moves)
     if(movesLength == 0)
     {
         moveVec.insert(moveVec.begin(), moves);
-        std::cout << "Won in " << moves << " moves which is the only win thus far" << std::endl;
         moveRank = 1;
+        movesLength = 1;
     }
     else
     {
         if(moves > moveVec[movesLength-1])
         {
             moveVec.push_back(moves);
-            std::cout << "Won in " << moves << " moves which is ranked number " << movesLength << " out of " << movesLength << " games" << endl;      
+            movesLength +=1;
             moveRank = movesLength;
         }
     } 
-    std::cout << "Current Win Streak at " << currentWins;
+    int bestMoves=moveVec[0];
+    int bestTime=timeVec[0];
+   
     int winRate = static_cast<int>((static_cast<double>(movesLength) / totalGames) * 100);
-    std::cout << " : Win percentage = " << winRate << std::endl;
 
     winReturn[0]=totalGames;
     winReturn[1]=currentWins;
-    winReturn[2]=movesLength;   // total number of wins
-    winReturn[3]=winRate;
-    winReturn[4]=seconds;
+    winReturn[2]=bestWins;
+    winReturn[3]=movesLength;   // total number of wins
+    winReturn[4]=winRate;
     winReturn[5]=timeRank;
-    winReturn[6]=moves;
-    winReturn[7]=moveRank;
+    winReturn[6]=moveRank;
+    winReturn[7]=bestMoves;
+    winReturn[8]=bestTime;
 
-    QString outputString = QString::number(totalGames) + " " + QString::number(currentWins) + " " + QString::number(timeVec.size()) + " ";
+    QString outputString = QString::number(totalGames) + " " + QString::number(currentWins) + " " + QString::number(bestWins) + " " + QString::number(timeVec.size()) + " ";
     for(int i=0; i<timeVec.size(); i++)
     {
         outputString = outputString + QString::number(timeVec[i]) + " ";
@@ -1611,18 +1618,18 @@ std::vector<int> Solitaire::qFileWin(int seconds, int moves)
         outputString = outputString + QString::number(moveVec[i]) + " ";
     }
 
-
     // save the data
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         out << outputString;
         file.close();
-        qDebug() << "File written to" << filePath;
+        qDebug() << "File written to win:" << filePath;
     } else {
         qWarning() << "Failed to write to file" << filePath;
     }
     return winReturn;
 }
+
 
 void Solitaire::qFileLoss()
 {
@@ -1641,7 +1648,7 @@ void Solitaire::qFileLoss()
         // If the file doesn't exist, create it with "0 0 0 0" as the content
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
-            out << "0 0 0 0";
+            out << "0 0 0 0 0";
             file.close();
         } else {
             qWarning() << "Failed to create file" << filePath;
@@ -1672,7 +1679,7 @@ void Solitaire::qFileLoss()
         QTextStream out(&file);
         out << modifiedString;
         file.close();
-        qDebug() << "File written to" << filePath;
+        qDebug() << "File written to loss:" << filePath;
     } else {
         qWarning() << "Failed to write to file" << filePath;
     }

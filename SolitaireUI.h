@@ -55,7 +55,7 @@ private:
     QLabel* m_moves;
     QLabel* m_timer;
     QLabel* m_noMovesLeft;
-    QLabel* m_winScreen[4];
+    QLabel* m_winScreen[5];
     QTimer timer;
     QElapsedTimer elapsedTimer;
     Solitaire* m_pSolitaire;

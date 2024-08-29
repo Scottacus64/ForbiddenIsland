@@ -130,7 +130,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     palette.setColor(QPalette::WindowText, QColor(255, 215, 0));
 
     m_moves = new QLabel(this);
-    m_moves->setGeometry(QRect(300,930,200,50));
+    m_moves->setGeometry(QRect(300,930,300,50));
     m_moves->setFont(font);
     m_moves->setPalette(palette);
     m_moves->setText(QString("Moves: "));
@@ -147,16 +147,16 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_noMovesLeft->setPalette(palette);
     m_noMovesLeft->setText(QString(""));
 
-    int alignment[4][4] = {{300,200,500,100},{300,300,166,400},{466,300,166,400},{632,300,166,400}};
-    for(int i=0; i<4; i++)
+    int alignment[5][4] = {{200,250,700,100},{200,275,225,400},{425,275,150,400},{575,275,150,400},{725,275,150,400}};
+    for(int i=0; i<5; i++)
     {
         m_winScreen[i] = new QLabel(this);
         m_winScreen[i]->setGeometry(QRect(alignment[i][0],alignment[i][1],alignment[i][2],alignment[i][3]));
         m_winScreen[i]->setFont(font);
         m_winScreen[i]->setPalette(palette);
         m_winScreen[i]->setVisible(false);
-        m_winScreen[i]->setAlignment(Qt::AlignLeft);
-        m_winScreen[i]->setText(QString("1234"));
+        m_winScreen[i]->setAlignment(Qt::AlignCenter);
+        m_winScreen[i]->setText(QString());
     }
 
     QObject::connect(&timer, &QTimer::timeout, [&]() {
@@ -171,10 +171,9 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     });
 
     m_pSolitaire = new Solitaire();
-    for(int i=0; i<4; i++)
+    for(int i=0; i<5; i++)
     {
         m_winScreen[i]->setVisible(true);
-        m_winScreen[i]->setText("1234");
     }
 }
 
@@ -207,10 +206,10 @@ void SolitaireUI::dealCards()
     timer.stop();
     elapsedMilliseconds = 0;
     m_timer->setText("Time:");
-    for(int i=0; i<4; i++)
+    for(int i=0; i<5; i++)
     {
         m_winScreen[i]->setVisible(false);
-        m_winScreen[i]->setText("1234");
+        
     }
 }
 
@@ -354,6 +353,7 @@ void SolitaireUI::cardClicked()
         bool canPlay = m_pSolitaire->checkCanPlay();
         bool win = false;
         win = m_pSolitaire->checkForWin();
+        std::cout << "Can Play = " << canPlay << endl;
         if (canPlay == false)
         {
             if (win == false)
@@ -364,6 +364,10 @@ void SolitaireUI::cardClicked()
             {
                 m_noMovesLeft->setText(QString("Win!"));
             }
+        }
+        else
+        {
+            m_noMovesLeft->setText(QString());
         }
     }
 }
@@ -400,14 +404,55 @@ void SolitaireUI::postWin()
     m_pD[1]->setIcon(QPixmap()); 
     m_pD[1]->setText("WIN!!");
     std::cout << "seconds = " << seconds << std::endl;
-    std::vector<int> winOutput(8);
+    std::vector<int> winOutput(11);
     int moves = m_pSolitaire->getMoves();
     std::cout << "moves = " << moves << endl;
     winOutput = m_pSolitaire-> qFileWin(seconds, moves);
-    for(int i=0; i<4; i++)
+
+    std::cout << "Back in Post Win" << std::endl;
+    int totalGames = winOutput[0];
+    int currentWins = winOutput[1];
+    int bestWins = winOutput[2];
+    //if(currentWins>bestWins){bestWins=currentWins;}
+    int totalWins = winOutput[3]; 
+    //if(totalWins==0){totalWins=1;}
+    int winRate = winOutput[4];
+    qint64 tMinutes = seconds / 60;
+    qint64 tSeconds = seconds % 60;
+    QString pTime = QString("%1:%2").arg(tMinutes, 1, 10, QLatin1Char('0')).arg(tSeconds, 2, 10, QLatin1Char('0')); ;
+    int timeRank = winOutput[5];
+    int moveRank = winOutput[6];
+    int bestMoves = winOutput[7];
+    int bestTime = winOutput[8];
+    //if(seconds<bestTime){bestTime=seconds;}
+    //if(seconds<bestMoves){bestMoves=moves;}
+    qint64 bMinutes = bestTime / 60;
+    qint64 bSeconds = bestTime % 60;
+    QString pBestTime = QString("%1:%2").arg(bMinutes, 1, 10, QLatin1Char('0')).arg(bSeconds, 2, 10, QLatin1Char('0')); 
+    std::cout << "Parameters loaded" << std::endl;
+
+    QString winText[5] = {
+    QString("Total Wins %1 : Total Games %2\nWin Percentage %3%")
+        .arg(totalWins) 
+        .arg(totalGames)
+        .arg(winRate), 
+    QString("\nMoves\nTime\nWin Streak"),
+    QString("Current\n%1\n%2\n%3")
+        .arg(moves)
+        .arg(pTime)
+        .arg(currentWins),
+    QString("Rank\n%1\n%2\n")
+        .arg(moveRank)
+        .arg(timeRank),
+    QString("Best\n%1\n%2\n%3")
+        .arg(bestMoves)
+        .arg(pBestTime)
+        .arg(bestWins)};
+
+    for(int i=0; i<5; i++)
     {
         m_winScreen[i]->setVisible(true);
-
+        m_winScreen[i]->setText(winText[i]);
     }
 }
 
