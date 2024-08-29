@@ -34,6 +34,7 @@ public:
     void autoFinish();
     void delayTimer(int delay);
     void undoPressed();
+    void newGamePressed();
     void refreshDecks();
     
 public slots:
@@ -49,6 +50,7 @@ private:
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];
     QPushButton* m_undo;
+    QPushButton* m_newGame;
     QPushButton* m_winnable;
     QPushButton* m_random;
     QTimer elapsedTime;

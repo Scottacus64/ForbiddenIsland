@@ -1540,10 +1540,6 @@ std::vector<int> Solitaire::qFileWin(int seconds, int moves)
     {
         bestWins = currentWins;
     }
-    else
-    {
-        currentWins = bestWins;
-    }
     // put seconds into the right slot in timeVec
     for (std::size_t i=0; i<secondsLength; i++)         // this tries to place seconds into the right slot
     {

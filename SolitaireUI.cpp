@@ -33,6 +33,12 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     QLabel *c0 = new QLabel(this);
     QLabel *c1 = new QLabel(this);
     QLabel *a0 = new QLabel(this);
+
+    // set up the labels
+    QFont font("Franklin Gothic Medium");
+    font.setPointSize(42);
+    QPalette palette;
+    palette.setColor(QPalette::WindowText, QColor(255, 215, 0));
     
     green = QPixmap(assetPath + "green.png");
     // set up all of the card image QPixmaps
@@ -53,7 +59,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         std::string name = "A" + std::to_string(i);
         m_pA[i] = new QPushButton(QString::fromStdString(name), this);
         m_pA[i]->setObjectName(QString::fromStdString(name));
-        m_pA[i]->setGeometry(QRect(290 + (i * 110), 0, 100, 140));
+        m_pA[i]->setGeometry(QRect(290 + (i * 110), 50, 100, 140));
         m_pA[i]->setIcon(QPixmap()); 
         m_pA[i]->setText(QString());
         m_pA[i]->setEnabled(false);
@@ -69,7 +75,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
             std::string name = "C" + std::to_string(j+(k*19));
             m_pC[j+(k*19)] = new QPushButton (QString::fromStdString(name), this);
             m_pC[j+(k*19)]->setObjectName(QString::fromStdString(name));
-            m_pC[j+(k*19)]->setGeometry(QRect(130+(k*110), 160+(j*25), 100, 140));
+            m_pC[j+(k*19)]->setGeometry(QRect(130+(k*110), 210+(j*25), 100, 140));
             m_pC[j+(k*19)]->setIcon(QPixmap(QString::fromUtf8("../../VSC/CPP/Solitaire/CardPNGs/13S.png")));
             m_pC[j+(k*19)]->setText(QString());
             m_pC[j+(k*19)]->setStyleSheet(QString::fromUtf8("border: none"));
@@ -104,30 +110,33 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         m_pD[i]->hide();
     }
     // set up the buttons
-    m_undo = new QPushButton("undo", this);
+    m_undo = new QPushButton("Undo", this);
     m_undo->setObjectName("undo");
-    m_undo->setGeometry(QRect(600, 800, 140, 50));
-    m_undo->setText(QString("Undo"));
+    m_undo->setGeometry(QRect(800, 120, 210, 50));
+    m_undo->setFont(font);  // Apply the QFont
+    m_undo->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 215, 0); text-align: left; padding-left: 10px;"); 
+    m_undo->setVisible(false);
     connect(m_undo, &QPushButton::clicked, this, &SolitaireUI::undoPressed);
+
+    m_newGame = new QPushButton("New Game", this);
+    m_newGame->setObjectName("newGame");
+    m_newGame->setGeometry(QRect(800, 60, 210, 50));
+    m_newGame->setFont(font);  // Apply the QFont
+    m_newGame->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 215, 0); text-align: left; padding-left: 10px;"); 
+    m_newGame->setVisible(true);
+    connect(m_newGame, &QPushButton::clicked, this, &SolitaireUI::newGamePressed);
 
     m_winnable = new QPushButton("winnable", this);
     m_winnable->setObjectName(QString::fromStdString("winnable"));
-    m_winnable->setGeometry(QRect(800, 740, 140, 50));
+    m_winnable->setGeometry(QRect(700, 800, 140, 50));
     m_winnable->setText(QString("deal winnable deck"));
     connect(m_winnable, &QPushButton::clicked, this, &SolitaireUI::winnableClicked);
 
     m_random = new QPushButton("random", this);
     m_random->setObjectName(QString::fromStdString("random"));
-    m_random->setGeometry(QRect(800, 800, 140, 50));
+    m_random->setGeometry(QRect(900, 800, 140, 50));
     m_random->setText(QString("deal random deck"));
     connect(m_random, &QPushButton::clicked, this, &SolitaireUI::randomClicked);
-
-
-    // set up the labels
-    QFont font("Franklin Gothic Medium");
-    font.setPointSize(42);
-    QPalette palette;
-    palette.setColor(QPalette::WindowText, QColor(255, 215, 0));
 
     m_moves = new QLabel(this);
     m_moves->setGeometry(QRect(300,930,300,50));
@@ -190,6 +199,8 @@ void SolitaireUI::dealCards()
     {
         m_pSolitaire->qFileLoss();
     }
+    m_pD[0]->setVisible(true);
+    m_undo->setVisible(true);
     m_pSolitaire->dealGame();
     refreshUpperSection();
     m_pD[0]->setEnabled(true);
@@ -360,10 +371,6 @@ void SolitaireUI::cardClicked()
             {
                 m_noMovesLeft->setText(QString("No Moves"));
             }
-            else
-            {
-                m_noMovesLeft->setText(QString("Win!"));
-            }
         }
         else
         {
@@ -394,12 +401,13 @@ void SolitaireUI::autoFinish()
 
 void SolitaireUI::postWin()
 {
+    m_undo->setVisible(false);
     timer.stop();
     elapsedMilliseconds = elapsedTimer.elapsed();
     qint64 elapsedSeconds = elapsedMilliseconds / 1000;
     int seconds = static_cast<int>(elapsedMilliseconds / 1000);
     m_pD[0]->setEnabled(false);
-    m_pD[0]->setText("WIN!!");
+    m_pD[0]->setVisible(false);
     m_pD[1]->setEnabled(false);
     m_pD[1]->setIcon(QPixmap()); 
     m_pD[1]->setText("WIN!!");
@@ -454,6 +462,7 @@ void SolitaireUI::postWin()
         m_winScreen[i]->setVisible(true);
         m_winScreen[i]->setText(winText[i]);
     }
+    m_noMovesLeft->setText(QString());
 }
 
 
@@ -501,6 +510,12 @@ void SolitaireUI::undoPressed()
     m_pSolitaire->loadGameState();
     refreshUpperSection(); 
     refreshDecks();
+}
+
+void SolitaireUI::newGamePressed()
+{
+    std::cout << "New aAme button pressed\n";
+
 }
 
 
