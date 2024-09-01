@@ -142,14 +142,14 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_undo = new QPushButton("Undo", this);
     m_undo->setGeometry(QRect(800, 120, 210, 50));
     m_undo->setFont(boldFont);
-    m_undo->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 215, 0); text-align: left; padding-left: 10px;"); 
+    m_undo->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 185, 0); text-align: left; padding-left: 10px;"); 
     m_undo->setVisible(false);
     connect(m_undo, &QPushButton::clicked, this, &SolitaireUI::undoPressed);
 
     m_newGame = new QPushButton("New Game", this);
     m_newGame->setGeometry(QRect(800, 60, 210, 50));
     m_newGame->setFont(boldFont);
-    m_newGame->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 215, 0); text-align: left; padding-left: 10px;"); 
+    m_newGame->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 185, 0); text-align: left; padding-left: 10px;"); 
     m_newGame->setVisible(true);
     connect(m_newGame, &QPushButton::clicked, this, &SolitaireUI::newGamePressed);
 
@@ -177,14 +177,14 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_moves = new QLabel(this);
     m_moves->setGeometry(QRect(300,930,300,50));
     lightFont.setPointSize(42);
+    m_moves->setStyleSheet("QLabel { color : rgb(255,185,0); }");
     m_moves->setFont(lightFont);
-    m_moves->setPalette(palette);
     m_moves->setText(QString("Moves: "));
 
     m_timer = new QLabel(this);           
     m_timer->setGeometry(QRect(600, 930, 300, 50));
     m_timer->setFont(lightFont);
-    m_timer->setPalette(palette);
+    m_timer->setStyleSheet("QLabel { color : rgb(255,185,0); }");
     m_timer->setText(QString("Time: "));
 
     m_noMovesLeft = new QLabel(this);
@@ -199,7 +199,7 @@ SolitaireUI::SolitaireUI(QWidget *parent)
         m_winScreen[i] = new QLabel(this);
         m_winScreen[i]->setGeometry(QRect(alignment[i][0],alignment[i][1],alignment[i][2],alignment[i][3]));
         m_winScreen[i]->setFont(lightFont);
-        m_winScreen[i]->setPalette(palette);
+        m_winScreen[i]->setStyleSheet("QLabel { color : rgb(255,185,0); }");
         m_winScreen[i]->setVisible(false);
         m_winScreen[i]->setAlignment(Qt::AlignCenter);
         m_winScreen[i]->setText(QString());
@@ -560,6 +560,10 @@ void SolitaireUI::newGamePressed()
     m_hard->raise();
     m_easy->setVisible(true);
     m_easy->raise();
+    for(int i=0; i<5; i++)
+    {
+        m_winScreen[i]->setVisible(false);
+    }
 }
 
 
