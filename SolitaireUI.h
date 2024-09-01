@@ -39,8 +39,8 @@ public:
     
 public slots:
     void cardClicked();
-    void winnableClicked();
-    void randomClicked();
+    void easyClicked();
+    void hardClicked();
 
 private:
     Ui::SolitaireUI *ui;
@@ -51,9 +51,10 @@ private:
     QPushButton* m_pD[4];
     QPushButton* m_undo;
     QPushButton* m_newGame;
-    QPushButton* m_winnable;
-    QPushButton* m_random;
+    QPushButton* m_easy;
+    QPushButton* m_hard;
     QTimer elapsedTime;
+    QLabel* m_startLogo;
     QLabel* m_moves;
     QLabel* m_timer;
     QLabel* m_noMovesLeft;
