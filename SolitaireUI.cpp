@@ -45,27 +45,22 @@ SolitaireUI::SolitaireUI(QWidget *parent)
      // Load LNBold font
     int boldFontId = QFontDatabase::addApplicationFont(assetPath + "LNBold.ttf");
     QString boldFontFamily;
-    if (boldFontId != -1) {
-        boldFontFamily = QFontDatabase::applicationFontFamilies(boldFontId).at(0);
-        QFont boldFont(boldFontFamily);
-    } 
-    else {
-        qWarning() << "Failed to load LNBold font from CardPNGs folder.";  }
+    boldFontFamily = QFontDatabase::applicationFontFamilies(boldFontId).at(0);
     QFont boldFont(boldFontFamily);
     boldFont.setPointSize(42);
+
+    QFont boldLargeFont(boldFontFamily);
+    boldLargeFont.setPointSize(84);
 
     // Load LNLight font
     int lightFontId = QFontDatabase::addApplicationFont(assetPath + "LNLight.ttf");
     QString lightFontFamily;
-    if (lightFontId != -1) {
-        lightFontFamily = QFontDatabase::applicationFontFamilies(lightFontId).at(0);
-        QFont lightFont(lightFontFamily);
-    } 
-    else {
-        qWarning() << "Failed to load LNLight font from CardPNGs folder.";
-    }  
-    QFont lightFont(lightFontFamily);
+    lightFontFamily = QFontDatabase::applicationFontFamilies(lightFontId).at(0);
+    QFont lightFont(lightFontFamily); 
     lightFont.setPointSize(42);
+
+    QFont lightLargeFont(lightFontFamily); 
+    lightLargeFont.setPointSize(84);
     
     green = QPixmap(assetPath + "green.jpeg");
     // set up all of the card image QPixmaps
@@ -165,7 +160,6 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_startLogo->setGeometry(QRect(300,200,480,200));
     m_startLogo->setStyleSheet("background-image: url(" + assetPath + "logo.png); border: none; background-position: center; background_size: contain;");
 
-
     m_hard = new QPushButton("hard", this);
     m_hard->setGeometry(QRect(400, 600, 200, 50));
     m_hard->setStyleSheet("background-color: transparent; border: none; color: rgb(255,185,0);");
@@ -176,10 +170,15 @@ SolitaireUI::SolitaireUI(QWidget *parent)
 
     m_moves = new QLabel(this);
     m_moves->setGeometry(QRect(300,930,300,50));
-    lightFont.setPointSize(42);
+    //lightFont.setPointSize(42);
     m_moves->setStyleSheet("QLabel { color : rgb(255,185,0); }");
     m_moves->setFont(lightFont);
     m_moves->setText(QString("Moves: "));
+
+    m_winMoves = new QLabel(this);
+    m_winMoves->setGeometry(QRect(250,450,300,100));
+    //m_winMoves->setStyleSheet("QLabel { color : rgb(255,185,0); }");
+    m_winMoves->setFont(lightLargeFont);
 
     m_timer = new QLabel(this);           
     m_timer->setGeometry(QRect(600, 930, 300, 50));
@@ -187,19 +186,27 @@ SolitaireUI::SolitaireUI(QWidget *parent)
     m_timer->setStyleSheet("QLabel { color : rgb(255,185,0); }");
     m_timer->setText(QString("Time: "));
 
+    m_winTime = new QLabel(this);
+    m_winTime->setGeometry(QRect(600,450,300,100));
+    //m_winTime->setStyleSheet("QLabel { color : rgb(255,185,0); }");
+    m_winTime->setFont(lightLargeFont);
+
     m_noMovesLeft = new QLabel(this);
     m_noMovesLeft->setGeometry(QRect(600,740,200,50));
     m_noMovesLeft->setFont(lightFont);
     m_noMovesLeft->setPalette(palette);
     m_noMovesLeft->setText(QString(""));
 
-    int alignment[5][4] = {{200,450,700,100},{200,475,225,400},{425,475,150,400},{575,475,150,400},{725,475,150,400}};
+    int alignment[5][4] = {{150,575,800,100},{200,600,225,400},{425,600,150,400},{575,600,150,400},{725,600,150,400}};
     for(int i=0; i<5; i++)
     {
         m_winScreen[i] = new QLabel(this);
         m_winScreen[i]->setGeometry(QRect(alignment[i][0],alignment[i][1],alignment[i][2],alignment[i][3]));
         m_winScreen[i]->setFont(lightFont);
-        m_winScreen[i]->setStyleSheet("QLabel { color : rgb(255,185,0); }");
+        if(i<2)
+        {m_winScreen[i]->setStyleSheet("QLabel { color : rgb(255,185,0); }");}
+        else
+        {m_winScreen[i]->setStyleSheet("QLabel { color : rgb(255,255,255); }");}
         m_winScreen[i]->setVisible(false);
         m_winScreen[i]->setAlignment(Qt::AlignCenter);
         m_winScreen[i]->setText(QString());
@@ -236,6 +243,10 @@ void SolitaireUI::dealCards()
     {
         m_pSolitaire->qFileLoss();
     }
+    m_moves->setVisible(true);
+    m_timer->setVisible(true);
+    m_winMoves->setVisible(false);
+    m_winTime->setVisible(false);
     m_pD[0]->setVisible(true);
     m_undo->setVisible(true);
     m_easy->setVisible(false);
@@ -445,6 +456,12 @@ void SolitaireUI::autoFinish()
 void SolitaireUI::postWin()
 {
     m_undo->setVisible(false);
+    m_moves->setVisible(false);
+    m_timer->setVisible(false);
+    m_winMoves->setVisible(true);
+    m_winTime->setVisible(true);
+    m_easy->setVisible(false);
+    m_hard->setVisible(false);
     timer.stop();
     elapsedMilliseconds = elapsedTimer.elapsed();
     qint64 elapsedSeconds = elapsedMilliseconds / 1000;
@@ -454,13 +471,11 @@ void SolitaireUI::postWin()
     m_pD[1]->setEnabled(false);
     m_pD[1]->setIcon(QPixmap()); 
     m_startLogo->setVisible(true);
-    std::cout << "seconds = " << seconds << std::endl;
     std::vector<int> winOutput(11);
     int moves = m_pSolitaire->getMoves();
-    std::cout << "moves = " << moves << endl;
-    winOutput = m_pSolitaire-> qFileWin(seconds, moves);
+    //winOutput = m_pSolitaire-> qFileWin(seconds, moves);
+    winOutput = m_pSolitaire-> qFileWin(360,200);
 
-    std::cout << "Back in Post Win" << std::endl;
     int totalGames = winOutput[0];
     int currentWins = winOutput[1];
     int bestWins = winOutput[2];
@@ -476,22 +491,31 @@ void SolitaireUI::postWin()
     qint64 bMinutes = bestTime / 60;
     qint64 bSeconds = bestTime % 60;
     QString pBestTime = QString("%1:%2").arg(bMinutes, 1, 10, QLatin1Char('0')).arg(bSeconds, 2, 10, QLatin1Char('0')); 
-    std::cout << "Parameters loaded" << std::endl;
 
     QString winText[5] = {
-    QString("Total Wins %1 : Total Games %2\nWin Percentage %3%")
-        .arg(totalWins) 
-        .arg(totalGames)
-        .arg(winRate), 
+    QString("<font color='#FFB900'>Total Wins: </font><font color='#FFFFFF'> %1 </font> &nbsp;&nbsp;&nbsp;&nbsp;"
+            "<font color='#FFB900'> Total Games: </font><font color='#FFFFFF'> %2 </font> &nbsp;&nbsp;&nbsp;&nbsp;"
+            "<font color='#FFB900'> Win Percentage: </font><font color='#FFFFFF'> %3% </font>")
+            .arg(totalWins)
+            .arg(totalGames)
+            .arg(winRate),
     QString("\nMoves\nTime\nWin Streak"),
-    QString("Current\n%1\n%2\n%3")
-        .arg(moves)
-        .arg(pTime)
-        .arg(currentWins),
-    QString("Rank\n%1\n%2\n")
-        .arg(moveRank)
-        .arg(timeRank),
-    QString("Best\n%1\n%2\n%3")
+    QString("<font color='#FFB900'> Current </font><br>"
+            "<font color='#FFFFFF'> %1 </font><br>"
+            "<font color='#FFFFFF'> %2 </font><br>"
+            "<font color='#FFFFFF'> %3 </font>")
+            .arg(moves)
+            .arg(pTime)
+            .arg(currentWins),
+    QString("<font color='#FFB900'> Rank </font><br>"
+            "<font colot='#FFFFFF'> %1 </font><br>"
+            "<font color='#FFFFFF'> %2 </font><br<br")
+            .arg(moveRank)
+            .arg(timeRank),
+    QString("<font color='#FFB900'> Best </font><br>"
+            "<font color='#FFFFFF'> %1 </font><br>"
+            "<font color='#FFFFFF'> %2 </font><br>"
+            "<font color='#FFFFFF'> %3 </font>")
         .arg(bestMoves)
         .arg(pBestTime)
         .arg(bestWins)};
@@ -501,6 +525,10 @@ void SolitaireUI::postWin()
         m_winScreen[i]->setVisible(true);
         m_winScreen[i]->setText(winText[i]);
     }
+    m_winMoves->setText("<font color='#FFB900'>Moves: </font>"
+                    "<font color='#FFFFFF'>144</font>");
+    m_winTime->setText("<font color='#FFB900'>Time: </font>"
+                    "<font color='#FFFFFF'>2:15</font>");
     m_noMovesLeft->setText(QString());
 }
 

@@ -56,7 +56,9 @@ private:
     QTimer elapsedTime;
     QLabel* m_startLogo;
     QLabel* m_moves;
+    QLabel* m_winMoves;
     QLabel* m_timer;
+    QLabel* m_winTime;
     QLabel* m_noMovesLeft;
     QLabel* m_winScreen[5];
     QTimer timer;
