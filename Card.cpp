@@ -2,20 +2,26 @@
 #include "Card.h"
 #include <iostream>
 
+const vector<string> Card::pvList = {"BG", "CG", "FL", "GG", "IG", "SG",  "CE", "CS", "CP", "TP", "HG", "WG", "TM", "TS",  "BB", "CA", "CF", "DD", "LL", "MM", "Ob", "PR", "TH", "Wt" };
+
 //using namespace std;
 
 Card::Card()
 {  
 }
 
-Card::Card(int fv, int av, int idn, char s, string pv)
+Card::Card(int fv, int av, int idn, string pv, int tv, int cv)
 {
     faceValue = fv;
     actualValue = av;
     id = idn;
-    suit = s;
+    treasureValue = tv;
+    characterValue = cv;
     printValue = pv;
-    faceUp = false;
+    faceUp = true;
+    state = 2;
+    // characters: 1 engineer, 2 expolorer, 3 pilot, 4 nav, 5 diver, 6 messenger,
+    // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
 
 
@@ -72,68 +78,27 @@ int Card::getID()
 }
 
 
-char Card::getSuit()
+int Card::getState()
 {
-    return suit;
-}
-
-
-int Card::getSuitInt()
-{
-    int suitInt;
-    if (suit==67)
-    {
-        suitInt = 0;
-    }
-    else if(suit==83)
-    {
-        suitInt = 1;
-    }
-    else if(suit==72)
-    {
-        suitInt = 2;
-    }
-    else
-    {
-        suitInt = 3;
-    }
-    return suitInt;
-}
-
-
-int Card::getBlackRed()
-{
-    int blackRed;
-    if (id <= 26)
-    {
-        blackRed = 0;
-    }
-    else
-    {   
-        blackRed = 1;
-    }
-    return blackRed;
+    return state;
 }
 
 
 void Card::printCard()
 {
-    if (faceUp == true)
+    if (state == 2)
     {
-        if (suit == 'H' || suit == 'D')
-        {
-            std::cout << "\033[31m";
-        }
-        else
-        {
-            std::cout << "\033[0m";
-        }
-        cout << printValue << suit;
+        std::cout << "\033[0m";
+        cout << printValue;
+    }
+    else if (state == 1)
+    {
+        std::cout << "\033[31m";
+        cout << printValue;
     }
     else
     {
-        std::cout << "\033[0m";
-        cout << " **";
+        cout << "  ";
     }
 }
 
@@ -141,5 +106,18 @@ void Card::printCard()
 void Card::printAV()
 {
     cout << actualValue;
+}
+
+void Card::floodCard()
+{
+    state-=1;
+    printCard();
+    cout << " state = " << state << endl;
+}
+
+
+void Card::shoreUpCard()
+{
+    state+=1;
 }
 

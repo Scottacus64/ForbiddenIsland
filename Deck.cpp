@@ -25,42 +25,22 @@ void Deck::makeDeck()
 {
     int av;
     int id = 0;
+    int cv = 0;
+    int tv = 0;
     string pv;
-    char suits[4] = {'C', 'S', 'H', 'D'};
-    for (int s=0; s<4; s++)
+
+    for (int fv=0; fv<24; fv++)
     {
-        for (int fv=1; fv<14; fv++)
-        {
-            id++;
-            switch (fv)
-            {
-            case 1:
-                av = 11;
-                pv = " A";
-                break;
-            case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9:
-                av = fv;
-                pv = " " + to_string(av);
-                break;
-            case 10:
-                av = fv;
-                pv = to_string(av);
-                break;
-            case 11:
-                av = 10;
-                pv = " J";
-                break;
-            case 12:
-                av = 10;
-                pv = " Q";
-                break;
-            case 13:
-                av = 10;
-                pv = " K";
-                break;
-            }
-            m_deck.push_back(new Card(fv, av, id, suits[s], pv));
-        }
+        id++;
+        pv = Card::pvList[fv];
+        av = fv;
+        if (fv < 6){cv = fv+1;}
+        if (fv > 5 and fv < 8){tv = 1;}
+        if (fv > 8 and fv < 10){tv = 2;}
+        if (fv > 10 and fv < 12){tv = 3;}
+        if (fv > 12 and fv < 14){tv = 4;}
+
+        m_deck.push_back(new Card(fv, av, id, pv, tv, cv));
     }
 }
 
@@ -74,7 +54,7 @@ void Deck::printDeck()
         pCard->printCard(); 
         cout << " ";
         
-        if (i%13 == 0) {cout << "\n";}
+        if (i%12 == 0) {cout << "\n";}
     }
 }
 

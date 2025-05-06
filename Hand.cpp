@@ -1,5 +1,6 @@
 #include "Hand.h"
 #include <iostream>
+const vector <int> Hand::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
 
 Hand::Hand()
 {
@@ -19,6 +20,13 @@ Card* Hand::removeCard(int position)
     int size = m_hand.size();
     //std::cout <<"Hand size is: " << size << "\n";
     return pCard;
+}
+
+
+int Hand::removeCardPointer(Card* pCard)
+{
+    int pos = getCardPosition(pCard);
+    m_hand.erase(m_hand.begin() + pos);
 }
 
 
@@ -48,13 +56,31 @@ int Hand::getSize()
 }
 
 
-
-void Hand::printHand()
+void Hand::printHand(int typeOfHand)
 {
-    for (auto pCard : m_hand) 
+    if (typeOfHand == 0)
+        for (auto pCard : m_hand) 
+        {
+            pCard->printCard();
+            std::cout << " ";
+        }
+    if (typeOfHand == 1)
     {
-        pCard->printCard();
-        std::cout << " ";
+        int card = 0;
+        for (int i=0; i<36; i++)
+        {
+            if (i % 6 == 0){cout << endl;}
+            if((find(invalidSquares.begin(), invalidSquares.end(), i) != invalidSquares.end()))
+            { cout << "   ";}
+            else
+            {
+                Card* pCard = getCard(card);
+                pCard->printCard();
+                card++;
+                std::cout << " ";            
+            }
+        }
+        cout << endl << endl;
     }
 }
 
@@ -76,37 +102,10 @@ void Hand::sortActualValue()
     std::sort(m_hand.begin(), m_hand.end(), compareByCardActualValue);
 }
 
+
 bool Hand::compareByCardActualValue(Card* pCard1, Card* pCard2) 
 {
     return pCard1->getActualValue() < pCard2->getActualValue();
-}
-
-
-void Hand::sortHandSuit()
-{
-    std::sort(m_hand.begin(), m_hand.end(), compareBySuit);
-}
-
-
-bool Hand::compareBySuit(Card* pCard1, Card* pCard2)
-{
-    return pCard1->getSuit() < pCard2->getSuit();
-}
-
-
-void Hand::sortHandSuitAndValue()
-{
-    std::sort(m_hand.begin(), m_hand.end(), compareBySuitAndCardValue);
-}
-
-
-bool Hand::compareBySuitAndCardValue(Card* pCard1, Card* pCard2)
-{
-    if (pCard1->getSuit() == pCard2->getSuit())
-    {
-        return pCard1->getFaceValue() < pCard2->getFaceValue();
-    }
-    return pCard1->getSuit() < pCard2->getSuit();
 }
 
 
@@ -138,16 +137,6 @@ int Hand::getLastCardValue()
 }
 
 
-char Hand::getLastCardSuit()
-{
-    char suit;
-    if (m_hand.size() > 0)
-    {
-        suit = m_hand[m_hand.size()-1]->getSuit();
-    }
-    return suit; 
-}
-
 Card* Hand::getLastCard()
 {
     Card* pCard;
@@ -157,6 +146,7 @@ Card* Hand::getLastCard()
     }
     return pCard;
 }
+
 
 Card* Hand::getFirstFlippedUp()
 {
@@ -174,6 +164,7 @@ Card* Hand::getFirstFlippedUp()
     }
     return pCard;
 }
+
 
 int Hand::getFirstFlippedUpPosition()
 {
@@ -194,6 +185,7 @@ int Hand::getFirstFlippedUpPosition()
     return location;  
 }
 
+
 bool Hand::allFaceDown()
 {
     Card* pCard;
@@ -212,10 +204,45 @@ bool Hand::allFaceDown()
     return allDown;
 }
 
+
 Card* Hand::getCardAt(int location)
 {
     Card* pCard;
     if (location < m_hand.size()){pCard = m_hand[location];}
     return pCard;
 
+}
+
+Card* Hand::getCardWithId(int id)
+{
+    Card* pCard;
+    if (m_hand.size() > 0)
+    {
+        for (int i=0; i<m_hand.size(); i++)
+        {
+            pCard = m_hand[i];
+            int cardID = pCard->getID();
+            if (cardID == id)
+            {
+                return pCard;
+            }
+        }
+    }
+
+}
+
+int Hand::getCardPosition(Card* pPosCard)
+{
+    Card* pCard;
+    if (m_hand.size() > 0)
+    {
+        for (int i=0; i<m_hand.size(); i++)
+        {
+            pCard = m_hand[i];
+            if (pCard == pPosCard)
+            {
+                return i;
+            }
+        }
+    }
 }

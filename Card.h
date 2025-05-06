@@ -2,6 +2,7 @@
 #define CARD_H
 
 #include <string>
+#include <vector>
 using namespace std;
 
 class Card
@@ -9,13 +10,11 @@ class Card
 public:
     Card();
     ~Card();
-    Card(int fv, int av, int idn, char s, string pv);
+    Card(int fv, int av, int idn, string pv, int tv, int cv);
     int  getFaceValue();
     int  getActualValue();
     bool getFaceUp();
     void setFaceUp(bool fUp);
-    char getSuit();
-    int  getSuitInt();
     void flipCard();
     void flipFaceUp();
     void printCard();
@@ -23,13 +22,19 @@ public:
     int  getID();
     string getPrintValue();
     int  getBlackRed();
+    static const vector<string> pvList;
+    void floodCard();
+    void shoreUpCard();
+    int  getState();
 
 private:
     int actualValue;
     int faceValue;
     int id;
-    char suit;
+    int treasureValue;
+    int characterValue;
     string printValue;
     bool faceUp;
-};
+    int state;
+    };
 #endif // CARD_H
