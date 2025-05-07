@@ -16,6 +16,8 @@ public:
     void printValidSquares();
     bool checkValidMove(int square, int direction);
     Card* flipFlood();
+    void shuffleFlood();
+    void shuffleTreasure();
 
 private:
     Deck islandDeck;

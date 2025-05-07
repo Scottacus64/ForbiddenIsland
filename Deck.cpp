@@ -189,3 +189,9 @@ Card* Deck::getDeckCardAt(int slot)
     Card* pCard = m_deck[slot];
     return pCard;
 }
+
+
+int Deck::deckSize()
+{
+    return m_deck.size();
+}

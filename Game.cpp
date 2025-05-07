@@ -44,7 +44,9 @@ Game::Game()
     pIsleCard->floodCard();
     cout << endl;
     islandHand.printHand(1);
+    shuffleFlood();
 }
+
 
 Game::~Game()
 {}
@@ -54,6 +56,7 @@ void Game::removeValidSquare(int square)
 {
     validSquares.erase(remove(validSquares.begin(), validSquares.end(), square), validSquares.end());
 }
+
 
 void Game::printValidSquares()
 {
@@ -108,6 +111,7 @@ bool Game::checkValidMove(int square, int direction)
     return true;   
 }
 
+
 Card* Game::flipFlood()
 {
     Card* pCard;
@@ -118,5 +122,33 @@ Card* Game::flipFlood()
     pIsleCard = islandHand.getCardWithId(id);
     pIsleCard->floodCard();
     floodDiscard.addCard(pCard);  
+}
+
+
+void Game::shuffleFlood()
+{
+    floodDeck.printDeck();
+    cout << endl;
+    floodDiscard.printDeck();
+    cout << endl;
+    floodDiscard.shuffle();
+    floodDiscard.printDeck();
+    Card* pCard;
+    int deckSize = floodDiscard.deckSize();
+    for (int i=0; i<deckSize; i++)
+    {
+        pCard = floodDiscard.deal();
+        floodDeck.addCard(pCard);
+    }
+    cout << endl;
+    floodDeck.printDeck();
+    pCard = floodDeck.deal();
+    pCard->printCard();
+}
+
+
+void Game::shuffleTreasure()
+{
+
 }
 

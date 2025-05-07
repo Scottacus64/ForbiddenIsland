@@ -25,6 +25,7 @@ public:
     void addCard(Card* pCard);
     void printTopCard();
     void addCardAt(Card* pCard, int slot);
+    int  deckSize();
 
     Card* getTopDeckCard();
     Card* getDeckCardAt(int slot);
