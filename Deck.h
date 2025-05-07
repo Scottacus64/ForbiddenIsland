@@ -11,8 +11,10 @@ class Deck
 public:
     Deck();
     Deck(int numberOfDecks);
+    Deck(int numberOfCards, bool custom);
     ~Deck();
     void makeDeck();
+    void makeDeck(int numberOfCards);
     void shuffle();
     Card* deal();
     Card* dealCardAt(int position);

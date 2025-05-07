@@ -16,6 +16,12 @@ Deck::Deck(int numberOfDecks)
 }
 
 
+Deck::Deck(int numberOfCards, bool custom)
+{
+    makeDeck(numberOfCards);
+}
+
+
 Deck::~Deck()
 {
 }
@@ -45,6 +51,31 @@ void Deck::makeDeck()
 }
 
 
+void Deck::makeDeck(int numberOfCards)
+{
+    int av = 0;
+    int id = 0;
+    int cv = 0;
+    int fv = 0;
+    int tv;
+    string pv;
+
+    for (int i=0; i<numberOfCards; i++)
+    {
+        id++;
+        if (i < 5){tv = 1;}
+        if (i > 4 and i < 10){tv = 2;}
+        if (i > 9 and i < 15){tv = 3;}
+        if (i > 14 and i < 20){tv = 4;}
+        if (i > 19 and i < 23){tv = 5;}
+        if (i > 22 and i < 25){tv = 6;}
+        if (i > 24 and i < 28){tv = 7;}
+        pv = to_string(tv);
+        m_deck.push_back(new Card(fv, av, id, pv, tv, cv));
+    }
+}
+
+
 void Deck::printDeck() 
 {
     int i = 0;
@@ -56,6 +87,7 @@ void Deck::printDeck()
         
         if (i%12 == 0) {cout << "\n";}
     }
+    cout << endl;
 }
 
 

@@ -21,6 +21,8 @@ private:
     Deck floodDeck;
     Deck floodDiscard;
     Deck floodOut;
+    Deck treasureDeck;
+    Deck treasureDiscard;
     Hand islandHand;
     Hand islandOut;
     static const vector<int> invalidSquares;

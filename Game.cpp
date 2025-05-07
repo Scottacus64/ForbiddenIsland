@@ -15,6 +15,9 @@ Game::Game()
     floodOut = Deck(0);
     islandHand = Hand();
     islandOut = Hand();
+    treasureDeck = Deck(28, true);
+    treasureDeck.shuffle();
+    treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
     for (int i=0; i<24; i++)
     {
@@ -28,6 +31,7 @@ Game::Game()
         flipFlood();
     }
     cout << endl;
+    treasureDeck.printDeck();
     floodDiscard.printDeck();
     cout << endl;
     islandHand.printHand(1);
