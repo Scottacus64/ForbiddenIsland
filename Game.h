@@ -1,3 +1,4 @@
+#ifndef GAME
 #include <string>
 #include <iostream>
 #include "Deck.h"
@@ -28,3 +29,4 @@ private:
     static const vector<int> invalidSquares;
     vector<int> validSquares;
 };
+#endif
