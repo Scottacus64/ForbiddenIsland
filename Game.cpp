@@ -48,6 +48,19 @@ Game::Game()
     islandHand.printHand(1);
     shuffleFlood();
     createPlayers(4);
+    Player playerUp = players[0];
+    playerUp.printPlayer();
+    for (int i=0; i<6; i++)
+    {
+        Card* pDCard;
+        Card* pCard = treasureDeck.deal();
+        pDCard = playerUp.drawCard(pCard);
+        if (pDCard != nullptr)
+        {
+            treasureDiscard.addCard(pDCard);
+        }
+    }
+
 }
 
 
@@ -163,9 +176,7 @@ void Game::createPlayers(int numberOfPlayers)
         int index = dist(rng);
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
-        generatePlayer = Player(classValue);
-        
-        generatePlayer.printPlayer();
+        generatePlayer = Player(classValue); 
         players.push_back(generatePlayer);
     }
     cout << endl;

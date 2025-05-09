@@ -26,13 +26,17 @@ void Player::movePlayer(int direction)
 {
     int offset = directionValue(direction);
     square = square + offset;
+    actions -=1;
 }
 
 
 int Player::shoreUp(int direction)
 {
+    if (direction < 0 || direction > 7)
+        return 100;
     int offset = directionValue(direction);
     int tileToShoreUp = square + offset;
+    actions -=1;
     return tileToShoreUp;
 }
 
@@ -42,6 +46,7 @@ bool Player::getTreasure(int treasure)
     int numberOfCards = playerTreasureHand.countValue(treasure);
     if (numberOfCards > 3)
     {
+        actions -=1;
         return true;
     }
     return false;
@@ -51,6 +56,7 @@ bool Player::getTreasure(int treasure)
 void Player::fly(int destination)
 {
     square = destination;
+    actions -=1;
 }
 
 
@@ -84,8 +90,8 @@ int Player::directionValue(int direction)
         case 5: return 5;
         case 6: return -1;
         case 7: return -7;
-        default: return 0;
     }
+    return 0;
 }
 
 
@@ -96,19 +102,34 @@ int Player::getHandSize()
 }
 
 
-void Player::drawCard(Card* pCard)
+Card* Player::drawCard(Card* pCard)
 {
+    Card* pDCard;
     playerTreasureHand.addCard(pCard);
+    if (playerTreasureHand.getSize() > 5)
+    {
+        pDCard = discardCard();
+        return pDCard;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 
 Card* Player::discardCard()
 {
+    cout << endl;
     playerTreasureHand.printHand(0);
-    cout << "Enter 1-5 to discard a card" << endl;
+    cout << endl;
+    cout << "Enter 0-5 to discard a card" << endl;
     int choice;
     cin >> choice;
     Card* pCard = playerTreasureHand.removeCard(choice);
+    cout << endl;
+    playerTreasureHand.printHand(0);
+    cout << endl;
     return pCard;
 }
 
@@ -126,4 +147,10 @@ Card* Player::discardAllTreasureOfType(int type)
         }
     }
     return nullptr;
+}
+
+
+void Player::nextTurn()
+{
+    actions = 3;
 }

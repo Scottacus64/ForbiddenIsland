@@ -21,9 +21,10 @@ public:
     void  printPlayer();
     int   directionValue(int direction);
     int   getHandSize();
-    void  drawCard(Card* pCard);
+    Card* drawCard(Card* pCard);
     Card* discardCard();
     Card* discardAllTreasureOfType(int type);
+    void  nextTurn();
 
 
 private:
