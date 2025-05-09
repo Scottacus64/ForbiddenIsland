@@ -5,6 +5,9 @@
 using namespace std;
 
 
+Player::Player()
+{}
+
 Player::Player(int pc)
 {
     playerClass = pc;
@@ -20,25 +23,27 @@ Player::~Player()
 
 void Player::movePlayer(int direction)
 {
-
+    int offset = directionValue(direction);
+    square = square + offset;
 }
 
 
-void Player::shoreUp(int direction)
+int Player::shoreUp(int direction)
 {
-
+    int offset = directionValue(direction);
+    int tileToShoreUp = square + offset;
 }
 
 
-void Player::getTreasure()
+bool Player::getTreasure(int treasure)
 {
-
+// need to check the player's hand for 4 of the treaure value and return true or false
 }
 
 
 void Player::fly(int destination)
 {
-
+    square = destination;
 }
 
 
@@ -57,4 +62,20 @@ void Player::giveTreasure(int treasure, int player)
 void Player::printPlayer()
 {
     cout << playerClass << " ";
+}
+
+
+int Player::directionValue(int direction)
+{
+    switch (direction)
+    {
+        case 0: return -6; 
+        case 1: return -5;
+        case 2: return 1;
+        case 3: return 7;
+        case 4: return 6;
+        case 5: return 5;
+        case 6: return -1;
+        case 7: return -7;
+    }
 }

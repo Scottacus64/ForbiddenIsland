@@ -5,7 +5,7 @@ using namespace std;
 const vector <int> Game::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
 
 
-Game::Game() : generatePlayer(0)
+Game::Game()
 {
     cout << "Game class built!" << endl;
     islandDeck = Deck();
