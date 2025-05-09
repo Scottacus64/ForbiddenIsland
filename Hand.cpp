@@ -1,6 +1,7 @@
 #include "Hand.h"
 #include <iostream>
 const vector <int> Hand::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
+using namespace std;
 
 Hand::Hand()
 {
@@ -23,7 +24,7 @@ Card* Hand::removeCard(int position)
 }
 
 
-int Hand::removeCardPointer(Card* pCard)
+void Hand::removeCardPointer(Card* pCard)
 {
     int pos = getCardPosition(pCard);
     m_hand.erase(m_hand.begin() + pos);
@@ -139,7 +140,7 @@ int Hand::getLastCardValue()
 
 Card* Hand::getLastCard()
 {
-    Card* pCard;
+    Card* pCard = nullptr;
     if (m_hand.size() > 0)
     {
         pCard = m_hand[m_hand.size()-1];
@@ -150,7 +151,7 @@ Card* Hand::getLastCard()
 
 Card* Hand::getFirstFlippedUp()
 {
-    Card* pCard;
+    Card* pCard = nullptr;
     if (m_hand.size() > 0)
     {
         for (int i=0; i<m_hand.size(); i++)
@@ -207,7 +208,7 @@ bool Hand::allFaceDown()
 
 Card* Hand::getCardAt(int location)
 {
-    Card* pCard;
+    Card* pCard = nullptr;
     if (location < m_hand.size()){pCard = m_hand[location];}
     return pCard;
 
@@ -228,8 +229,9 @@ Card* Hand::getCardWithId(int id)
             }
         }
     }
-
+    return nullptr;
 }
+
 
 int Hand::getCardPosition(Card* pPosCard)
 {
@@ -245,4 +247,5 @@ int Hand::getCardPosition(Card* pPosCard)
             }
         }
     }
+    return -1;
 }

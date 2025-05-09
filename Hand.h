@@ -11,7 +11,7 @@ public:
     ~Hand();
     void  printHand(int typeOfHand);
     Card* removeCard(int position);
-    int   removeCardPointer(Card* pCard);
+    void  removeCardPointer(Card* pCard);
     void  addCard(Card* pCard);
     void  addCardAt (Card* pCard, int slot);
     void  clearHand();

@@ -15,6 +15,7 @@ add_executable(ForbiddenIsland
     ${CMAKE_SOURCE_DIR}/Deck.cpp
     ${CMAKE_SOURCE_DIR}/Card.cpp
     ${CMAKE_SOURCE_DIR}/Hand.cpp
+    ${CMAKE_SOURCE_DIR}/Player.cpp
 )
 cmake_minimum_required(VERSION 3.5)
 

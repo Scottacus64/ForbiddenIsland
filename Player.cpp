@@ -1,39 +1,60 @@
 #include "Deck.h"
+#include "Player.h"
 #include <iostream>
 
 using namespace std;
 
-void movePlayer(int direction)
+
+Player::Player(int pc)
+{
+    playerClass = pc;
+    actions = 3;
+    square = 0;
+}
+
+
+Player::~Player()
+{}
+
+
+
+void Player::movePlayer(int direction)
 {
 
 }
 
 
-void shoreUp(int direction)
+void Player::shoreUp(int direction)
 {
 
 }
 
 
-void getTreasure()
+void Player::getTreasure()
 {
 
 }
 
 
-void fly(int destination)
+void Player::fly(int destination)
 {
 
 }
 
 
-void moveOtherPlayer(int player, int direection)
+void Player::moveOtherPlayer(int player, int direction)
 {
 
 }
 
 
-void giveTreasure(int treasure, int player)
+void Player::giveTreasure(int treasure, int player)
 {
 
+}
+
+
+void Player::printPlayer()
+{
+    cout << playerClass << " ";
 }

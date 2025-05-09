@@ -111,8 +111,7 @@ void Card::printAV()
 void Card::floodCard()
 {
     state-=1;
-    printCard();
-    cout << " state = " << state << endl;
+    if(state<0){state = 0;}
 }
 
 

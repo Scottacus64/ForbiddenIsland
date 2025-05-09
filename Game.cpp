@@ -1,9 +1,11 @@
 #include "Game.h"
 
+
 using namespace std;
 const vector <int> Game::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
 
-Game::Game()
+
+Game::Game() : generatePlayer(0)
 {
     cout << "Game class built!" << endl;
     islandDeck = Deck();
@@ -45,6 +47,7 @@ Game::Game()
     cout << endl;
     islandHand.printHand(1);
     shuffleFlood();
+    createPlayers(4);
 }
 
 
@@ -112,11 +115,10 @@ bool Game::checkValidMove(int square, int direction)
 }
 
 
-Card* Game::flipFlood()
+void Game::flipFlood()
 {
     Card* pCard;
     Card* pIsleCard;
-    Card* removeCard;
     pCard = floodDeck.deal();
     int id = pCard->getID();
     pIsleCard = islandHand.getCardWithId(id);
@@ -127,12 +129,7 @@ Card* Game::flipFlood()
 
 void Game::shuffleFlood()
 {
-    floodDeck.printDeck();
-    cout << endl;
-    floodDiscard.printDeck();
-    cout << endl;
     floodDiscard.shuffle();
-    floodDiscard.printDeck();
     Card* pCard;
     int deckSize = floodDiscard.deckSize();
     for (int i=0; i<deckSize; i++)
@@ -140,15 +137,42 @@ void Game::shuffleFlood()
         pCard = floodDiscard.deal();
         floodDeck.addCard(pCard);
     }
-    cout << endl;
-    floodDeck.printDeck();
-    pCard = floodDeck.deal();
-    pCard->printCard();
 }
 
 
 void Game::shuffleTreasure()
 {
-
+    Card* pCard;
+    treasureDiscard.shuffle();
+    for(int i=0; i<28; i++)
+    {
+        pCard = treasureDiscard.deal();
+        treasureDeck.addCard(pCard);
+    }
 }
 
+
+void Game::createPlayers(int numberOfPlayers)
+{
+    playerClasses = {1,2,3,4,5,6};
+    int classValue;
+    for (int i = 0; i < numberOfPlayers && !playerClasses.empty(); i++) 
+    {    
+        static std::mt19937 rng(static_cast<unsigned>(time(nullptr)));
+        std::uniform_int_distribution<int> dist(0, playerClasses.size() - 1);
+        int index = dist(rng);
+        classValue = playerClasses[index];
+        playerClasses.erase(playerClasses.begin() + index);
+        generatePlayer = Player(classValue);
+        
+        generatePlayer.printPlayer();
+        players.push_back(generatePlayer);
+    }
+    cout << endl;
+    Player* pPlayer;
+    for (Player p : players)
+    {
+        p.printPlayer();
+    }
+    cout << endl;
+}

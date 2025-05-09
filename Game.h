@@ -1,9 +1,11 @@
 #ifndef GAME
 #include <string>
 #include <iostream>
+#include <random> 
+#include <ctime>
 #include "Deck.h"
 #include "Hand.h"
-
+#include "Player.h"
 
 using std::string;
 
@@ -15,9 +17,10 @@ public:
     void removeValidSquare(int square);
     void printValidSquares();
     bool checkValidMove(int square, int direction);
-    Card* flipFlood();
+    void flipFlood();
     void shuffleFlood();
     void shuffleTreasure();
+    void createPlayers (int numberOfPlayers);
 
 private:
     Deck islandDeck;
@@ -28,7 +31,10 @@ private:
     Deck treasureDiscard;
     Hand islandHand;
     Hand islandOut;
+    Player generatePlayer;
+    vector<Player> players;
     static const vector<int> invalidSquares;
+    vector<int> playerClasses;
     vector<int> validSquares;
 };
 #endif
