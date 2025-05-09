@@ -21,6 +21,10 @@ public:
     void shuffleFlood();
     void shuffleTreasure();
     void createPlayers (int numberOfPlayers);
+    void playerDrawCards(Player* player);
+    void playerDiscardCards(Player* player);
+    void getTreasure(Player* pPlayer, int treasure);
+
 
 
 private:

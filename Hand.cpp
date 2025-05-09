@@ -18,9 +18,19 @@ Card* Hand::removeCard(int position)
     //std::cout << "** H remove card, pos = " << position << "\n";
     Card* pCard = m_hand[position];
     m_hand.erase(m_hand.begin() + position);
-    int size = m_hand.size();
+    //int size = m_hand.size();
     //std::cout <<"Hand size is: " << size << "\n";
     return pCard;
+}
+
+
+void Hand::removeCard(Card* pCard)
+{
+    auto it = find(m_hand.begin(), m_hand.end(), pCard);
+    if (it != m_hand.end())
+    {
+        m_hand.erase(it);
+    }
 }
 
 

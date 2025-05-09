@@ -12,6 +12,7 @@ public:
     void  printHand(int typeOfHand);
     Card* removeCard(int position);
     Card* removeValue(int value);
+    void  removeCard(Card* pCard);
     void  removeCardPointer(Card* pCard);
     void  addCard(Card* pCard);
     void  addCardAt (Card* pCard, int slot);

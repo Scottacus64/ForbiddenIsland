@@ -176,3 +176,46 @@ void Game::createPlayers(int numberOfPlayers)
     }
     cout << endl;
 }
+
+
+void Game::playerDrawCards(Player* pPlayer)
+{
+    Card* pCard;
+    int handSize = pPlayer->getHandSize();
+    if (handSize < 5)
+    {
+        Card* pCard = treasureDeck.deal();
+        pPlayer->drawCard(pCard);
+    }
+    else
+    {
+        cout << "You have five cards, choose one to play or discard" << endl;
+        pCard = pPlayer->discardCard();
+        treasureDiscard.addCard(pCard);
+    }
+}
+
+
+void Game::playerDiscardCards(Player* player)
+{
+
+}
+
+
+void Game::getTreasure(Player* pPlayer, int treasure)
+{
+    Card* pCard;
+    bool canGet = pPlayer->getTreasure(treasure);
+    if (canGet == false)
+    {
+        cout << "You don't have four of those treasure cards" << endl;
+    }
+    else
+    {
+        for (int i=0; i<pPlayer->getHandSize(); i++)
+        {
+            pCard = pPlayer->discardAllTreasureOfType(treasure);
+            treasureDiscard.addCard(pCard);
+        }
+    }
+}

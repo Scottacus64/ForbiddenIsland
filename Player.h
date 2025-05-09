@@ -12,20 +12,25 @@ public:
     Player();
     Player(int playerClass);
     ~Player();
-    void movePlayer(int direction);
-    int shoreUp(int direction);
-    bool getTreasure(int treasure);
-    void fly(int destination);
-    void moveOtherPlayer(int player, int direection);
-    void giveTreasure(int treasure, int player);
-    void printPlayer();
-    int  directionValue(int direction);
+    void  movePlayer(int direction);
+    int   shoreUp(int direction);
+    bool  getTreasure(int treasure);
+    void  fly(int destination);
+    void  moveOtherPlayer(int player, int direection);
+    void  giveTreasure(int treasure, int player);
+    void  printPlayer();
+    int   directionValue(int direction);
+    int   getHandSize();
+    void  drawCard(Card* pCard);
+    Card* discardCard();
+    Card* discardAllTreasureOfType(int type);
+
 
 private:
-    int actions = 3;
-    int playerClass;
-    int square;
-    Hand playerTreasure;
+    int  actions = 3;
+    int  playerClass;
+    int  square;
+    Hand playerTreasureHand;
 };
 
 #endif 
