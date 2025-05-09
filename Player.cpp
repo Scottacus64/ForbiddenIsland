@@ -13,10 +13,11 @@ Player::Player(int pc)
     playerClass = pc;
     actions = 3;
     square = 0;
+    playerTreasure = Hand();
 }
 
 
-Player::~Player()
+Player::~Player()   
 {}
 
 
@@ -37,7 +38,13 @@ int Player::shoreUp(int direction)
 
 bool Player::getTreasure(int treasure)
 {
-// need to check the player's hand for 4 of the treaure value and return true or false
+// if true then need game to get player to discard these cards
+    int numberOfCards = playerTreasure.countValue(treasure);
+    if (numberOfCards > 3)
+    {
+        return true;
+    }
+    return false;
 }
 
 

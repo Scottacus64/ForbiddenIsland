@@ -24,6 +24,22 @@ Card* Hand::removeCard(int position)
 }
 
 
+Card* Hand::removeValue(int value)
+{
+    Card* pCard;
+    for (int i=0; i<m_hand.size(); i++)
+    {
+        pCard = m_hand[i];
+        int treasureValue = pCard->getTreasureValue();
+        if (treasureValue == value)
+        {
+            m_hand.erase(m_hand.begin() + i);
+            return pCard;
+        }
+    }
+}
+
+
 void Hand::removeCardPointer(Card* pCard)
 {
     int pos = getCardPosition(pCard);
@@ -248,4 +264,19 @@ int Hand::getCardPosition(Card* pPosCard)
         }
     }
     return -1;
+}
+
+
+int Hand::countValue(int value)
+{
+    int numberOfCards;
+    for (int i=0; i<m_hand.size(); i++)
+    {
+        int treasureValue = m_hand[i]->getTreasureValue();
+        if (treasureValue == value)
+        {
+            numberOfCards++;
+        }
+    }
+    return numberOfCards;
 }

@@ -26,6 +26,7 @@ public:
     void floodCard();
     void shoreUpCard();
     int  getState();
+    int  getTreasureValue();
 
 private:
     int actualValue;

@@ -11,6 +11,7 @@ public:
     ~Hand();
     void  printHand(int typeOfHand);
     Card* removeCard(int position);
+    Card* removeValue(int value);
     void  removeCardPointer(Card* pCard);
     void  addCard(Card* pCard);
     void  addCardAt (Card* pCard, int slot);
@@ -27,6 +28,7 @@ public:
     int   getLastCardValue();
     int   getCardPosition(Card* pPosCard);
     Card* getCardAt(int location);
+    int   countValue(int value);
 
     void sortHandValue();
     void sortActualValue();

@@ -120,3 +120,9 @@ void Card::shoreUpCard()
     state+=1;
 }
 
+
+int Card::getTreasureValue()
+{
+    return treasureValue;
+}
+
