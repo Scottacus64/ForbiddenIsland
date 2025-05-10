@@ -48,19 +48,11 @@ Game::Game()
     islandHand.printHand(1);
     shuffleFlood();
     createPlayers(4);
-    Player playerUp = players[0];
-    playerUp.printPlayer();
     for (int i=0; i<6; i++)
     {
-        Card* pDCard;
-        Card* pCard = treasureDeck.deal();
-        pDCard = playerUp.drawCard(pCard);
-        if (pDCard != nullptr)
-        {
-            treasureDiscard.addCard(pDCard);
-        }
+        drawCards(0);
     }
-
+    
 }
 
 
@@ -189,44 +181,33 @@ void Game::createPlayers(int numberOfPlayers)
 }
 
 
-void Game::playerDrawCards(Player* pPlayer)
+void Game::getTreasure(Player player, int treasure)
 {
     Card* pCard;
-    int handSize = pPlayer->getHandSize();
-    if (handSize < 5)
-    {
-        Card* pCard = treasureDeck.deal();
-        pPlayer->drawCard(pCard);
-    }
-    else
-    {
-        cout << "You have five cards, choose one to play or discard" << endl;
-        pCard = pPlayer->discardCard();
-        treasureDiscard.addCard(pCard);
-    }
-}
-
-
-void Game::playerDiscardCards(Player* player)
-{
-
-}
-
-
-void Game::getTreasure(Player* pPlayer, int treasure)
-{
-    Card* pCard;
-    bool canGet = pPlayer->getTreasure(treasure);
+    bool canGet = player.getTreasure(treasure);
     if (canGet == false)
     {
         cout << "You don't have four of those treasure cards" << endl;
     }
     else
     {
-        for (int i=0; i<pPlayer->getHandSize(); i++)
+        for (int i=0; i<player.getHandSize(); i++)
         {
-            pCard = pPlayer->discardAllTreasureOfType(treasure);
+            pCard = player.discardAllTreasureOfType(treasure);
             treasureDiscard.addCard(pCard);
         }
+    }
+}
+
+
+void Game::drawCards(int playerSlot)
+{
+    Player& playerUp = players[playerSlot];
+    Card* pDCard;
+    Card* pCard = treasureDeck.deal();
+    pDCard = playerUp.drawCard(pCard);
+    if (pDCard != nullptr)
+    {
+        treasureDiscard.addCard(pDCard);
     }
 }

@@ -106,6 +106,7 @@ Card* Player::drawCard(Card* pCard)
 {
     Card* pDCard;
     playerTreasureHand.addCard(pCard);
+    cout << playerTreasureHand.getSize();
     if (playerTreasureHand.getSize() > 5)
     {
         pDCard = discardCard();
@@ -153,4 +154,10 @@ Card* Player::discardAllTreasureOfType(int type)
 void Player::nextTurn()
 {
     actions = 3;
+}
+
+
+void Player::printHand()
+{
+    playerTreasureHand.printHand(0);
 }

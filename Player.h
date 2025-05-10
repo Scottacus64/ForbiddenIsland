@@ -25,6 +25,7 @@ public:
     Card* discardCard();
     Card* discardAllTreasureOfType(int type);
     void  nextTurn();
+    void printHand();
 
 
 private:

@@ -21,11 +21,9 @@ public:
     void shuffleFlood();
     void shuffleTreasure();
     void createPlayers (int numberOfPlayers);
-    void playerDrawCards(Player* player);
-    void playerDiscardCards(Player* player);
-    void getTreasure(Player* pPlayer, int treasure);
-
-
+    void getTreasure(Player player, int treasure);
+    void drawCards(int playerSlot);
+    vector<Player> players;
 
 private:
     Deck islandDeck;
@@ -37,7 +35,7 @@ private:
     Hand islandHand;
     Hand islandOut;
     Player generatePlayer;
-    vector<Player> players;
+    
     static const vector<int> invalidSquares;
     vector<int> playerClasses;
     vector<int> validSquares;
