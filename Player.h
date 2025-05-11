@@ -10,14 +10,15 @@ class Player
 {
 public:
     Player();
-    Player(int playerClass);
+    Player(int playerClass, int slot);
     ~Player();
     void  movePlayer(int direction);
     int   shoreUp(int direction);
     bool  getTreasure(int treasure);
     void  fly(int destination);
     void  moveOtherPlayer(int player, int direection);
-    void  giveTreasure(int treasure, int player);
+    Card* giveTreasure(int treasureSlot);
+    void  takeTreasure(Card* pCard);
     void  printPlayer();
     int   directionValue(int direction);
     int   getHandSize();
@@ -25,13 +26,14 @@ public:
     Card* discardCard();
     Card* discardAllTreasureOfType(int type);
     void  nextTurn();
-    void printHand();
+    void  printHand();
 
 
 private:
     int  actions = 3;
     int  playerClass;
     int  square;
+    int  playerSlot;
     Hand playerTreasureHand;
 };
 

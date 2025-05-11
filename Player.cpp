@@ -8,8 +8,9 @@ using namespace std;
 Player::Player()
 {}
 
-Player::Player(int pc)
+Player::Player(int pc, int slot)
 {
+    playerSlot = slot;
     playerClass = pc;
     actions = 3;
     square = 0;
@@ -66,15 +67,17 @@ void Player::moveOtherPlayer(int player, int direction)
 }
 
 
-void Player::giveTreasure(int treasure, int player)
+Card* Player::giveTreasure(int treasureSlot)
 {
-
+    Card* pCard = playerTreasureHand.getCard(treasureSlot);
+    playerTreasureHand.removeCard(pCard);
+    return pCard;
 }
 
 
 void Player::printPlayer()
 {
-    cout << playerClass << " ";
+    cout << playerSlot << " " << playerClass << " ";
 }
 
 
@@ -159,5 +162,13 @@ void Player::nextTurn()
 
 void Player::printHand()
 {
+    cout << "hand = ";
     playerTreasureHand.printHand(0);
+    cout << endl;
+}
+
+
+void Player::takeTreasure(Card* pCard)
+{
+    playerTreasureHand.addCard(pCard);
 }

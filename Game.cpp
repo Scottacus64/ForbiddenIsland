@@ -48,11 +48,15 @@ Game::Game()
     islandHand.printHand(1);
     shuffleFlood();
     createPlayers(4);
-    for (int i=0; i<6; i++)
+    for (int i=0; i<7; i++)
     {
-        drawCards(0);
+        drawTreasureCards(0);
     }
-    
+    Player& givePlayer = *players[0];
+    Player& takePlayer = *players[1];
+    transferTreasure(givePlayer, takePlayer, 0);
+    players[0]->printHand();
+    players[1]->printHand();
 }
 
 
@@ -168,14 +172,17 @@ void Game::createPlayers(int numberOfPlayers)
         int index = dist(rng);
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
-        generatePlayer = Player(classValue); 
-        players.push_back(generatePlayer);
+        int slot = i+1;
+        players.push_back(make_shared<Player>(classValue, slot));
+        //generatePlayer = Player(classValue, slot); 
+        //players.push_back(make_shared<Player>(generatePlayer));
+        //players.push_back(generatePlayer);
     }
     cout << endl;
-    Player* pPlayer;
-    for (Player p : players)
+    Player pPlayer;
+    for (shared_ptr<Player>& p : players)
     {
-        p.printPlayer();
+        p->printPlayer();
     }
     cout << endl;
 }
@@ -200,14 +207,30 @@ void Game::getTreasure(Player player, int treasure)
 }
 
 
-void Game::drawCards(int playerSlot)
+void Game::drawTreasureCards(int playerSlot)
 {
-    Player& playerUp = players[playerSlot];
+    Player& playerUp = *players[playerSlot];
     Card* pDCard;
     Card* pCard = treasureDeck.deal();
-    pDCard = playerUp.drawCard(pCard);
-    if (pDCard != nullptr)
+    if(pCard->getTreasureValue() == 7)
     {
-        treasureDiscard.addCard(pDCard);
+        cout << "got a water rise card" << endl;
+        shuffleFlood();                     //shuffle the flood discard deck and put it on top of the flood deck
+        treasureDiscard.addCard(pCard);     //discard the water rise card
     }
+    else
+    {
+        pDCard = playerUp.drawCard(pCard);
+        if (pDCard != nullptr)
+        {
+            treasureDiscard.addCard(pDCard);
+        }
+    }
+}
+
+
+void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot)
+{
+    Card* pCard = givePlayer.giveTreasure(cardSlot);
+    takePlayer.takeTreasure(pCard);
 }
