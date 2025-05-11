@@ -61,7 +61,12 @@ Game::Game()
 
 
 Game::~Game()
-{}
+{
+    for (Player* p : players) {
+        delete p;
+    }
+    players.clear();
+}
 
 
 void Game::removeValidSquare(int square)
@@ -173,10 +178,9 @@ void Game::createPlayers(int numberOfPlayers)
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
         int slot = i+1; 
-        //players.push_back(make_shared<Player>(classValue, slot));
         players.push_back(new Player(classValue, slot));
     }
-    cout << endl;
+    cout << "players (slot/class): ";
     Player* pPlayer;
     for (Player* p : players)
     {

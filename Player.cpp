@@ -77,7 +77,7 @@ Card* Player::giveTreasure(int treasureSlot)
 
 void Player::printPlayer()
 {
-    cout << playerSlot << " " << playerClass << " ";
+    cout << playerSlot << ":" << playerClass << " ";
 }
 
 
