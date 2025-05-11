@@ -37,7 +37,7 @@ void Deck::makeDeck()
 
     for (int fv=0; fv<24; fv++)
     {
-        id++;
+        id = fv;
         pv = Card::pvList[fv];
         av = fv;
         if (fv < 6){cv = fv+1;}
@@ -47,6 +47,7 @@ void Deck::makeDeck()
         if (fv > 12 and fv < 14){tv = 4;}
 
         m_deck.push_back(new Card(fv, av, id, pv, tv, cv));
+        cv = 0;
     }
 }
 

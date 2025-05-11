@@ -17,16 +17,28 @@ Game::Game()
     floodOut = Deck(0);
     islandHand = Hand();
     islandOut = Hand();
-    treasureDeck = Deck(28, true);
+    treasureDeck = Deck(28, false);
     treasureDeck.shuffle();
     treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
-    for (int i=0; i<24; i++)
+    for (int i=0; i<36; i++)
     {
-        Card* pCard;
-        pCard = islandDeck.deal();
-        islandHand.addCard(pCard);
+    if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
+        {
+            Card* pCard;
+            pCard = islandDeck.deal();
+            islandHand.addCard(pCard);
+            islandCardPositions.push_back({pCard->getID(), i});
+            cout << pCard->getID() << ":" << i << endl;
+        }
+        else
+        {
+            islandCardPositions.push_back({100,i});
+            cout << "100" << ":" << i << endl;
+        }
+        
     }
+    
     islandHand.printHand(1);
     for (int i=0; i<6; i++)
     {
@@ -61,6 +73,14 @@ Game::Game()
     //players[1]->printHand();
     players[0].printHand();
     players[1].printHand();
+    for (int i=0; i<4; i++)
+    {
+        Player& spotPlayer = players[i];
+        int location = placePlayers(spotPlayer);
+        cout << "player at: " << validSquares[location] << endl;
+    }
+    // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
+    // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
 
 
@@ -244,4 +264,18 @@ void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot
 {
     Card* pCard = givePlayer.giveTreasure(cardSlot);
     takePlayer.takeTreasure(pCard);
+}
+
+
+int Game::placePlayers(Player& player)
+{
+    for (int i=0; i<islandHand.getSize(); i++)
+    {
+        Card* pCard = islandHand.getCard(i);
+        if (player.getPlayerClass() == pCard->getCharacterValue())
+        {
+            cout << player.getPlayerClass() << " : " << pCard->getCharacterValue() << " : " << i << endl;
+            return i;
+        }
+    }
 }

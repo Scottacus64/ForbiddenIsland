@@ -172,3 +172,9 @@ void Player::takeTreasure(Card* pCard)
 {
     playerTreasureHand.addCard(pCard);
 }
+
+
+int Player::getPlayerClass()
+{
+    return playerClass;
+}

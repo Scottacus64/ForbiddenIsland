@@ -24,8 +24,9 @@ public:
     void getTreasure(Player player, int treasure);
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
+    int  placePlayers(Player& player);
     //vector <Player*> players;
-    vector <Player> players;
+
 
 private:
     Deck islandDeck;
@@ -37,9 +38,10 @@ private:
     Hand islandHand;
     Hand islandOut;
     Player generatePlayer;
-
+    vector <Player> players;
     static const vector<int> invalidSquares;
     vector<int> playerClasses;
     vector<int> validSquares;
+    vector<pair<int, int>> islandCardPositions;
 };
 #endif

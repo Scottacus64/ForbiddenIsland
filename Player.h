@@ -27,6 +27,7 @@ public:
     Card* discardAllTreasureOfType(int type);
     void  nextTurn();
     void  printHand();
+    int   getPlayerClass();
 
 
 private:

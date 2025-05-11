@@ -126,3 +126,10 @@ int Card::getTreasureValue()
     return treasureValue;
 }
 
+
+int Card::getCharacterValue()
+{
+    return characterValue;
+}
+
+

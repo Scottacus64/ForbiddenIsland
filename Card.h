@@ -27,6 +27,7 @@ public:
     void shoreUpCard();
     int  getState();
     int  getTreasureValue();
+    int  getCharacterValue();
 
 private:
     int actualValue;
