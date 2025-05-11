@@ -52,20 +52,24 @@ Game::Game()
     {
         drawTreasureCards(0);
     }
-    Player& givePlayer = *players[0];
-    Player& takePlayer = *players[1];
+    //Player& givePlayer = *players[0];
+    Player& givePlayer = players[0];
+    Player& takePlayer = players[1];
+    //Player& takePlayer = *players[1];
     transferTreasure(givePlayer, takePlayer, 0);
-    players[0]->printHand();
-    players[1]->printHand();
+    //players[0]->printHand();
+    //players[1]->printHand();
+    players[0].printHand();
+    players[1].printHand();
 }
 
 
 Game::~Game()
 {
-    for (Player* p : players) {
+    /*for (Player* p : players) {
         delete p;
     }
-    players.clear();
+    players.clear();*/
 }
 
 
@@ -178,13 +182,16 @@ void Game::createPlayers(int numberOfPlayers)
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
         int slot = i+1; 
-        players.push_back(new Player(classValue, slot));
+        //players.push_back(new Player(classValue, slot));
+        players.emplace_back(classValue, slot);
     }
     cout << "players (slot/class): ";
     Player* pPlayer;
-    for (Player* p : players)
+    for (Player p : players)
+    //for (Player* p : players)
     {
-        p->printPlayer();
+        //p->printPlayer();
+        p.printPlayer();
     }
     cout << endl;
 }
@@ -211,7 +218,8 @@ void Game::getTreasure(Player player, int treasure)
 
 void Game::drawTreasureCards(int playerSlot)
 {
-    Player* playerUp = players[playerSlot];
+    //Player* playerUp = players[playerSlot];
+    Player& playerUp = players[playerSlot];
     Card* pDCard;
     Card* pCard = treasureDeck.deal();
     if(pCard->getTreasureValue() == 7)
@@ -222,7 +230,8 @@ void Game::drawTreasureCards(int playerSlot)
     }
     else
     {
-        pDCard = playerUp->drawCard(pCard);
+        //pDCard = playerUp->drawCard(pCard);
+        pDCard = playerUp.drawCard(pCard);
         if (pDCard != nullptr)
         {
             treasureDiscard.addCard(pDCard);

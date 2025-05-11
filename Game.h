@@ -24,7 +24,8 @@ public:
     void getTreasure(Player player, int treasure);
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
-    vector <Player*> players;
+    //vector <Player*> players;
+    vector <Player> players;
 
 private:
     Deck islandDeck;
