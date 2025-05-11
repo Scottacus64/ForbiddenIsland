@@ -172,16 +172,13 @@ void Game::createPlayers(int numberOfPlayers)
         int index = dist(rng);
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
-        int slot = i+1;
+        int slot = i+1; 
         //players.push_back(make_shared<Player>(classValue, slot));
-        //generatePlayer = Player(classValue, slot); 
-        players.push_back(make_shared<Player>(classValue, slot));
-        //players.push_back(make_shared<Player>(generatePlayer));
-        //players.push_back(generatePlayer);
+        players.push_back(new Player(classValue, slot));
     }
     cout << endl;
     Player* pPlayer;
-    for (shared_ptr<Player>& p : players)
+    for (Player* p : players)
     {
         p->printPlayer();
     }
@@ -210,7 +207,7 @@ void Game::getTreasure(Player player, int treasure)
 
 void Game::drawTreasureCards(int playerSlot)
 {
-    Player* playerUp = players[playerSlot].get();
+    Player* playerUp = players[playerSlot];
     Card* pDCard;
     Card* pCard = treasureDeck.deal();
     if(pCard->getTreasureValue() == 7)
