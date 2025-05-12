@@ -25,6 +25,7 @@ public:
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
     int  placePlayers(Player& player);
+    void gameMovePlayer(Player& player, int direction);
     //vector <Player*> players;
 
 

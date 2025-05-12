@@ -16,7 +16,7 @@ public:
     int   shoreUp(int direction);
     bool  getTreasure(int treasure);
     void  fly(int destination);
-    void  moveOtherPlayer(int player, int direection);
+    void  moveOtherPlayer(Player player, int direection);
     Card* giveTreasure(int treasureSlot);
     void  takeTreasure(Card* pCard);
     void  printPlayer();
@@ -27,7 +27,10 @@ public:
     Card* discardAllTreasureOfType(int type);
     void  nextTurn();
     void  printHand();
+    void  placePlayer(int location);
     int   getPlayerClass();
+    int   getLocation();
+    int   getActions();
 
 
 private:

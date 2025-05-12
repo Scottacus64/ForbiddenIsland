@@ -61,7 +61,7 @@ void Player::fly(int destination)
 }
 
 
-void Player::moveOtherPlayer(int player, int direction)
+void Player::moveOtherPlayer(Player player, int direction)
 {
 
 }
@@ -177,4 +177,22 @@ void Player::takeTreasure(Card* pCard)
 int Player::getPlayerClass()
 {
     return playerClass;
+}
+
+
+void Player::placePlayer(int location)
+{
+    square = location;
+}
+
+
+int Player::getLocation()
+{
+    return square;
+}
+
+
+int Player::getActions()
+{
+    return actions;
 }

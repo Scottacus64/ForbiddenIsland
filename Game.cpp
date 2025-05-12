@@ -21,6 +21,7 @@ Game::Game()
     treasureDeck.shuffle();
     treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
+    // create the island
     for (int i=0; i<36; i++)
     {
     if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
@@ -29,26 +30,23 @@ Game::Game()
             pCard = islandDeck.deal();
             islandHand.addCard(pCard);
             islandCardPositions.push_back({pCard->getID(), i});
-            cout << pCard->getID() << ":" << i << endl;
         }
         else
         {
             islandCardPositions.push_back({100,i});
-            cout << "100" << ":" << i << endl;
         }
         
     }
     
     islandHand.printHand(1);
+    // sink six island cards by one degree
     for (int i=0; i<6; i++)
     {
         flipFlood();
     }
-    cout << endl;
-    treasureDeck.printDeck();
-    floodDiscard.printDeck();
-    cout << endl;
+    // print the island with sunked cards
     islandHand.printHand(1);
+    // shuffle the flood discard pile, place on top of the draw pile and draw one card to remove an island card
     Card* pCard;
     Card* pIsleCard;
     pCard = floodDiscard.deal();
@@ -58,39 +56,68 @@ Game::Game()
     pIsleCard->floodCard();
     cout << endl;
     islandHand.printHand(1);
-    shuffleFlood();
+    // create four players
     createPlayers(4);
+    // draw six treasure cards and limit hand to five cards
     for (int i=0; i<7; i++)
     {
         drawTreasureCards(0);
     }
-    //Player& givePlayer = *players[0];
+    // show that treasure cards can be passed to another player
     Player& givePlayer = players[0];
     Player& takePlayer = players[1];
-    //Player& takePlayer = *players[1];
     transferTreasure(givePlayer, takePlayer, 0);
-    //players[0]->printHand();
-    //players[1]->printHand();
     players[0].printHand();
     players[1].printHand();
+    // this places the four players on the board
     for (int i=0; i<4; i++)
     {
         Player& spotPlayer = players[i];
         int location = placePlayers(spotPlayer);
-        cout << "player at: " << validSquares[location] << endl;
+        spotPlayer.placePlayer(validSquares[location]);
+        cout << "player at: " << spotPlayer.getLocation() << endl;
     }
+    // move a player in various directions and show that actions decreases with each valid move
+    Player& movePlayer = players[0];
+    for (int i=0; i<5; i++)
+    {
+        cout << endl;
+        cout << "player's location is: " << movePlayer.getLocation() << " ";
+        cout << "enter a direction to move: ";
+        int direction;
+        cin >> direction;
+        cout << endl;
+        gameMovePlayer(movePlayer, direction);
+    }
+    // fly a player to another square
+    int destination;
+    cout << "fly to location: ";
+    cin >> destination;
+    bool validDestination = find(validSquares.begin(), validSquares.end(), destination) != validSquares.end();
+    if (destination != movePlayer.getLocation() && validDestination == true)
+    {
+        movePlayer.fly(destination);
+    }
+    cout << "player's new location is: " << movePlayer.getLocation() << endl;
+    // move another player
+    int playerToMove;
+    cout << "enter a player to move (0-3)";
+    cin >> playerToMove;
+    Player& otherPlayer = players[playerToMove];
+    cout << " player located at "  << otherPlayer.getLocation() << " enter a direction to move: ";
+    int direction;
+    cin >> direction;
+    gameMovePlayer(otherPlayer, direction);
+    cout << endl;
+    cout << "player's new location is: " << otherPlayer.getLocation() << endl;
+
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
 
 
 Game::~Game()
-{
-    /*for (Player* p : players) {
-        delete p;
-    }
-    players.clear();*/
-}
+{}
 
 
 void Game::removeValidSquare(int square)
@@ -142,13 +169,11 @@ bool Game::checkValidMove(int square, int direction)
         default:
             return false;
     }
-    cout << testSquare << endl;
     if (testSquare < 0 or testSquare > 33) {return false;}
     if (find(validSquares.begin(), validSquares.end(), testSquare) == validSquares.end())
     {
         return false;
     }
-    cout << testSquare << endl;
     return true;   
 }
 
@@ -202,15 +227,12 @@ void Game::createPlayers(int numberOfPlayers)
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
         int slot = i+1; 
-        //players.push_back(new Player(classValue, slot));
         players.emplace_back(classValue, slot);
     }
     cout << "players (slot/class): ";
     Player* pPlayer;
     for (Player p : players)
-    //for (Player* p : players)
     {
-        //p->printPlayer();
         p.printPlayer();
     }
     cout << endl;
@@ -238,7 +260,6 @@ void Game::getTreasure(Player player, int treasure)
 
 void Game::drawTreasureCards(int playerSlot)
 {
-    //Player* playerUp = players[playerSlot];
     Player& playerUp = players[playerSlot];
     Card* pDCard;
     Card* pCard = treasureDeck.deal();
@@ -250,7 +271,6 @@ void Game::drawTreasureCards(int playerSlot)
     }
     else
     {
-        //pDCard = playerUp->drawCard(pCard);
         pDCard = playerUp.drawCard(pCard);
         if (pDCard != nullptr)
         {
@@ -278,4 +298,15 @@ int Game::placePlayers(Player& player)
             return i;
         }
     }
+}
+
+
+void Game::gameMovePlayer(Player& player, int  direction)
+{
+    bool result = checkValidMove(player.getLocation(), direction);
+    if (result == true)
+    {
+        player.movePlayer(direction);
+    }
+    cout <<  "players actions = " << player.getActions() << endl;
 }
