@@ -12,31 +12,30 @@ public:
     Player();
     Player(int playerClass, int slot);
     ~Player();
-    void  movePlayer(int direction);
+    void  setLocation(int direction);
     int   shoreUp(int direction);
     bool  getTreasure(int treasure);
     void  fly(int destination);
-    void  moveOtherPlayer(Player player, int direection);
-    Card* giveTreasure(int treasureSlot);
-    void  takeTreasure(Card* pCard);
+    Card* giveTreasureCard(int treasureSlot);
+    void  getTreasureCard(Card* pCard);
     void  printPlayer();
-    int   directionValue(int direction);
+    void  printHand();
     int   getHandSize();
     Card* drawCard(Card* pCard);
     Card* discardCard();
     Card* discardAllTreasureOfType(int type);
-    void  nextTurn();
-    void  printHand();
+    void  resetActions();
     void  placePlayer(int location);
     int   getPlayerClass();
     int   getLocation();
     int   getActions();
+    int   directionValue(int direction);
 
 
 private:
     int  actions = 3;
     int  playerClass;
-    int  square;
+    int  location;
     int  playerSlot;
     Hand playerTreasureHand;
 };

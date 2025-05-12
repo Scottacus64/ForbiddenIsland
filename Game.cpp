@@ -58,6 +58,7 @@ Game::Game()
     islandHand.printHand(1);
     // create four players
     createPlayers(4);
+    updatePlayerLocations();
     // draw six treasure cards and limit hand to five cards
     for (int i=0; i<7; i++)
     {
@@ -75,30 +76,30 @@ Game::Game()
         Player& spotPlayer = players[i];
         int location = placePlayers(spotPlayer);
         spotPlayer.placePlayer(validSquares[location]);
-        cout << "player at: " << spotPlayer.getLocation() << endl;
     }
+    updatePlayerLocations();
     // move a player in various directions and show that actions decreases with each valid move
-    Player& movePlayer = players[0];
+    Player& movingPlayer = players[0];
     for (int i=0; i<5; i++)
     {
         cout << endl;
-        cout << "player's location is: " << movePlayer.getLocation() << " ";
+        cout << "player's location is: " << movingPlayer.getLocation() << " ";
         cout << "enter a direction to move: ";
         int direction;
         cin >> direction;
         cout << endl;
-        gameMovePlayer(movePlayer, direction);
+        movePlayer(movingPlayer, direction);
     }
     // fly a player to another square
     int destination;
     cout << "fly to location: ";
     cin >> destination;
     bool validDestination = find(validSquares.begin(), validSquares.end(), destination) != validSquares.end();
-    if (destination != movePlayer.getLocation() && validDestination == true)
+    if (destination != movingPlayer.getLocation() && validDestination == true)
     {
-        movePlayer.fly(destination);
+        movingPlayer.fly(destination);
     }
-    cout << "player's new location is: " << movePlayer.getLocation() << endl;
+    cout << "player's new location is: " << movingPlayer.getLocation() << endl;
     // move another player
     int playerToMove;
     cout << "enter a player to move (0-3)";
@@ -107,9 +108,13 @@ Game::Game()
     cout << " player located at "  << otherPlayer.getLocation() << " enter a direction to move: ";
     int direction;
     cin >> direction;
-    gameMovePlayer(otherPlayer, direction);
+    movePlayer(otherPlayer, direction);
     cout << endl;
     cout << "player's new location is: " << otherPlayer.getLocation() << endl;
+    cout << "enter a location to helo from: ";
+    int startLocation;
+    cin >> startLocation;
+    heloPlayers(startLocation, players);
 
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
@@ -282,8 +287,8 @@ void Game::drawTreasureCards(int playerSlot)
 
 void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot)
 {
-    Card* pCard = givePlayer.giveTreasure(cardSlot);
-    takePlayer.takeTreasure(pCard);
+    Card* pCard = givePlayer.giveTreasureCard(cardSlot);
+    takePlayer.getTreasureCard(pCard);
 }
 
 
@@ -298,15 +303,80 @@ int Game::placePlayers(Player& player)
             return i;
         }
     }
+    return -1;
 }
 
 
-void Game::gameMovePlayer(Player& player, int  direction)
+void Game::movePlayer(Player& player, int  direction)
 {
-    bool result = checkValidMove(player.getLocation(), direction);
-    if (result == true)
+    if (direction == 0 or direction == 2 or direction == 4 or direction == 6 or player.getPlayerClass() == 2)
     {
-        player.movePlayer(direction);
+        bool result = checkValidMove(player.getLocation(), direction);
+        if (result == true)
+        {
+            player.setLocation(direction);
+        }
+        cout <<  "players actions = " << player.getActions() << endl;
     }
-    cout <<  "players actions = " << player.getActions() << endl;
+    else
+    {
+        cout << "can't move that direction" << endl;
+    }
+}
+
+
+
+void Game::heloPlayers(int location, vector<Player> players)
+{
+    vector<Player*>startPlayers;
+    for(int i=0; i<players.size(); i++)
+    {
+        Player& p = players[i];
+        if (p.getLocation() == location)
+        {
+            startPlayers.push_back(&p);
+        }
+    }
+    cout << "These players are in this location: ";
+    for (int i=0; i<startPlayers.size(); i++)
+    {
+        cout << startPlayers[i]->getPlayerClass() << ", ";
+    }
+    cout << endl;
+    for (int i=0; i<startPlayers.size(); i++)
+    {
+        char move;
+        cout << "do you want to move player " << startPlayers[i]->getPlayerClass() << " (y/n)" ;
+        cin >> move;
+        if (move != 'Y' && move != 'y')
+        {
+            startPlayers.erase(startPlayers.begin() + i);
+        }
+    }
+    cout << "startPlayers = ";
+    for (int i=0; i<startPlayers.size(); i++)
+    {
+        cout << startPlayers[i]->getPlayerClass();
+    }
+    cout << endl;
+    cout << "where to helo to: ";
+    int destination;
+    cin >> destination;
+    for (int i=0; i<startPlayers.size(); i++)
+    {
+        startPlayers[i]->fly(destination);
+    }
+    updatePlayerLocations();
+}
+
+
+void Game::updatePlayerLocations()
+{
+    playerLocations.clear();
+    for(int i=0; i<players.size(); i++)
+    {
+        Player& p = players[i];
+        playerLocations.push_back(p.getLocation());
+        cout << "player " << p.getPlayerClass() << " is at " << p.getLocation() << endl;
+    }
 }

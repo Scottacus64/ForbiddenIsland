@@ -13,7 +13,7 @@ Player::Player(int pc, int slot)
     playerSlot = slot;
     playerClass = pc;
     actions = 3;
-    square = 0;
+    location = 0;
     playerTreasureHand = Hand();
 }
 
@@ -23,10 +23,10 @@ Player::~Player()
 
 
 
-void Player::movePlayer(int direction)
+void Player::setLocation(int direction)
 {
     int offset = directionValue(direction);
-    square = square + offset;
+    location = location + offset;
     actions -=1;
 }
 
@@ -36,7 +36,7 @@ int Player::shoreUp(int direction)
     if (direction < 0 || direction > 7)
         return 100;
     int offset = directionValue(direction);
-    int tileToShoreUp = square + offset;
+    int tileToShoreUp = location + offset;
     actions -=1;
     return tileToShoreUp;
 }
@@ -56,18 +56,12 @@ bool Player::getTreasure(int treasure)
 
 void Player::fly(int destination)
 {
-    square = destination;
+    location = destination;
     actions -=1;
 }
 
 
-void Player::moveOtherPlayer(Player player, int direction)
-{
-
-}
-
-
-Card* Player::giveTreasure(int treasureSlot)
+Card* Player::giveTreasureCard(int treasureSlot)
 {
     Card* pCard = playerTreasureHand.getCard(treasureSlot);
     playerTreasureHand.removeCard(pCard);
@@ -78,6 +72,14 @@ Card* Player::giveTreasure(int treasureSlot)
 void Player::printPlayer()
 {
     cout << playerSlot << ":" << playerClass << " ";
+}
+
+
+void Player::printHand()
+{
+    cout << "hand = ";
+    playerTreasureHand.printHand(0);
+    cout << endl;
 }
 
 
@@ -154,21 +156,13 @@ Card* Player::discardAllTreasureOfType(int type)
 }
 
 
-void Player::nextTurn()
+void Player::resetActions()
 {
     actions = 3;
 }
 
 
-void Player::printHand()
-{
-    cout << "hand = ";
-    playerTreasureHand.printHand(0);
-    cout << endl;
-}
-
-
-void Player::takeTreasure(Card* pCard)
+void Player::getTreasureCard(Card* pCard)
 {
     playerTreasureHand.addCard(pCard);
 }
@@ -180,15 +174,15 @@ int Player::getPlayerClass()
 }
 
 
-void Player::placePlayer(int location)
+void Player::placePlayer(int loc)
 {
-    square = location;
+    location = loc;
 }
 
 
 int Player::getLocation()
 {
-    return square;
+    return location;
 }
 
 
