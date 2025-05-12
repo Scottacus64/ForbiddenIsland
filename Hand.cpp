@@ -279,7 +279,7 @@ int Hand::getCardPosition(Card* pPosCard)
 
 int Hand::countValue(int value)
 {
-    int numberOfCards;
+    int numberOfCards = 0;
     for (int i=0; i<m_hand.size(); i++)
     {
         int treasureValue = m_hand[i]->getTreasureValue();

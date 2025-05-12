@@ -14,7 +14,7 @@ public:
     ~Player();
     void  setLocation(int direction);
     int   shoreUp(int direction);
-    bool  getTreasure(int treasure);
+    bool  canGetTreasure(int treasure);
     void  fly(int destination);
     Card* giveTreasureCard(int treasureSlot);
     void  getTreasureCard(Card* pCard);

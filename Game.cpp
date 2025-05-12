@@ -56,20 +56,15 @@ Game::Game()
     pIsleCard->floodCard();
     cout << endl;
     islandHand.printHand(1);
+    // island treasure
+    cout << "islandTreasure" << endl;
+    for (int i=0; i<islandTreasure.size(); i++)
+    {
+        cout << islandTreasure[i] << " ";
+    }
+    cout << endl;
     // create four players
     createPlayers(4);
-    updatePlayerLocations();
-    // draw six treasure cards and limit hand to five cards
-    for (int i=0; i<7; i++)
-    {
-        drawTreasureCards(0);
-    }
-    // show that treasure cards can be passed to another player
-    Player& givePlayer = players[0];
-    Player& takePlayer = players[1];
-    transferTreasure(givePlayer, takePlayer, 0);
-    players[0].printHand();
-    players[1].printHand();
     // this places the four players on the board
     for (int i=0; i<4; i++)
     {
@@ -78,6 +73,24 @@ Game::Game()
         spotPlayer.placePlayer(validSquares[location]);
     }
     updatePlayerLocations();
+    // draw six treasure cards and limit hand to five cards
+    for (int i=0; i<20; i++)
+    {
+        drawTreasureCards(0);
+    }
+    cout << "enter a treasure to collect ";
+    int treasure;
+    cin >> treasure;
+    if (players[0].canGetTreasure(treasure) == true)
+    {
+        getTreasure(players[0], treasure);
+    }
+    // show that treasure cards can be passed to another player
+    Player& givePlayer = players[0];
+    Player& takePlayer = players[1];
+    transferTreasure(givePlayer, takePlayer, 0);
+    players[0].printHand();
+    players[1].printHand();
     // move a player in various directions and show that actions decreases with each valid move
     Player& movingPlayer = players[0];
     for (int i=0; i<5; i++)
@@ -114,7 +127,7 @@ Game::Game()
     cout << "enter a location to helo from: ";
     int startLocation;
     cin >> startLocation;
-    heloPlayers(startLocation, players);
+    heloPlayers(startLocation);
 
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
@@ -244,10 +257,10 @@ void Game::createPlayers(int numberOfPlayers)
 }
 
 
-void Game::getTreasure(Player player, int treasure)
+void Game::getTreasure(Player& player, int treasure)
 {
     Card* pCard;
-    bool canGet = player.getTreasure(treasure);
+    bool canGet = player.canGetTreasure(treasure);
     if (canGet == false)
     {
         cout << "You don't have four of those treasure cards" << endl;
@@ -258,6 +271,19 @@ void Game::getTreasure(Player player, int treasure)
         {
             pCard = player.discardAllTreasureOfType(treasure);
             treasureDiscard.addCard(pCard);
+        }
+        islandTreasure.erase(remove(islandTreasure.begin(), islandTreasure.end(), treasure), islandTreasure.end());
+        playerTreasure.push_back(treasure);
+        cout << "player treasure = ";
+        for (int i=0; i<playerTreasure.size(); i++)
+        {
+            cout << playerTreasure[i] << " ";
+        }
+        cout << endl;
+        cout << "island treasure = ";
+        for (int i=0; i<islandTreasure.size(); i++)
+        {
+            cout << islandTreasure[i] << " ";
         }
     }
 }
@@ -326,7 +352,7 @@ void Game::movePlayer(Player& player, int  direction)
 
 
 
-void Game::heloPlayers(int location, vector<Player> players)
+void Game::heloPlayers(int location)
 {
     vector<Player*>startPlayers;
     for(int i=0; i<players.size(); i++)
@@ -356,7 +382,7 @@ void Game::heloPlayers(int location, vector<Player> players)
     cout << "startPlayers = ";
     for (int i=0; i<startPlayers.size(); i++)
     {
-        cout << startPlayers[i]->getPlayerClass();
+        cout << startPlayers[i]->getPlayerClass() << ", ";
     }
     cout << endl;
     cout << "where to helo to: ";

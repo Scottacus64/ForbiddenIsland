@@ -42,9 +42,10 @@ int Player::shoreUp(int direction)
 }
 
 
-bool Player::getTreasure(int treasure)
+bool Player::canGetTreasure(int treasure)
 {
     int numberOfCards = playerTreasureHand.countValue(treasure);
+    cout << "number of cards = " << numberOfCards << endl;
     if (numberOfCards > 3)
     {
         actions -=1;
@@ -111,7 +112,6 @@ Card* Player::drawCard(Card* pCard)
 {
     Card* pDCard;
     playerTreasureHand.addCard(pCard);
-    cout << playerTreasureHand.getSize();
     if (playerTreasureHand.getSize() > 5)
     {
         pDCard = discardCard();

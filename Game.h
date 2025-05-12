@@ -21,12 +21,12 @@ public:
     void shuffleFlood();
     void shuffleTreasure();
     void createPlayers (int numberOfPlayers);
-    void getTreasure(Player player, int treasure);
+    void getTreasure(Player& player, int treasure);
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
     int  placePlayers(Player& player);
     void movePlayer(Player& player, int direction);
-    void heloPlayers(int location, vector<Player>players);
+    void heloPlayers(int location);
     void updatePlayerLocations();
     vector <Player> players;
 
@@ -46,5 +46,7 @@ private:
     vector<int> validSquares;
     vector<pair<int, int>> islandCardPositions;
     vector<int> playerLocations;
+    vector<int> islandTreasure {1,2,3,4};
+    vector<int> playerTreasure;
 };
 #endif
