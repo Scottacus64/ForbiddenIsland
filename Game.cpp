@@ -7,7 +7,6 @@ const vector <int> Game::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
 
 Game::Game()
 {
-    cout << "Game class built!" << endl;
     islandDeck = Deck();
     islandDeck.shuffle();
     cout << endl;
@@ -21,6 +20,15 @@ Game::Game()
     treasureDeck.shuffle();
     treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
+    // recycle deck test
+    int size = floodDeck.deckSize();
+    for(int i=0; i<size; i++)
+    {
+        Card* pCard = floodDeck.deal();
+        floodDiscard.addCard(pCard);
+    }
+    floodDiscard.recycleDeck(&floodDeck);
+    floodDeck.printDeck();
     // create the island
     for (int i=0; i<36; i++)
     {
@@ -63,6 +71,7 @@ Game::Game()
         cout << islandTreasure[i] << " ";
     }
     cout << endl;
+    bool test = checkForWin();
     // create four players
     createPlayers(4);
     // this places the four players on the board
@@ -74,7 +83,7 @@ Game::Game()
     }
     updatePlayerLocations();
     // draw six treasure cards and limit hand to five cards
-    for (int i=0; i<20; i++)
+    for (int i=0; i<6; i++)
     {
         drawTreasureCards(0);
     }
@@ -205,6 +214,10 @@ void Game::flipFlood()
     pIsleCard = islandHand.getCardWithId(id);
     pIsleCard->floodCard();
     floodDiscard.addCard(pCard);  
+    if(floodDeck.deckSize() == 0)
+    {
+        floodDiscard.recycleDeck(&floodDeck);
+    }
 }
 
 
@@ -247,13 +260,6 @@ void Game::createPlayers(int numberOfPlayers)
         int slot = i+1; 
         players.emplace_back(classValue, slot);
     }
-    cout << "players (slot/class): ";
-    Player* pPlayer;
-    for (Player p : players)
-    {
-        p.printPlayer();
-    }
-    cout << endl;
 }
 
 
@@ -325,7 +331,6 @@ int Game::placePlayers(Player& player)
         Card* pCard = islandHand.getCard(i);
         if (player.getPlayerClass() == pCard->getCharacterValue())
         {
-            cout << player.getPlayerClass() << " : " << pCard->getCharacterValue() << " : " << i << endl;
             return i;
         }
     }
@@ -405,4 +410,51 @@ void Game::updatePlayerLocations()
         playerLocations.push_back(p.getLocation());
         cout << "player " << p.getPlayerClass() << " is at " << p.getLocation() << endl;
     }
+}
+
+
+bool Game::checkForWin()
+{
+    bool win = true;
+    int flLocation = 0;
+    for(int i=0; i<24; i++)
+    {
+        if (islandCardPositions[i].first == 2)
+        flLocation = i;
+    }
+    cout << "fools landing at: " << flLocation << endl;
+    for (int i=0; i<players.size(); i++)
+    {
+        if(players[i].getLocation() != flLocation)
+        {
+            win = false;
+        }
+    }
+    if(playerTreasure.size() < 4)
+    {
+        win = false;
+    }
+}
+
+
+bool Game::checkForLoss()
+{
+    int fire = 0;
+    int water = 0;
+    int wind = 0;
+    int earth = 0;
+    bool loss = false;
+    for(int i=0; i<islandHand.getSize(); i++)
+    {
+        Card* card = islandHand.getCard(i);
+        if(card->getTreasureValue() == 1 and card->getState() > 0){fire +=1;}
+        if(card->getTreasureValue() == 2 and card->getState() > 0){water +=1;}
+        if(card->getTreasureValue() == 3 and card->getState() > 0){wind +=1;}
+        if(card->getTreasureValue() == 4 and card->getState() > 0){earth +=1;}
+    }
+    if((fire == 0 && find(playerTreasure.begin(), playerTreasure.end(), 1) == playerTreasure.end())){loss = true;}
+    if((water == 0 && find(playerTreasure.begin(), playerTreasure.end(), 2) == playerTreasure.end())){loss = true;}
+    if((wind == 0 && find(playerTreasure.begin(), playerTreasure.end(), 3) == playerTreasure.end())){loss = true;}
+    if((earth == 0 && find(playerTreasure.begin(), playerTreasure.end(), 4) == playerTreasure.end())){loss = true;}
+    return loss;
 }

@@ -196,3 +196,15 @@ int Deck::deckSize()
 {
     return m_deck.size();
 }
+
+
+void Deck::recycleDeck(Deck* draw)
+{
+    int size = this->deckSize();
+    for(int i=0; i<size; i++)
+    {
+        Card* pCard = this->deal();
+        draw->addCard(pCard);
+    }
+    draw->shuffle();
+}

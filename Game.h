@@ -28,7 +28,9 @@ public:
     void movePlayer(Player& player, int direction);
     void heloPlayers(int location);
     void updatePlayerLocations();
-    vector <Player> players;
+    bool checkForLoss();
+    bool checkForWin();
+
 
 private:
     Deck islandDeck;
@@ -40,7 +42,7 @@ private:
     Hand islandHand;
     Hand islandOut;
     Player generatePlayer;
-    
+    vector <Player> players;    
     static const vector<int> invalidSquares;
     vector<int> playerClasses;
     vector<int> validSquares;
