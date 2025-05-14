@@ -100,6 +100,7 @@ Game::Game()
     transferTreasure(givePlayer, takePlayer, 0);
     players[0].printHand();
     players[1].printHand();
+    printGameState();
     // move a player in various directions and show that actions decreases with each valid move
     Player& movingPlayer = players[0];
     for (int i=0; i<5; i++)
@@ -457,4 +458,20 @@ bool Game::checkForLoss()
     if((wind == 0 && find(playerTreasure.begin(), playerTreasure.end(), 3) == playerTreasure.end())){loss = true;}
     if((earth == 0 && find(playerTreasure.begin(), playerTreasure.end(), 4) == playerTreasure.end())){loss = true;}
     return loss;
+}
+
+
+void Game::printGameState()
+{
+    vector<string>classes = {"engineer ", "expolorer", "pilot   ", "navigator", "diver   ", "messenger"};
+    islandHand.printHand(1);
+
+    cout << "Active player: " << activePlayer << "      Water level: " << waterLevel << endl;
+    for (int i=0; i<players.size(); i++)
+    {
+        Player& player = players[i];
+        cout << "Player " << i << ": " << classes[i] << "\t" << " location: " << player.getLocation() <<  "\t" << "treasure: ";
+        player.printHand();
+    }
+    cout << "\nChoose an option:"  << "\n" << "1) Move \n" << "2) Shore Up \n" << "3) Get Treasure \n" << "4) Play Card \n" << "5) Special \n";
 }

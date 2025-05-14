@@ -98,11 +98,13 @@ void Hand::printHand(int typeOfHand)
         {
             if (i % 6 == 0){cout << endl;}
             if((find(invalidSquares.begin(), invalidSquares.end(), i) != invalidSquares.end()))
-            { cout << "   ";}
+            { cout << "     ";}
             else
             {
                 Card* pCard = getCard(card);
                 pCard->printCard();
+                if(i < 10){cout << "0";}
+                cout << i;
                 card++;
                 std::cout << " ";            
             }

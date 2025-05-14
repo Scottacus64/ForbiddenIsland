@@ -78,7 +78,6 @@ void Player::printPlayer()
 
 void Player::printHand()
 {
-    cout << "hand = ";
     playerTreasureHand.printHand(0);
     cout << endl;
 }
