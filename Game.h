@@ -14,6 +14,7 @@ class Game
 public:
     Game();
     ~Game();
+    void newGame();
     void removeValidSquare(int square);
     void printValidSquares();
     bool checkValidMove(int square, int direction);

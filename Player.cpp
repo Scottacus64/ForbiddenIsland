@@ -44,6 +44,7 @@ int Player::shoreUp(int direction)
 
 bool Player::canGetTreasure(int treasure)
 {
+    if(treasure>4){return false;}
     int numberOfCards = playerTreasureHand.countValue(treasure);
     cout << "number of cards = " << numberOfCards << endl;
     if (numberOfCards > 3)

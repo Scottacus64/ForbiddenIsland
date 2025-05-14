@@ -8,136 +8,16 @@ const vector <int> Game::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
 Game::Game()
 {
     islandDeck = Deck();
-    islandDeck.shuffle();
-    cout << endl;
     floodDeck = Deck();
-    floodDeck.shuffle();
     floodDiscard = Deck(0);
     floodOut = Deck(0);
     islandHand = Hand();
     islandOut = Hand();
     treasureDeck = Deck(28, false);
-    treasureDeck.shuffle();
     treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
-    // recycle deck test
-    int size = floodDeck.deckSize();
-    for(int i=0; i<size; i++)
-    {
-        Card* pCard = floodDeck.deal();
-        floodDiscard.addCard(pCard);
-    }
-    floodDiscard.recycleDeck(&floodDeck);
-    floodDeck.printDeck();
-    // create the island
-    for (int i=0; i<36; i++)
-    {
-    if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
-        {
-            Card* pCard;
-            pCard = islandDeck.deal();
-            islandHand.addCard(pCard);
-            islandCardPositions.push_back({pCard->getID(), i});
-        }
-        else
-        {
-            islandCardPositions.push_back({100,i});
-        }
-        
-    }
-    
-    islandHand.printHand(1);
-    // sink six island cards by one degree
-    for (int i=0; i<6; i++)
-    {
-        flipFlood();
-    }
-    // print the island with sunked cards
-    islandHand.printHand(1);
-    // shuffle the flood discard pile, place on top of the draw pile and draw one card to remove an island card
-    Card* pCard;
-    Card* pIsleCard;
-    pCard = floodDiscard.deal();
-    int id = pCard->getID();
-    pIsleCard = islandHand.getCardWithId(id);
-    int state = pIsleCard->getState();
-    pIsleCard->floodCard();
-    cout << endl;
-    islandHand.printHand(1);
-    // island treasure
-    cout << "islandTreasure" << endl;
-    for (int i=0; i<islandTreasure.size(); i++)
-    {
-        cout << islandTreasure[i] << " ";
-    }
-    cout << endl;
-    bool test = checkForWin();
-    // create four players
-    createPlayers(4);
-    // this places the four players on the board
-    for (int i=0; i<4; i++)
-    {
-        Player& spotPlayer = players[i];
-        int location = placePlayers(spotPlayer);
-        spotPlayer.placePlayer(validSquares[location]);
-    }
-    updatePlayerLocations();
-    // draw six treasure cards and limit hand to five cards
-    for (int i=0; i<6; i++)
-    {
-        drawTreasureCards(0);
-    }
-    cout << "enter a treasure to collect ";
-    int treasure;
-    cin >> treasure;
-    if (players[0].canGetTreasure(treasure) == true)
-    {
-        getTreasure(players[0], treasure);
-    }
-    // show that treasure cards can be passed to another player
-    Player& givePlayer = players[0];
-    Player& takePlayer = players[1];
-    transferTreasure(givePlayer, takePlayer, 0);
-    players[0].printHand();
-    players[1].printHand();
-    printGameState();
-    // move a player in various directions and show that actions decreases with each valid move
-    Player& movingPlayer = players[0];
-    for (int i=0; i<5; i++)
-    {
-        cout << endl;
-        cout << "player's location is: " << movingPlayer.getLocation() << " ";
-        cout << "enter a direction to move: ";
-        int direction;
-        cin >> direction;
-        cout << endl;
-        movePlayer(movingPlayer, direction);
-    }
-    // fly a player to another square
-    int destination;
-    cout << "fly to location: ";
-    cin >> destination;
-    bool validDestination = find(validSquares.begin(), validSquares.end(), destination) != validSquares.end();
-    if (destination != movingPlayer.getLocation() && validDestination == true)
-    {
-        movingPlayer.fly(destination);
-    }
-    cout << "player's new location is: " << movingPlayer.getLocation() << endl;
-    // move another player
-    int playerToMove;
-    cout << "enter a player to move (0-3)";
-    cin >> playerToMove;
-    Player& otherPlayer = players[playerToMove];
-    cout << " player located at "  << otherPlayer.getLocation() << " enter a direction to move: ";
-    int direction;
-    cin >> direction;
-    movePlayer(otherPlayer, direction);
-    cout << endl;
-    cout << "player's new location is: " << otherPlayer.getLocation() << endl;
-    cout << "enter a location to helo from: ";
-    int startLocation;
-    cin >> startLocation;
-    heloPlayers(startLocation);
+    newGame();
+
 
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
@@ -474,4 +354,50 @@ void Game::printGameState()
         player.printHand();
     }
     cout << "\nChoose an option:"  << "\n" << "1) Move \n" << "2) Shore Up \n" << "3) Get Treasure \n" << "4) Play Card \n" << "5) Special \n";
+}
+
+
+void Game::newGame()
+{
+    int numberOfPlayers = 0;
+    cout << "Enter the number of players (1–4): ";
+    while (!(cin >> numberOfPlayers) || numberOfPlayers < 1 || numberOfPlayers > 4) {
+        cin.clear(); // clear the error flag
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard invalid input
+        cout << "Invalid input. Please enter a number between 1 and 4: ";
+    }
+    createPlayers(numberOfPlayers);
+    // this places the four players on the board
+    for (int i=0; i<numberOfPlayers; i++)
+    {
+        Player& spotPlayer = players[i];
+        int location = placePlayers(spotPlayer);
+        spotPlayer.placePlayer(validSquares[location]);
+    }
+    // shuffle the decks
+    islandDeck.shuffle();
+    floodDeck.shuffle();
+    treasureDeck.shuffle();
+    // create the island
+    for (int i=0; i<36; i++)
+    {
+    if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
+        {
+            Card* pCard;
+            pCard = islandDeck.deal();
+            islandHand.addCard(pCard);
+            islandCardPositions.push_back({pCard->getID(), i});
+        }
+        else
+        {
+            islandCardPositions.push_back({100,i});
+        }   
+    }
+    // sink six island cards by one degree
+    for (int i=0; i<6; i++)
+    {
+        flipFlood();
+    }
+
+    printGameState();
 }
