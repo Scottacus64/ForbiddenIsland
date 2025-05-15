@@ -17,10 +17,6 @@ Game::Game()
     treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
     newGame();
-
-
-    // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
-    // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
 
 
@@ -133,14 +129,39 @@ void Game::createPlayers(int numberOfPlayers)
     int classValue;
     for (int i = 0; i < numberOfPlayers && !playerClasses.empty(); i++) 
     {    
+
         static std::mt19937 rng(static_cast<unsigned>(time(nullptr)));
         std::uniform_int_distribution<int> dist(0, playerClasses.size() - 1);
         int index = dist(rng);
         classValue = playerClasses[index];
         playerClasses.erase(playerClasses.begin() + index);
         int slot = i+1; 
-        players.emplace_back(classValue, slot);
+        Player newPlayer = Player(classValue, slot);
+        for (int i=0; i<islandHand.getSize(); i++)
+        {
+            Card* pCard = islandHand.getCard(i);
+            int cardValue = pCard->getCharacterValue();
+            if (classValue == cardValue)
+            {
+                newPlayer.placePlayer(validSquares[i]);
+            }
+        }
+        players.push_back(newPlayer);
     }
+}
+
+
+int Game::getPlayerStartLocation(Player& player)
+{
+    for (int i=0; i<islandHand.getSize(); i++)
+    {
+        Card* pCard = islandHand.getCard(i);
+        if (player.getPlayerClass() == pCard->getCharacterValue())
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
 
@@ -202,20 +223,6 @@ void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot
 {
     Card* pCard = givePlayer.giveTreasureCard(cardSlot);
     takePlayer.getTreasureCard(pCard);
-}
-
-
-int Game::placePlayers(Player& player)
-{
-    for (int i=0; i<islandHand.getSize(); i++)
-    {
-        Card* pCard = islandHand.getCard(i);
-        if (player.getPlayerClass() == pCard->getCharacterValue())
-        {
-            return i;
-        }
-    }
-    return -1;
 }
 
 
@@ -350,40 +357,41 @@ void Game::printGameState()
     for (int i=0; i<players.size(); i++)
     {
         Player& player = players[i];
-        cout << "Player " << i << ": " << classes[i] << "\t" << " location: " << player.getLocation() <<  "\t" << "treasure: ";
+        int playerClass = player.getPlayerClass();
+        int location = player.getLocation();
+        cout << "Player " << i << ": " << classes[playerClass-1] << "\t" << " location: " << location <<  "\t" << "treasure: ";
         player.printHand();
     }
     cout << "\nChoose an option:"  << "\n" << "1) Move \n" << "2) Shore Up \n" << "3) Get Treasure \n" << "4) Play Card \n" << "5) Special \n";
+    // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
+    // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
 
 
 void Game::newGame()
 {
     int numberOfPlayers = 0;
-    cout << "Enter the number of players (1–4): ";
-    while (!(cin >> numberOfPlayers) || numberOfPlayers < 1 || numberOfPlayers > 4) {
-        cin.clear(); // clear the error flag
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // discard invalid input
-        cout << "Invalid input. Please enter a number between 1 and 4: ";
-    }
-    createPlayers(numberOfPlayers);
-    // this places the four players on the board
-    for (int i=0; i<numberOfPlayers; i++)
-    {
-        Player& spotPlayer = players[i];
-        int location = placePlayers(spotPlayer);
-        spotPlayer.placePlayer(validSquares[location]);
-    }
-    // shuffle the decks
+    Card* pCard;
+    // rebuild and shuffle the decks
+    islandDeck.resetState();
     islandDeck.shuffle();
+    for(int i=0; i<floodDiscard.deckSize(); i++)
+    {
+        pCard = floodDiscard.deal();
+        floodDeck.addCard(pCard);
+    }
     floodDeck.shuffle();
+    for(int i=0; i<treasureDiscard.deckSize(); i++)
+    {
+        pCard = treasureDiscard.deal();
+        treasureDeck.addCard(pCard);
+    }
     treasureDeck.shuffle();
     // create the island
     for (int i=0; i<36; i++)
     {
     if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
         {
-            Card* pCard;
             pCard = islandDeck.deal();
             islandHand.addCard(pCard);
             islandCardPositions.push_back({pCard->getID(), i});
@@ -398,6 +406,17 @@ void Game::newGame()
     {
         flipFlood();
     }
-
+    cout << endl;
+    cout << "Enter the number of players (1–4): ";
+    while (!(cin >> numberOfPlayers) || numberOfPlayers < 1 || numberOfPlayers > 4) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input. Please enter a number between 1 and 4: ";
+    }
+    createPlayers(numberOfPlayers);
+    for(int i=0; i<players.size(); i++)
+    {
+        players[i].printPlayer();
+    }
     printGameState();
 }

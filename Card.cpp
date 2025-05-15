@@ -133,3 +133,8 @@ int Card::getCharacterValue()
 }
 
 
+void Card::setState(int newState)
+{
+    state = newState;
+}
+

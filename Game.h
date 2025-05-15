@@ -25,7 +25,7 @@ public:
     void getTreasure(Player& player, int treasure);
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
-    int  placePlayers(Player& player);
+    int  getPlayerStartLocation(Player& player);
     void movePlayer(Player& player, int direction);
     void heloPlayers(int location);
     void updatePlayerLocations();

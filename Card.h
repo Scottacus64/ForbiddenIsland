@@ -25,6 +25,7 @@ public:
     static const vector<string> pvList;
     void floodCard();
     void shoreUpCard();
+    void setState(int newState);
     int  getState();
     int  getTreasureValue();
     int  getCharacterValue();

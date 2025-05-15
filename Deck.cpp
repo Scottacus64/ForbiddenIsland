@@ -208,3 +208,14 @@ void Deck::recycleDeck(Deck* draw)
     }
     draw->shuffle();
 }
+
+
+void Deck::resetState()
+{
+    int size = this->deckSize();
+    for(int i=0; i<size; i++)
+    {
+        Card* pCard = this->getDeckCardAt(i);
+        pCard->setState(2);
+    }
+}
