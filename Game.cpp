@@ -40,48 +40,6 @@ void Game::printValidSquares()
 }
 
 
-bool Game::checkValidMove(int square, int direction)
-{
-    int testSquare;
-    // directions 0 up, clockwise to 7 up and left
-    switch (direction)
-    {
-        case 0:
-            testSquare = square - 6;
-            break;
-        case 1:
-            testSquare = square - 5;
-            break;
-        case 2:
-            testSquare = square + 1;
-            break;
-        case 3:
-            testSquare = square + 7;
-            break;
-        case 4:
-            testSquare = square + 6;
-            break;
-        case 5:
-            testSquare = square + 5;
-            break;
-        case 6:
-            testSquare = square - 1;
-            break;
-        case 7:
-            testSquare = square - 7;
-            break;
-        default:
-            return false;
-    }
-    if (testSquare < 0 or testSquare > 33) {return false;}
-    if (find(validSquares.begin(), validSquares.end(), testSquare) == validSquares.end())
-    {
-        return false;
-    }
-    return true;   
-}
-
-
 void Game::flipFlood()
 {
     Card* pCard;
@@ -228,13 +186,12 @@ void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot
 
 void Game::movePlayer(Player& player, int  direction)
 {
+    cout << "in move players" << endl;
     if (direction == 0 or direction == 2 or direction == 4 or direction == 6 or player.getPlayerClass() == 2)
     {
-        bool result = checkValidMove(player.getLocation(), direction);
-        if (result == true)
-        {
-            player.setLocation(direction);
-        }
+        int result = checkValidMove(player.getLocation(), direction);
+        if (result == 2) {player.setLocation(direction, 0);}
+        if (result == 1) {player.setLocation(direction, 1);}
         cout <<  "players actions = " << player.getActions() << endl;
     }
     else
@@ -243,6 +200,64 @@ void Game::movePlayer(Player& player, int  direction)
     }
 }
 
+
+int Game::checkValidMove(int square, int direction)
+{
+    int testSquare;
+    // directions 0 up, clockwise to 7 up and left
+    switch (direction)
+    {
+        case 0:
+            testSquare = square - 6;
+            break;
+        case 1:
+            testSquare = square - 5;
+            break;
+        case 2:
+            testSquare = square + 1;
+            break;
+        case 3:
+            testSquare = square + 7;
+            break;
+        case 4:
+            testSquare = square + 6;
+            break;
+        case 5:
+            testSquare = square + 5;
+            break;
+        case 6:
+            testSquare = square - 1;
+            break;
+        case 7:
+            testSquare = square - 7;
+            break;
+        default:
+            return false;
+    }
+    if (testSquare < 0 or testSquare > 33) {return false;}
+    // diver check for sunken square
+    if (find(invalidSquares.begin(), invalidSquares.end(), testSquare) != invalidSquares.end()){return 0;}
+    if (find(validSquares.begin(), validSquares.end(), testSquare) != validSquares.end()) 
+    {
+        if(players[activePlayer].getPlayerClass() == 5 ) //diver
+        {
+            if(islandHand.getCardAt(testSquare)->getState() == 1)
+            {
+                return 2; // flooded square costs nothing
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            return 1; // all other players cost one action
+        }
+    }
+    if (find(validSquares.begin(), validSquares.end(), testSquare) == validSquares.end()) {return 2;}
+    return 0;  // can't move here
+}
 
 
 void Game::heloPlayers(int location)
@@ -353,7 +368,7 @@ void Game::printGameState()
     vector<string>classes = {"engineer ", "expolorer", "pilot   ", "navigator", "diver   ", "messenger"};
     islandHand.printHand(1);
 
-    cout << "Active player: " << activePlayer << "      Water level: " << waterLevel << endl;
+    cout << "Active player: " << activePlayer <<  "     Actions Left: " << players[activePlayer].getActions() << "      Water level: " << waterLevel << endl;
     for (int i=0; i<players.size(); i++)
     {
         Player& player = players[i];
@@ -362,7 +377,7 @@ void Game::printGameState()
         cout << "Player " << i << ": " << classes[playerClass-1] << "\t" << " location: " << location <<  "\t" << "treasure: ";
         player.printHand();
     }
-    cout << "\nChoose an option:"  << "\n" << "1) Move \n" << "2) Shore Up \n" << "3) Get Treasure \n" << "4) Play Card \n" << "5) Special \n";
+    cout << "\nChoose an option:"  << "\n" << "1) Move \n" << "2) Shore Up \n" << "3) Get Treasure \n" << "4) Play Card \n" << "5) Special \n" << "6) End Turn \n";
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
@@ -418,5 +433,107 @@ void Game::newGame()
     {
         players[i].printPlayer();
     }
-    printGameState();
+    gameTurn();
+}
+
+
+void Game::gameTurn()
+{
+    pilotFlight = false;
+    while(players[activePlayer].getActions()>0)
+    {
+        printGameState();
+        int playerChoice;
+        while (!(cin >> playerChoice) || playerChoice < 1 || playerChoice > 5) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number between 1 and 6: ";
+        }
+        Player& movingPlayer = players[activePlayer];
+        switch (playerChoice)
+        {
+            case 1:
+                int direction;
+                cout << "Enter a direction to move (0-7)";
+                while (!(cin >> direction) || direction < 0 || direction > 7) 
+                {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid input. Please enter a number between 0 and 7: ";
+                }  
+                movePlayer(movingPlayer,direction);
+                break;
+            case 2:
+                //shore up
+                break;
+            case 3:
+                //get tresure
+                break;
+            case 4:
+                //play card
+                break;
+            case 5:
+                cout << "Special Abilities \n1) Fly (Pilot)\n2) Send Treasure Card (Messenger)\n3) Move Other Player (Navigator)\n4) Return to Main Menu\n";
+                int option;
+                while (!(cin >> option) || option < 0 || option > 4)
+                {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid input. Please enter a number between 1 and 5: ";
+                }
+                switch (option)
+                {
+                    case 1: // fly
+                        if(players[activePlayer].getPlayerClass() == 3 && pilotFlight == false)
+                        {
+                            cout << "Enter a location to fly to: ";
+                            int destination;
+                            cin >> destination;
+                            players[activePlayer].fly(destination);
+                            pilotFlight = true;
+                        }
+                        else
+                        {
+                            cout << "Cannot fly this turn" << endl;
+                        }
+                        break;
+                    case 2: // send treasure
+                        if(players[activePlayer].getPlayerClass() == 6 && players[activePlayer].getHandSize() > 0)
+                        {
+                            int receivingPlayer;
+                            cout << "Enter a player number to give the card to: ";
+                            cin >> receivingPlayer;
+                            if(receivingPlayer != activePlayer && receivingPlayer > 0 && receivingPlayer < players.size())
+                            {
+                                int treasureSlot;
+                                cout << "Which treasure to give: ";
+                                cin >> treasureSlot;
+                                if (treasureSlot > -1 && treasureSlot < players[activePlayer].getHandSize())
+                                {
+                                    transferTreasure(players[activePlayer], players[receivingPlayer], treasureSlot);
+                                }
+                            }
+                            else {cout << "Can't transfer treasure \n";}
+                        }
+                        break;
+                    case 3: // move other player
+                        break;
+                    case 4: // return to main menu
+                        break;
+                }
+                break;  
+            case 6:
+                players[activePlayer].setActions(0);  
+        }
+    }
+
+}
+
+
+void Game::nextPlayer()
+{
+    activePlayer +=1;
+    if (activePlayer > (players.size()-1))
+    {activePlayer = 0;}
+    players[activePlayer].setActions(3);
 }

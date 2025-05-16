@@ -12,7 +12,7 @@ public:
     Player();
     Player(int playerClass, int slot);
     ~Player();
-    void  setLocation(int direction);
+    void  setLocation(int direction, int cost);
     int   shoreUp(int direction);
     bool  canGetTreasure(int treasure);
     void  fly(int destination);
@@ -30,6 +30,7 @@ public:
     int   getLocation();
     int   getActions();
     int   directionValue(int direction);
+    void  setActions(int actionsValue);
 
 
 private:

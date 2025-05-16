@@ -23,11 +23,11 @@ Player::~Player()
 
 
 
-void Player::setLocation(int direction)
+void Player::setLocation(int direction, int cost)
 {
     int offset = directionValue(direction);
     location = location + offset;
-    actions -=1;
+    actions -=cost;
 }
 
 
@@ -189,4 +189,10 @@ int Player::getLocation()
 int Player::getActions()
 {
     return actions;
+}
+
+
+void Player::setActions(int actionsValue)
+{
+    actions = actionsValue;
 }

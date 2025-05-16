@@ -17,7 +17,7 @@ public:
     void newGame();
     void removeValidSquare(int square);
     void printValidSquares();
-    bool checkValidMove(int square, int direction);
+    int  checkValidMove(int square, int direction);
     void flipFlood();
     void shuffleFlood();
     void shuffleTreasure();
@@ -32,6 +32,8 @@ public:
     bool checkForLoss();
     bool checkForWin();
     void printGameState();
+    void gameTurn();
+    void nextPlayer();
 
 private:
     Deck islandDeck;
@@ -53,5 +55,6 @@ private:
     vector<int> playerTreasure;
     int waterLevel = 2;
     int activePlayer = 0;
+    bool pilotFlight = false;
 };
 #endif

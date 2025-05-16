@@ -41,6 +41,7 @@ public:
 private:
     std::vector<Card*> m_hand;
     static const vector<int> invalidSquares;
+    static const vector<pair<int,int>> slotLocation;
 };
 
 #endif // HAND_H

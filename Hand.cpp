@@ -1,6 +1,8 @@
 #include "Hand.h"
 #include <iostream>
 const vector <int> Hand::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
+const vector<pair <int,int>> Hand::slotLocation = {{0,2},{1,3},{2,7},{3,8},{4,9},{5,10},{6,12},{7,13},{8,14},{9,15},
+{10,16},{11,17},{12,18},{13,19},{14,20},{15,21},{16,22},{17,23},{18,25},{19,26},{20,27},{21,28},{22,32},{23,33}};
 using namespace std;
 
 Hand::Hand()
@@ -237,9 +239,20 @@ bool Hand::allFaceDown()
 Card* Hand::getCardAt(int location)
 {
     Card* pCard = nullptr;
-    if (location < m_hand.size()){pCard = m_hand[location];}
-    return pCard;
+    for (const auto& pair : slotLocation)
+    {
+        if (pair.second == location)
+        {
+            int slot = pair.first;
+            if (slot < m_hand.size())
+            {
+                pCard = m_hand[slot];
+            }
+            break;
+        }
+    }
 
+    return pCard;
 }
 
 Card* Hand::getCardWithId(int id)
