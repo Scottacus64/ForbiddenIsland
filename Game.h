@@ -28,7 +28,7 @@ public:
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
     int  getPlayerStartLocation(Player& player);
     void movePlayer(Player& player, int direction);
-    void heloPlayers(int location);
+    bool heloPlayers(int location);
     void updatePlayerLocations();
     bool checkForLoss();
     bool checkForWin();
@@ -57,6 +57,7 @@ private:
     vector<int> playerTreasure;
     int waterLevel = 2;
     int activePlayer = 0;
+    int mPlayer = 100;
     bool pilotFlight = false;
 };
 #endif

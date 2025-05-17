@@ -210,7 +210,7 @@ int Game::checkValidMove(int location, int direction)
     if (find(invalidSquares.begin(), invalidSquares.end(), testLocation) != invalidSquares.end()){return 0;}
     if (find(validSquares.begin(), validSquares.end(), testLocation) != validSquares.end()) 
     {
-        if(players[activePlayer].getPlayerClass() == 5 ) //diver
+        if(players[activePlayer].getPlayerClass() == 5  || players[mPlayer].getPlayerClass() == 5) //diver
         {
             if(islandHand.getCardAt(testLocation)->getState() == 1)
             {
@@ -269,8 +269,9 @@ int Game::destinationValue(int location, int direction)
 }
 
 
-void Game::heloPlayers(int location)
+bool Game::heloPlayers(int location)
 {
+    bool canHelo = false;
     vector<Player*>startPlayers;
     for(int i=0; i<players.size(); i++)
     {
@@ -278,6 +279,7 @@ void Game::heloPlayers(int location)
         if (p.getLocation() == location)
         {
             startPlayers.push_back(&p);
+            canHelo = true;
         }
     }
     cout << "These players are in this location: ";
@@ -310,6 +312,7 @@ void Game::heloPlayers(int location)
         startPlayers[i]->fly(destination);
     }
     updatePlayerLocations();
+    return canHelo;
 }
 
 
@@ -386,6 +389,7 @@ bool Game::checkForWin()
     {
         win = false;
     }
+    return win;
 }
 
 
@@ -517,9 +521,49 @@ void Game::gameTurn()
                 break;
             case 3:
                 //get tresure
+                int treasure;
+                cout << "Enter a treasure to capture (1-4):";
+                cin >> treasure;
+                getTreasure(players[activePlayer], treasure);
                 break;
             case 4:
                 //play card
+                int cardSlot;
+                cout << "Enter a card slot to play (1-5):";
+                cin >> cardSlot;
+                int cardTValue;
+                cardTValue = players[activePlayer].getCardTreasureValue(cardSlot);
+                if(cardTValue == 5) // helo
+                {
+                    cout << "Enter a location to helicopter from: ";
+                    int hLocation;
+                    cin >> hLocation;
+                    bool canHelo;
+                    canHelo = heloPlayers(hLocation);
+                    if(canHelo == true)
+                    {
+                        Card* pCard;
+                        pCard =players[activePlayer].playCard(cardSlot);
+                        treasureDiscard.addCard(pCard);
+                    }
+                }
+                if (cardTValue == 6) //sandbag
+                {
+                    cout << "Enter a location to sandbag: ";
+                    int location;
+                    cin >> location;
+                    Card* pCard = islandHand.getCardAt(location);
+                    if (pCard->getState() == 1)
+                    {
+                        pCard->setState(2);
+                        pCard =players[activePlayer].playCard(cardSlot);
+                        treasureDiscard.addCard(pCard);
+                    }
+                    else
+                    {
+                        cout << "Not a valid location to sandbag";
+                    }
+                }
                 break;
             case 5:
                 cout << "Special Abilities \n1) Fly (Pilot)\n2) Send Treasure Card (Messenger)\n3) Move Other Player (Navigator)\n4) Return to Main Menu\n";
@@ -568,10 +612,9 @@ void Game::gameTurn()
                     case 3: // move other player
                         if(players[activePlayer].getPlayerClass() == 4)
                         {
-                            int movingPlayer;
                             cout << "Enter the player to move:";
-                            cin >> movingPlayer;
-                            if(movingPlayer != activePlayer && movingPlayer > -1 && movingPlayer < players.size())
+                            cin >> mPlayer;
+                            if(mPlayer != activePlayer && mPlayer > -1 && mPlayer < players.size())
                             {
                                 for(int i=0; i<2; i++)
                                 {
@@ -588,7 +631,7 @@ void Game::gameTurn()
                                     int direction;
                                     cout << "Enter a direction: ";
                                     cin >> direction;
-                                    movePlayer(players[movingPlayer], direction);
+                                    movePlayer(players[mPlayer], direction);
                                     printGameState();
                                 }
                             }

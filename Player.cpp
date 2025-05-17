@@ -140,6 +140,15 @@ Card* Player::discardCard()
 }
 
 
+
+Card* Player::playCard(int slot)
+{
+    Card* pCard;
+    pCard = playerTreasureHand.getCardAt(slot);
+    return pCard;
+}
+
+
 Card* Player::discardAllTreasureOfType(int type)
 {
     for (int i=0; i<playerTreasureHand.getSize(); i++)
@@ -202,4 +211,12 @@ void Player::setActions(int actionsChange)
     {
         actions = actions + actionsChange;
     }
+}
+
+
+int Player::getCardTreasureValue(int slot)
+{
+    Card* pCard;
+    pCard = playerTreasureHand.getCardAt(slot-1);
+    return pCard->getTreasureValue();
 }

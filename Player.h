@@ -23,6 +23,7 @@ public:
     int   getHandSize();
     Card* drawCard(Card* pCard);
     Card* discardCard();
+    Card* playCard(int slot);
     Card* discardAllTreasureOfType(int type);
     void  resetActions();
     void  placePlayer(int location);
@@ -31,6 +32,7 @@ public:
     int   getActions();
     int   directionValue(int direction);
     void  setActions(int actionsChange);
+    int   getCardTreasureValue(int slot);
 
 
 private:
