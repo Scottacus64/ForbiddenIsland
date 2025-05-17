@@ -24,17 +24,17 @@ Game::~Game()
 {}
 
 
-void Game::removeValidSquare(int square)
+void Game::removeValidSquare(int location)
 {
-    validSquares.erase(remove(validSquares.begin(), validSquares.end(), square), validSquares.end());
+    validSquares.erase(remove(validSquares.begin(), validSquares.end(), location), validSquares.end());
 }
 
 
 void Game::printValidSquares()
 {
-    for (int square : validSquares)
+    for (int location : validSquares)
     {
-        cout << square << " ";
+        cout << location << " ";
     }
     cout << endl;
 }
@@ -201,49 +201,20 @@ void Game::movePlayer(Player& player, int  direction)
 }
 
 
-int Game::checkValidMove(int square, int direction)
+int Game::checkValidMove(int location, int direction)
 {
-    int testSquare;
-    // directions 0 up, clockwise to 7 up and left
-    switch (direction)
-    {
-        case 0:
-            testSquare = square - 6;
-            break;
-        case 1:
-            testSquare = square - 5;
-            break;
-        case 2:
-            testSquare = square + 1;
-            break;
-        case 3:
-            testSquare = square + 7;
-            break;
-        case 4:
-            testSquare = square + 6;
-            break;
-        case 5:
-            testSquare = square + 5;
-            break;
-        case 6:
-            testSquare = square - 1;
-            break;
-        case 7:
-            testSquare = square - 7;
-            break;
-        default:
-            return false;
-    }
-    if (testSquare < 0 or testSquare > 33) {return false;}
-    // diver check for sunken square
-    if (find(invalidSquares.begin(), invalidSquares.end(), testSquare) != invalidSquares.end()){return 0;}
-    if (find(validSquares.begin(), validSquares.end(), testSquare) != validSquares.end()) 
+    int testLocation = destinationValue(location, direction);
+    if (testLocation == location){return false;}
+    if (testLocation < 0 or testLocation > 33) {return false;}
+    // diver check for sunken location
+    if (find(invalidSquares.begin(), invalidSquares.end(), testLocation) != invalidSquares.end()){return 0;}
+    if (find(validSquares.begin(), validSquares.end(), testLocation) != validSquares.end()) 
     {
         if(players[activePlayer].getPlayerClass() == 5 ) //diver
         {
-            if(islandHand.getCardAt(testSquare)->getState() == 1)
+            if(islandHand.getCardAt(testLocation)->getState() == 1)
             {
-                return 2; // flooded square costs nothing
+                return 2; // flooded location costs nothing
             }
             else
             {
@@ -255,8 +226,46 @@ int Game::checkValidMove(int square, int direction)
             return 1; // all other players cost one action
         }
     }
-    if (find(validSquares.begin(), validSquares.end(), testSquare) == validSquares.end()) {return 2;}
+    if (find(validSquares.begin(), validSquares.end(), testLocation) == validSquares.end()) {return 2;}
     return 0;  // can't move here
+}
+
+
+int Game::destinationValue(int location, int direction)
+{
+    int testLocation = 0;
+    switch (direction)
+    {
+        // directions 0 up, clockwise to 7 up and left, 8 for the players location for shore up
+        case 0:
+            testLocation = location - 6;
+            break;
+        case 1:
+            testLocation = location - 5;
+            break;
+        case 2:
+            testLocation = location + 1;
+            break;
+        case 3:
+            testLocation = location + 7;
+            break;
+        case 4:
+            testLocation = location + 6;
+            break;
+        case 5:
+            testLocation = location + 5;
+            break;
+        case 6:
+            testLocation = location - 1;
+            break;
+        case 7:
+            testLocation = location - 7;
+            break;
+        case 8:
+            testLocation = location;
+            break;
+    }
+    return testLocation;
 }
 
 
@@ -301,6 +310,46 @@ void Game::heloPlayers(int location)
         startPlayers[i]->fly(destination);
     }
     updatePlayerLocations();
+}
+
+
+void Game::shoreUp()
+{
+    int engineerTurns = 1;
+    if(players[activePlayer].getPlayerClass() == 1){engineerTurns = 2;}
+    for(int i=0; i<engineerTurns; i++)
+    {
+        int direction;
+        cout << "Enter a direction to shore up(0-7 or 8 for thr player's location):";
+        cin >> direction;
+        int start = players[activePlayer].getLocation();
+        int target = destinationValue(start, direction); 
+        Card* pCard = islandHand.getCardAt(target);
+        if (pCard->getState() == 1)
+        {
+            pCard->setState(2);
+            if(players[activePlayer].getPlayerClass() == 1 && i==0)
+            {
+                char another;
+                cout << "Do you want to shore up another island location (y/n)?";
+                cin >> another;
+                if(another != 'y' && another !='Y')
+                {
+                    players[activePlayer].setActions(-1);
+                    return;
+                }
+                
+            }
+            else
+            {
+                players[activePlayer].setActions(-1);
+            }
+        }
+        else
+        {
+            cout << "Unable to shore up location";
+        }
+    }
 }
 
 
@@ -444,7 +493,7 @@ void Game::gameTurn()
     {
         printGameState();
         int playerChoice;
-        while (!(cin >> playerChoice) || playerChoice < 1 || playerChoice > 5) {
+        while (!(cin >> playerChoice) || playerChoice < 1 || playerChoice > 6) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Invalid input. Please enter a number between 1 and 6: ";
@@ -464,7 +513,7 @@ void Game::gameTurn()
                 movePlayer(movingPlayer,direction);
                 break;
             case 2:
-                //shore up
+                shoreUp();
                 break;
             case 3:
                 //get tresure
@@ -503,7 +552,7 @@ void Game::gameTurn()
                             int receivingPlayer;
                             cout << "Enter a player number to give the card to: ";
                             cin >> receivingPlayer;
-                            if(receivingPlayer != activePlayer && receivingPlayer > 0 && receivingPlayer < players.size())
+                            if(receivingPlayer != activePlayer && receivingPlayer > -1 && receivingPlayer < players.size())
                             {
                                 int treasureSlot;
                                 cout << "Which treasure to give: ";
@@ -517,6 +566,33 @@ void Game::gameTurn()
                         }
                         break;
                     case 3: // move other player
+                        if(players[activePlayer].getPlayerClass() == 4)
+                        {
+                            int movingPlayer;
+                            cout << "Enter the player to move:";
+                            cin >> movingPlayer;
+                            if(movingPlayer != activePlayer && movingPlayer > -1 && movingPlayer < players.size())
+                            {
+                                for(int i=0; i<2; i++)
+                                {
+                                    if(i>0)
+                                    {
+                                        char moveAgain;
+                                        cout << "Move player again (y/n)?";
+                                        cin >> moveAgain;
+                                        if(moveAgain != 'y' && moveAgain != 'Y')
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    int direction;
+                                    cout << "Enter a direction: ";
+                                    cin >> direction;
+                                    movePlayer(players[movingPlayer], direction);
+                                    printGameState();
+                                }
+                            }
+                        }
                         break;
                     case 4: // return to main menu
                         break;
@@ -526,7 +602,7 @@ void Game::gameTurn()
                 players[activePlayer].setActions(0);  
         }
     }
-
+    printGameState();
 }
 
 
@@ -535,5 +611,5 @@ void Game::nextPlayer()
     activePlayer +=1;
     if (activePlayer > (players.size()-1))
     {activePlayer = 0;}
-    players[activePlayer].setActions(3);
+    players[activePlayer].resetActions();
 }

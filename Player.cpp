@@ -192,7 +192,14 @@ int Player::getActions()
 }
 
 
-void Player::setActions(int actionsValue)
+void Player::setActions(int actionsChange)
 {
-    actions = actionsValue;
+    if(actionsChange == 0)
+    {
+        actions = 0;
+    }
+    else
+    {
+        actions = actions + actionsChange;
+    }
 }

@@ -15,9 +15,10 @@ public:
     Game();
     ~Game();
     void newGame();
-    void removeValidSquare(int square);
+    void removeValidSquare(int location);
     void printValidSquares();
-    int  checkValidMove(int square, int direction);
+    int  checkValidMove(int location, int direction);
+    int  destinationValue(int location, int direction);
     void flipFlood();
     void shuffleFlood();
     void shuffleTreasure();
@@ -34,6 +35,7 @@ public:
     void printGameState();
     void gameTurn();
     void nextPlayer();
+    void shoreUp();
 
 private:
     Deck islandDeck;

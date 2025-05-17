@@ -30,7 +30,7 @@ public:
     int   getLocation();
     int   getActions();
     int   directionValue(int direction);
-    void  setActions(int actionsValue);
+    void  setActions(int actionsChange);
 
 
 private:
