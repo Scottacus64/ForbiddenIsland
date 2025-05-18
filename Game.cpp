@@ -340,8 +340,7 @@ void Game::shoreUp()
                 {
                     players[activePlayer].setActions(-1);
                     return;
-                }
-                
+                }  
             }
             else
             {
@@ -427,10 +426,17 @@ void Game::printGameState()
         Player& player = players[i];
         int playerClass = player.getPlayerClass();
         int location = player.getLocation();
-        cout << "Player " << i << ": " << classes[playerClass-1] << "\t" << " location: " << location <<  "\t" << "treasure: ";
+        cout << "Player " << i << ": " << classes[playerClass-1] 
+        << "\t" << " location: " << location <<  "\t" << "treasure: ";
         player.printHand();
     }
-    cout << "\nChoose an option:"  << "\n" << "1) Move \n" << "2) Shore Up \n" << "3) Get Treasure \n" << "4) Play Card \n" << "5) Special \n" << "6) End Turn \n";
+    cout << "\nChoose an option:\n"
+    "1) Move \n"
+    "2) Shore Up \n"
+    "3) Get Treasure \n"
+    "4) Play Card \n"
+    "5) Special \n" 
+    "6) End Turn \n";
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
@@ -566,7 +572,11 @@ void Game::gameTurn()
                 }
                 break;
             case 5:
-                cout << "Special Abilities \n1) Fly (Pilot)\n2) Send Treasure Card (Messenger)\n3) Move Other Player (Navigator)\n4) Return to Main Menu\n";
+                cout << "Special Abilities \n"
+                "1) Fly (Pilot)\n"
+                "2) Send Treasure Card (Messenger)\n"
+                "3) Move Other Player (Navigator)\n"
+                "4) Return to Main Menu\n";
                 int option;
                 while (!(cin >> option) || option < 0 || option > 4)
                 {
