@@ -165,6 +165,8 @@ void Game::drawTreasureCards(int playerSlot)
         cout << "got a water rise card" << endl;
         shuffleFlood();                     //shuffle the flood discard deck and put it on top of the flood deck
         treasureDiscard.addCard(pCard);     //discard the water rise card
+        waterLevel +=1;
+        checkForLoss();
     }
     else
     {
@@ -411,6 +413,8 @@ bool Game::checkForLoss()
     if((water == 0 && find(playerTreasure.begin(), playerTreasure.end(), 2) == playerTreasure.end())){loss = true;}
     if((wind == 0 && find(playerTreasure.begin(), playerTreasure.end(), 3) == playerTreasure.end())){loss = true;}
     if((earth == 0 && find(playerTreasure.begin(), playerTreasure.end(), 4) == playerTreasure.end())){loss = true;}
+    if(waterLevel > 8){loss = true;}
+    if(players.size() == 0){loss = true;}
     return loss;
 }
 
@@ -492,14 +496,14 @@ void Game::newGame()
     {
         players[i].printPlayer();
     }
-    gameTurn();
+    playerTurn();
 }
 
 
-void Game::gameTurn()
+void Game::playerTurn()
 {
     pilotFlight = false;
-    while(players[activePlayer].getActions()>0)
+    while(players[activePlayer].getActions() > 0)
     {
         printGameState();
         int playerChoice;
@@ -511,7 +515,7 @@ void Game::gameTurn()
         Player& movingPlayer = players[activePlayer];
         switch (playerChoice)
         {
-            case 1:
+            case 1: // move
                 int direction;
                 cout << "Enter a direction to move (0-7)";
                 while (!(cin >> direction) || direction < 0 || direction > 7) 
@@ -522,18 +526,16 @@ void Game::gameTurn()
                 }  
                 movePlayer(movingPlayer,direction);
                 break;
-            case 2:
+            case 2: //shore up
                 shoreUp();
                 break;
-            case 3:
-                //get tresure
+            case 3: //get tresure
                 int treasure;
                 cout << "Enter a treasure to capture (1-4):";
                 cin >> treasure;
                 getTreasure(players[activePlayer], treasure);
                 break;
-            case 4:
-                //play card
+            case 4: //play card
                 int cardSlot;
                 cout << "Enter a card slot to play (1-5):";
                 cin >> cardSlot;
@@ -541,37 +543,14 @@ void Game::gameTurn()
                 cardTValue = players[activePlayer].getCardTreasureValue(cardSlot);
                 if(cardTValue == 5) // helo
                 {
-                    cout << "Enter a location to helicopter from: ";
-                    int hLocation;
-                    cin >> hLocation;
-                    bool canHelo;
-                    canHelo = heloPlayers(hLocation);
-                    if(canHelo == true)
-                    {
-                        Card* pCard;
-                        pCard =players[activePlayer].playCard(cardSlot);
-                        treasureDiscard.addCard(pCard);
-                    }
+                    helo(cardSlot);
                 }
                 if (cardTValue == 6) //sandbag
                 {
-                    cout << "Enter a location to sandbag: ";
-                    int location;
-                    cin >> location;
-                    Card* pCard = islandHand.getCardAt(location);
-                    if (pCard->getState() == 1)
-                    {
-                        pCard->setState(2);
-                        pCard =players[activePlayer].playCard(cardSlot);
-                        treasureDiscard.addCard(pCard);
-                    }
-                    else
-                    {
-                        cout << "Not a valid location to sandbag";
-                    }
+                    sandBag(cardSlot);
                 }
                 break;
-            case 5:
+            case 5: //special ability
                 cout << "Special Abilities \n"
                 "1) Fly (Pilot)\n"
                 "2) Send Treasure Card (Messenger)\n"
@@ -652,10 +631,174 @@ void Game::gameTurn()
                 }
                 break;  
             case 6:
+                // end turn
                 players[activePlayer].setActions(0);  
         }
     }
-    printGameState();
+    for (int i=0; i<2; i++)
+    {
+        drawTreasureCards(activePlayer);
+        printGameState();
+    }
+    cout << "done with player turn";
+    gameTurn();
+}
+
+
+void Game::sandBag(int cardSlot)
+{
+    cout << "Enter a location to sandbag: ";
+    int location;
+    cin >> location;
+    Card* pCard = islandHand.getCardAt(location);
+    if (pCard->getState() == 1)
+    {
+        pCard->setState(2);
+        pCard =players[activePlayer].playCard(cardSlot);
+        treasureDiscard.addCard(pCard);
+    }
+    else
+    {
+        cout << "Not a valid location to sandbag";
+    }
+}
+
+
+void Game::helo(int cardSlot)
+{
+    cout << "Enter a location to helicopter from: ";
+    int hLocation;
+    cin >> hLocation;
+    bool canHelo;
+    canHelo = heloPlayers(hLocation);
+    if(canHelo == true)
+    {
+        Card* pCard;
+        pCard =players[activePlayer].playCard(cardSlot);
+        treasureDiscard.addCard(pCard);
+    }
+}
+
+
+void Game::gameTurn()
+{
+    cout << "In game turn";
+    vector<int>floodDrawNumber = {2,2,3,3,3,4,4,5,5};
+    int cardsToDraw = floodDrawNumber[waterLevel];
+    for(int i=0; i<cardsToDraw; i++)
+    {
+        char choice;
+        int numberOfHeloSandBagCards = 0;
+        for(int i=0; i<players.size(); i++)
+        {
+            int handSize = players[i].getHandSize();
+            if(handSize > 0)
+            {
+                for(int j=0; j<handSize; j++)
+                {
+                    if(players[i].getCardTreasureValue(j) > 4)
+                    {
+                        numberOfHeloSandBagCards +=1;
+                    }
+                }
+            }
+        }
+       bool keepLooping = true;
+        while(keepLooping == true)
+        {
+            cout << "Do you want to play any helicopter or sand bag cards(y/n)?";
+            cin >> choice;
+            if(choice == 'y' or choice == 'Y')
+            {
+                int pSlot;
+                int cSlot;
+                cout << "Enter a player slot: ";
+                cin >> pSlot;
+                cout << "Enter a card slot: ";
+                cin >> cSlot;
+                Card* pCard = players[pSlot].playCard(cSlot);
+                int cardType = pCard->getTreasureValue();
+                if(cardType == 5)
+                {
+                    helo(cSlot);
+                    numberOfHeloSandBagCards -=1;
+                }
+                if(cardType == 6)
+                {
+                    sandBag(cSlot);
+                    numberOfHeloSandBagCards -=1;
+                }
+                if(numberOfHeloSandBagCards < 1)
+                {
+                    keepLooping = false;
+                }
+            }
+            else
+            {
+                keepLooping = false;
+            }
+        }
+        flipFlood();
+        checkForLoss();
+        checkPlayerInWater();
+    }
+    nextPlayer();
+}
+
+
+void Game::checkPlayerInWater()
+{
+    for(int i=0; i<players.size(); i++)
+    {
+        int pLocation = players[i].getLocation();
+        bool canMove = false;
+        Card* pCard = islandHand.getCardAt(pLocation);
+        if(pCard->getState() == 0)
+        {
+            int location;
+            cout << "Playert in water!";
+            int pClass =players[i].getPlayerClass();
+            if(pClass == 3) // pilot
+            {
+                canMove = true;
+                cout << "choose destination to fly to: ";
+                cin >> location;
+                players[i].fly(location);
+            }
+            else
+            {
+                for(int i=0; i<8; i++)
+                {
+                    int destinationState = checkValidMove(pLocation,i);
+                    if(destinationState > 0 && i%2 == 0)
+                    {
+                        canMove = true;
+                    }
+                    if(destinationState > 0 and players[i].getPlayerClass() == 2)
+                    {
+                        canMove = true;
+                    }
+                    if(players[i].getPlayerClass() == 5)
+                    {
+                        canMove = true;
+                    }
+                }
+            }
+            if(canMove == true)
+            {
+                cout << "Enter a direction to swim: ";
+                int direction;
+                cin >> direction;
+                movePlayer(players[i],direction);
+            }
+            else
+            {
+                cout << "Player lost!";
+                players.erase(players.begin() + i);
+                checkForLoss();
+            }
+        }
+    }
 }
 
 
@@ -665,4 +808,5 @@ void Game::nextPlayer()
     if (activePlayer > (players.size()-1))
     {activePlayer = 0;}
     players[activePlayer].resetActions();
+    playerTurn();
 }

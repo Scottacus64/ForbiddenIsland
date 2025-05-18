@@ -33,9 +33,13 @@ public:
     bool checkForLoss();
     bool checkForWin();
     void printGameState();
-    void gameTurn();
     void nextPlayer();
     void shoreUp();
+    void playerTurn();
+    void gameTurn();
+    void checkPlayerInWater();
+    void sandBag(int cardSlot);
+    void helo(int cardSlot);
 
 private:
     Deck islandDeck;
@@ -55,7 +59,7 @@ private:
     vector<int> playerLocations;
     vector<int> islandTreasure {1,2,3,4};
     vector<int> playerTreasure;
-    int waterLevel = 2;
+    int waterLevel = 1;
     int activePlayer = 0;
     int mPlayer = 100;
     bool pilotFlight = false;

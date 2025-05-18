@@ -18,6 +18,7 @@ public:
     void  fly(int destination);
     Card* giveTreasureCard(int treasureSlot);
     void  getTreasureCard(Card* pCard);
+    int   getCardTreasureValue(int slot);
     void  printPlayer();
     void  printHand();
     int   getHandSize();
@@ -32,7 +33,7 @@ public:
     int   getActions();
     int   directionValue(int direction);
     void  setActions(int actionsChange);
-    int   getCardTreasureValue(int slot);
+   
 
 
 private:
