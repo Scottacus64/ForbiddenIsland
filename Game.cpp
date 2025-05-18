@@ -53,6 +53,9 @@ void Game::flipFlood()
     {
         floodDiscard.recycleDeck(&floodDeck);
     }
+    int cardPosition = islandHand.getCardPosition(pIsleCard);
+    int location = islandHand.getLocationFromHandSlot(cardPosition);
+    cout << "\nFlooded location: " << location << "\n";
 }
 
 
@@ -440,7 +443,8 @@ void Game::printGameState()
     "3) Get Treasure \n"
     "4) Play Card \n"
     "5) Special \n" 
-    "6) End Turn \n";
+    "6) End Turn \n"
+    "7) Give Treasure card \n";
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
     // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
 }
@@ -507,7 +511,7 @@ void Game::playerTurn()
     {
         printGameState();
         int playerChoice;
-        while (!(cin >> playerChoice) || playerChoice < 1 || playerChoice > 6) {
+        while (!(cin >> playerChoice) || playerChoice < 1 || playerChoice > 7) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Invalid input. Please enter a number between 1 and 6: ";
@@ -537,7 +541,7 @@ void Game::playerTurn()
                 break;
             case 4: //play card
                 int cardSlot;
-                cout << "Enter a card slot to play (1-5):";
+                cout << "Enter a card slot to play (0-4):";
                 cin >> cardSlot;
                 int cardTValue;
                 cardTValue = players[activePlayer].getCardTreasureValue(cardSlot);
@@ -630,9 +634,20 @@ void Game::playerTurn()
                         break;
                 }
                 break;  
-            case 6:
-                // end turn
-                players[activePlayer].setActions(0);  
+            case 6: // end turn
+                players[activePlayer].setActions(0); 
+                break;
+            case 7: // give treasure card
+                {
+                    int rPlayer;
+                    int slot;
+                    cout << "\nPlayer to give card to: ";
+                    cin >> rPlayer;
+                    cout << "Slot of card to give: ";
+                    cin >> slot;
+                    transferTreasure(players[activePlayer], players[rPlayer], slot);
+                    break;
+                }
         }
     }
     for (int i=0; i<2; i++)
@@ -651,11 +666,12 @@ void Game::sandBag(int cardSlot)
     int location;
     cin >> location;
     Card* pCard = islandHand.getCardAt(location);
+    Card* pPlayerHandCard;
     if (pCard->getState() == 1)
     {
         pCard->setState(2);
-        pCard =players[activePlayer].playCard(cardSlot);
-        treasureDiscard.addCard(pCard);
+        pPlayerHandCard =players[activePlayer].playCard(cardSlot);
+        treasureDiscard.addCard(pPlayerHandCard);
     }
     else
     {
@@ -682,7 +698,6 @@ void Game::helo(int cardSlot)
 
 void Game::gameTurn()
 {
-    cout << "In game turn";
     vector<int>floodDrawNumber = {2,2,3,3,3,4,4,5,5};
     int cardsToDraw = floodDrawNumber[waterLevel];
     for(int i=0; i<cardsToDraw; i++)
@@ -703,39 +718,41 @@ void Game::gameTurn()
                 }
             }
         }
-       bool keepLooping = true;
-        while(keepLooping == true)
-        {
-            cout << "Do you want to play any helicopter or sand bag cards(y/n)?";
-            cin >> choice;
-            if(choice == 'y' or choice == 'Y')
+        bool keepLooping = true;
+        if(numberOfHeloSandBagCards > 0)
+            {while(keepLooping == true)
             {
-                int pSlot;
-                int cSlot;
-                cout << "Enter a player slot: ";
-                cin >> pSlot;
-                cout << "Enter a card slot: ";
-                cin >> cSlot;
-                Card* pCard = players[pSlot].playCard(cSlot);
-                int cardType = pCard->getTreasureValue();
-                if(cardType == 5)
+                cout << "Do you want to play any helicopter or sand bag cards(y/n)?";
+                cin >> choice;
+                if(choice == 'y' or choice == 'Y')
                 {
-                    helo(cSlot);
-                    numberOfHeloSandBagCards -=1;
+                    int pSlot;
+                    int cSlot;
+                    cout << "Enter a player slot: ";
+                    cin >> pSlot;
+                    cout << "Enter a card slot: ";
+                    cin >> cSlot;
+                    Card* pCard = players[pSlot].playCard(cSlot);
+                    int cardType = pCard->getTreasureValue();
+                    if(cardType == 5)
+                    {
+                        helo(cSlot);
+                        numberOfHeloSandBagCards -=1;
+                    }
+                    if(cardType == 6)
+                    {
+                        sandBag(cSlot);
+                        numberOfHeloSandBagCards -=1;
+                    }
+                    if(numberOfHeloSandBagCards < 1)
+                    {
+                        keepLooping = false;
+                    }
                 }
-                if(cardType == 6)
-                {
-                    sandBag(cSlot);
-                    numberOfHeloSandBagCards -=1;
-                }
-                if(numberOfHeloSandBagCards < 1)
+                else
                 {
                     keepLooping = false;
                 }
-            }
-            else
-            {
-                keepLooping = false;
             }
         }
         flipFlood();

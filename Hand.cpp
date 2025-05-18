@@ -255,6 +255,19 @@ Card* Hand::getCardAt(int location)
     return pCard;
 }
 
+
+int Hand::getLocationFromHandSlot(int slot)
+{
+    for (const auto& pair : slotLocation)
+    {
+        if (pair.first == slot)
+        {
+            return pair.second;
+            break;
+        }
+    }  
+}
+
 Card* Hand::getCardWithId(int id)
 {
     Card* pCard;

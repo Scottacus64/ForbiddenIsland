@@ -30,6 +30,7 @@ public:
     int   getCardPosition(Card* pPosCard);
     Card* getCardAt(int location);
     int   countValue(int value);
+    int   getLocationFromHandSlot(int slot);
 
     void sortHandValue();
     void sortActualValue();
