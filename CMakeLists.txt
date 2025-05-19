@@ -6,7 +6,8 @@ project(ForbiddenIsland VERSION 1.0)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add the executable
 add_executable(ForbiddenIsland

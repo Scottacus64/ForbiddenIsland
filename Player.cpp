@@ -144,7 +144,7 @@ Card* Player::discardCard()
 Card* Player::playCard(int slot)
 {
     Card* pCard;
-    pCard = playerTreasureHand.getCardAt(slot);
+    pCard = playerTreasureHand.getCard(slot);
     return pCard;
 }
 
