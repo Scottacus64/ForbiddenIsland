@@ -38,8 +38,8 @@ public:
     void playerTurn();
     void gameTurn();
     void checkPlayerInWater();
-    void sandBag(int cardSlot);
-    void helo(int cardSlot);
+    void sandBag(int player, int cardSlot);
+    void helo(int player,int cardSlot);
 
 private:
     Deck islandDeck;

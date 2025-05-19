@@ -42,17 +42,12 @@ int Player::shoreUp(int direction)
 }
 
 
-bool Player::canGetTreasure(int treasure)
+int Player::canGetTreasure(int treasure)
 {
-    if(treasure>4){return false;}
+    if(treasure>4){return 0;}
     int numberOfCards = playerTreasureHand.countValue(treasure);
     cout << "number of cards = " << numberOfCards << endl;
-    if (numberOfCards > 3)
-    {
-        actions -=1;
-        return true;
-    }
-    return false;
+    return numberOfCards;
 }
 
 
@@ -140,11 +135,24 @@ Card* Player::discardCard()
 }
 
 
-
-Card* Player::playCard(int slot)
+Card* Player::playCardSlot(int slot)
 {
-    Card* pCard;
-    pCard = playerTreasureHand.getCard(slot);
+    if(slot < playerTreasureHand.getSize())
+    {
+        cout << "Removing card at: " << slot << "\n";
+        Card* pCard = playerTreasureHand.removeCard(slot);
+        return pCard;
+    }
+    else
+    {
+
+    }
+}
+
+
+Card* Player::lookAtCardSlot(int slot)
+{
+    Card* pCard = playerTreasureHand.getCard(slot);
     return pCard;
 }
 

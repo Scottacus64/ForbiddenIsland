@@ -129,14 +129,14 @@ int Game::getPlayerStartLocation(Player& player)
 void Game::getTreasure(Player& player, int treasure)
 {
     Card* pCard;
-    bool canGet = player.canGetTreasure(treasure);
-    if (canGet == false)
+    int numberOfCards = player.canGetTreasure(treasure);
+    if (numberOfCards < 4)
     {
         cout << "You don't have four of those treasure cards" << endl;
     }
     else
     {
-        for (int i=0; i<player.getHandSize(); i++)
+        for (int i=0; i<numberOfCards; i++)
         {
             pCard = player.discardAllTreasureOfType(treasure);
             treasureDiscard.addCard(pCard);
@@ -338,6 +338,7 @@ void Game::shoreUp()
             pCard->setState(2);
             if(players[activePlayer].getPlayerClass() == 1 && i==0)
             {
+                printGameState();
                 char another;
                 cout << "Do you want to shore up another island location (y/n)?";
                 cin >> another;
@@ -446,7 +447,7 @@ void Game::printGameState()
     "6) End Turn \n"
     "7) Give Treasure card \n";
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
-    // treasure: 1 fire, 2 water, 3 wind, 4 earth, 5 helo, 6 sandbag, 7 water rise
+    // treasure: 1 fire CS,CE / 2 waterCP, TP / 3 wind HG, WG / 4 earth TM,TS / 5 helo, 6 sandbag, 7 water rise
 }
 
 
@@ -547,11 +548,11 @@ void Game::playerTurn()
                 cardTValue = players[activePlayer].getCardTreasureValue(cardSlot);
                 if(cardTValue == 5) // helo
                 {
-                    helo(cardSlot);
+                    helo(activePlayer, cardSlot);
                 }
                 if (cardTValue == 6) //sandbag
                 {
-                    sandBag(cardSlot);
+                    sandBag(activePlayer, cardSlot);
                 }
                 break;
             case 5: //special ability
@@ -655,22 +656,20 @@ void Game::playerTurn()
         drawTreasureCards(activePlayer);
         printGameState();
     }
-    cout << "done with player turn";
     gameTurn();
 }
 
 
-void Game::sandBag(int cardSlot)
+void Game::sandBag(int player, int cardSlot)
 {
     cout << "Enter a location to sandbag: ";
     int location;
     cin >> location;
     Card* pCard = islandHand.getCardAt(location);
-    Card* pPlayerHandCard;
     if (pCard->getState() == 1)
     {
         pCard->setState(2);
-        pPlayerHandCard =players[activePlayer].playCard(cardSlot);
+        Card* pPlayerHandCard = players[player].playCardSlot(cardSlot);
         treasureDiscard.addCard(pPlayerHandCard);
     }
     else
@@ -680,7 +679,7 @@ void Game::sandBag(int cardSlot)
 }
 
 
-void Game::helo(int cardSlot)
+void Game::helo(int player, int cardSlot)
 {
     cout << "Enter a location to helicopter from: ";
     int hLocation;
@@ -689,8 +688,7 @@ void Game::helo(int cardSlot)
     canHelo = heloPlayers(hLocation);
     if(canHelo == true)
     {
-        Card* pCard;
-        pCard =players[activePlayer].playCard(cardSlot);
+        Card* pCard = players[player].playCardSlot(cardSlot);
         treasureDiscard.addCard(pCard);
     }
 }
@@ -732,16 +730,16 @@ void Game::gameTurn()
                     cin >> pSlot;
                     cout << "Enter a card slot: ";
                     cin >> cSlot;
-                    Card* pCard = players[pSlot].playCard(cSlot);
+                    Card* pCard = players[pSlot].lookAtCardSlot(cSlot);
                     int cardType = pCard->getTreasureValue();
                     if(cardType == 5)
                     {
-                        helo(cSlot);
+                        helo(pSlot, cSlot);
                         numberOfHeloSandBagCards -=1;
                     }
                     if(cardType == 6)
                     {
-                        sandBag(cSlot);
+                        sandBag(pSlot, cSlot);
                         numberOfHeloSandBagCards -=1;
                     }
                     if(numberOfHeloSandBagCards < 1)
@@ -753,9 +751,11 @@ void Game::gameTurn()
                 {
                     keepLooping = false;
                 }
+                printGameState();
             }
         }
         flipFlood();
+        printGameState();
         checkForLoss();
         checkPlayerInWater();
     }

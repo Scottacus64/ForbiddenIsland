@@ -14,7 +14,7 @@ public:
     ~Player();
     void  setLocation(int direction, int cost);
     int   shoreUp(int direction);
-    bool  canGetTreasure(int treasure);
+    int   canGetTreasure(int treasure);
     void  fly(int destination);
     Card* giveTreasureCard(int treasureSlot);
     void  getTreasureCard(Card* pCard);
@@ -24,7 +24,8 @@ public:
     int   getHandSize();
     Card* drawCard(Card* pCard);
     Card* discardCard();
-    Card* playCard(int slot);
+    Card* playCardSlot(int slot);
+    Card* lookAtCardSlot(int slot);
     Card* discardAllTreasureOfType(int type);
     void  resetActions();
     void  placePlayer(int location);
