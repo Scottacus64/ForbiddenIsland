@@ -1,5 +1,5 @@
 #include "Game.h"
-
+#include <cstdlib>
 
 using namespace std;
 const vector <int> Game::invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
@@ -56,10 +56,11 @@ void Game::flipFlood()
     int cardPosition = islandHand.getCardPosition(pIsleCard);
     int location = islandHand.getLocationFromHandSlot(cardPosition);
     cout << "\nFlooded location: " << location << "\n";
-    bool outcome = checkForLoss();
-    if(outcome == true)
+    bool loss = checkForLoss();
+    if(loss == true && gameStarted == true)
     {
-        cout << "\nLOSS!";
+        cout<< "\n ***** GAME OVER *****\n";
+        playAgain();
     }
 }
 
@@ -188,7 +189,11 @@ void Game::drawTreasureCards(int playerSlot)
         shuffleFlood();                     //shuffle the flood discard deck and put it on top of the flood deck
         treasureDiscard.addCard(pCard);     //discard the water rise card
         waterLevel +=1;
-        checkForLoss();
+        bool loss = checkForLoss();
+        if(loss == true){
+            cout << "\n ***** GAME OVER *****\n";
+            playAgain();
+        }
     }
     else
     {
@@ -205,6 +210,11 @@ void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot
 {
     Card* pCard = givePlayer.giveTreasureCard(cardSlot);
     takePlayer.getTreasureCard(pCard);
+    if(takePlayer.getHandSize() > 5)
+    {
+        Card* pDCard = takePlayer.discardCard();
+        treasureDiscard.addCard(pDCard);
+    }
 }
 
 
@@ -350,25 +360,34 @@ void Game::shoreUp()
         cin >> direction;
         int start = players[activePlayer].getLocation();
         int target = destinationValue(start, direction); 
-        Card* pCard = islandHand.getCardAt(target);
-        if (pCard->getState() == 1)
+        bool validTarget = true;
+        for(int i=0; i<invalidSquares.size(); i++)
         {
-            pCard->setState(2);
-            if(players[activePlayer].getPlayerClass() == 1 && i==0)
+            if(target == invalidSquares[i]){validTarget = false;}
+        }
+        if(target < 0 || target > 35){validTarget = false;}
+        if(validTarget == true)
+        {
+            Card* pCard = islandHand.getCardAt(target);
+            if (pCard->getState() == 1)
             {
-                printGameState();
-                char another;
-                cout << "Do you want to shore up another island location (y/n)?";
-                cin >> another;
-                if(another != 'y' && another !='Y')
+                pCard->setState(2);
+                if(players[activePlayer].getPlayerClass() == 1 && i==0)
+                {
+                    printGameState();
+                    char another;
+                    cout << "Do you want to shore up another island location (y/n)?";
+                    cin >> another;
+                    if(another != 'y' && another !='Y')
+                    {
+                        players[activePlayer].setActions(-1);
+                        return;
+                    }  
+                }
+                else
                 {
                     players[activePlayer].setActions(-1);
-                    return;
-                }  
-            }
-            else
-            {
-                players[activePlayer].setActions(-1);
+                }
             }
         }
         else
@@ -425,12 +444,12 @@ bool Game::checkForLoss()
     bool loss = false;
     for(int i=0; i<islandHand.getSize(); i++)
     {
-        Card* card = islandHand.getCard(i);
-        if(card->getTreasureValue() == 1 and card->getState() > 0){fire +=1;}
-        if(card->getTreasureValue() == 2 and card->getState() > 0){water +=1;}
-        if(card->getTreasureValue() == 3 and card->getState() > 0){wind +=1;}
-        if(card->getTreasureValue() == 4 and card->getState() > 0){earth +=1;}
-        if(card->getPrintValue() == "FL" && card->getState() == 0){loss = true;}
+        Card* pCard = islandHand.getCard(i);
+        if(pCard->getTreasureValue() == 1 && pCard->getState() > 0){fire +=1;}
+        if(pCard->getTreasureValue() == 2 && pCard->getState() > 0){water +=1;}
+        if(pCard->getTreasureValue() == 3 && pCard->getState() > 0){wind +=1;}
+        if(pCard->getTreasureValue() == 4 && pCard->getState() > 0){earth +=1;}
+        if(pCard->getPrintValue() == "FL" && pCard->getState() == 0){loss = true;}
     }
     if((fire == 0 && find(playerTreasure.begin(), playerTreasure.end(), 1) == playerTreasure.end())){loss = true;}
     if((water == 0 && find(playerTreasure.begin(), playerTreasure.end(), 2) == playerTreasure.end())){loss = true;}
@@ -525,6 +544,7 @@ void Game::newGame()
     {
         players[i].printPlayer();
     }
+    gameStarted = true;
     playerTurn();
 }
 
@@ -567,7 +587,13 @@ void Game::playerTurn()
             case 4: //play card
                 int cardSlot;
                 cout << "Enter a card slot to play (0-4):";
-                cin >> cardSlot;
+                if (!(cin >> cardSlot) || cardSlot < 0 || cardSlot > players[activePlayer].getHandSize()-1) 
+                {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid input.\n";
+                    break; // now this breaks the switch case
+                }
                 int cardTValue;
                 cardTValue = players[activePlayer].getCardTreasureValue(cardSlot);
                 if(cardTValue == 5) // helo
@@ -711,6 +737,12 @@ void Game::sandBag(int player, int cardSlot)
 
 void Game::helo(int player, int cardSlot)
 {
+    bool win = checkForWin();
+    if(win == true)
+    {
+        cout << "\n******** WIN!!! *********\n";
+        playAgain();
+    }
     cout << "Enter a location to helicopter from: ";
     int hLocation;
     cin >> hLocation;
@@ -789,7 +821,12 @@ void Game::gameTurn()
         }
         flipFlood();
         printGameState();
-        checkForLoss();
+        bool loss = checkForLoss();
+        if(loss == true)
+        {
+            cout<< "\n ***** GAME OVER *****\n";
+            playAgain();
+        }
         checkPlayerInWater();
     }
     nextPlayer();
@@ -845,7 +882,12 @@ void Game::checkPlayerInWater()
             {
                 cout << "Player lost!";
                 players.erase(players.begin() + i);
-                checkForLoss();
+                bool loss = checkForLoss();
+                if(loss == true)
+                {
+                    cout<< "\n ***** GAME OVER *****\n";
+                    playAgain();
+                }
             }
         }
     }
@@ -859,4 +901,21 @@ void Game::nextPlayer()
     {activePlayer = 0;}
     players[activePlayer].resetActions();
     playerTurn();
+}
+
+
+void Game::playAgain()
+{
+    cout << "Do you want to play again (y/n)?";
+    gameStarted = false;
+    char choice;
+    cin >> choice;
+    if(choice == 'y' || choice == 'Y')
+    {
+        newGame();
+    }
+    else
+    {
+        exit(0);
+    }
 }

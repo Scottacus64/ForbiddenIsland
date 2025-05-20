@@ -224,7 +224,6 @@ void Player::setActions(int actionsChange)
 
 int Player::getCardTreasureValue(int slot)
 {
-    Card* pCard;
-    pCard = playerTreasureHand.getCard(slot);
+    Card* pCard = playerTreasureHand.getCard(slot);
     return pCard->getTreasureValue();
 }

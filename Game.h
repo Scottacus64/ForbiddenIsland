@@ -40,6 +40,7 @@ public:
     void checkPlayerInWater();
     void sandBag(int player, int cardSlot);
     void helo(int player,int cardSlot);
+    void playAgain();
 
 private:
     Deck islandDeck;
@@ -63,5 +64,6 @@ private:
     int activePlayer = 0;
     int mPlayer = 100;
     bool pilotFlight = false;
+    bool gameStarted = false;
 };
 #endif
