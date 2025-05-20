@@ -56,6 +56,11 @@ void Game::flipFlood()
     int cardPosition = islandHand.getCardPosition(pIsleCard);
     int location = islandHand.getLocationFromHandSlot(cardPosition);
     cout << "\nFlooded location: " << location << "\n";
+    bool outcome = checkForLoss();
+    if(outcome == true)
+    {
+        cout << "\nLOSS!";
+    }
 }
 
 
@@ -162,7 +167,21 @@ void Game::drawTreasureCards(int playerSlot)
 {
     Player& playerUp = players[playerSlot];
     Card* pDCard;
-    Card* pCard = treasureDeck.deal();
+    Card* pCard;
+    if(treasureDeck.deckSize() > 0)
+    {
+        pCard = treasureDeck.deal();
+    }
+    else
+    {
+        treasureDiscard.shuffle();
+        for(int i=0; i<treasureDiscard.deckSize(); i++)
+        {
+            Card* dCard = treasureDiscard.deal();
+            treasureDeck.addCard(dCard);
+        }
+        pCard = treasureDeck.deal();
+    }
     if(pCard->getTreasureValue() == 7)
     {
         cout << "got a water rise card" << endl;
@@ -191,7 +210,6 @@ void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot
 
 void Game::movePlayer(Player& player, int  direction)
 {
-    cout << "in move players" << endl;
     if (direction == 0 or direction == 2 or direction == 4 or direction == 6 or player.getPlayerClass() == 2)
     {
         int result = checkValidMove(player.getLocation(), direction);
@@ -412,6 +430,7 @@ bool Game::checkForLoss()
         if(card->getTreasureValue() == 2 and card->getState() > 0){water +=1;}
         if(card->getTreasureValue() == 3 and card->getState() > 0){wind +=1;}
         if(card->getTreasureValue() == 4 and card->getState() > 0){earth +=1;}
+        if(card->getPrintValue() == "FL" && card->getState() == 0){loss = true;}
     }
     if((fire == 0 && find(playerTreasure.begin(), playerTreasure.end(), 1) == playerTreasure.end())){loss = true;}
     if((water == 0 && find(playerTreasure.begin(), playerTreasure.end(), 2) == playerTreasure.end())){loss = true;}
@@ -438,6 +457,11 @@ void Game::printGameState()
         << "\t" << " location: " << location <<  "\t" << "treasure: ";
         player.printHand();
     }
+    cout << "player treasure = ";
+    for (int i=0; i<playerTreasure.size(); i++)
+    {
+        cout << playerTreasure[i] << " ";
+    }
     cout << "\nChoose an option:\n"
     "1) Move \n"
     "2) Shore Up \n"
@@ -447,7 +471,7 @@ void Game::printGameState()
     "6) End Turn \n"
     "7) Give Treasure card \n";
     // characters: 1 engineer BG, 2 expolorer CG, 3 pilot FL, 4 nav GG, 5 diver IG, 6 messenger SG,
-    // treasure: 1 fire CS,CE / 2 waterCP, TP / 3 wind HG, WG / 4 earth TM,TS / 5 helo, 6 sandbag, 7 water rise
+    // treasure: 1 fire CS,CE / 2 water CP, TP / 3 wind HG, WG / 4 earth TM,TS / 5 helo, 6 sandbag, 7 water rise
 }
 
 
@@ -549,10 +573,12 @@ void Game::playerTurn()
                 if(cardTValue == 5) // helo
                 {
                     helo(activePlayer, cardSlot);
+                    players[activePlayer].setActions(-1);
                 }
                 if (cardTValue == 6) //sandbag
                 {
                     sandBag(activePlayer, cardSlot);
+                    players[activePlayer].setActions(-1);
                 }
                 break;
             case 5: //special ability
@@ -578,6 +604,7 @@ void Game::playerTurn()
                             cin >> destination;
                             players[activePlayer].fly(destination);
                             pilotFlight = true;
+                            players[activePlayer].setActions(-1);
                         }
                         else
                         {
@@ -598,6 +625,7 @@ void Game::playerTurn()
                                 if (treasureSlot > -1 && treasureSlot < players[activePlayer].getHandSize())
                                 {
                                     transferTreasure(players[activePlayer], players[receivingPlayer], treasureSlot);
+                                    players[activePlayer].setActions(-1);
                                 }
                             }
                             else {cout << "Can't transfer treasure \n";}
@@ -628,6 +656,7 @@ void Game::playerTurn()
                                     movePlayer(players[mPlayer], direction);
                                     printGameState();
                                 }
+                                players[activePlayer].setActions(-1);
                             }
                         }
                         break;
@@ -647,6 +676,7 @@ void Game::playerTurn()
                     cout << "Slot of card to give: ";
                     cin >> slot;
                     transferTreasure(players[activePlayer], players[rPlayer], slot);
+                    players[activePlayer].setActions(-1);
                     break;
                 }
         }
@@ -730,17 +760,20 @@ void Game::gameTurn()
                     cin >> pSlot;
                     cout << "Enter a card slot: ";
                     cin >> cSlot;
-                    Card* pCard = players[pSlot].lookAtCardSlot(cSlot);
-                    int cardType = pCard->getTreasureValue();
-                    if(cardType == 5)
+                    if(cSlot < players[pSlot].getHandSize())
                     {
-                        helo(pSlot, cSlot);
-                        numberOfHeloSandBagCards -=1;
-                    }
-                    if(cardType == 6)
-                    {
-                        sandBag(pSlot, cSlot);
-                        numberOfHeloSandBagCards -=1;
+                        Card* pCard = players[pSlot].lookAtCardSlot(cSlot);
+                        int cardType = pCard->getTreasureValue();
+                        if(cardType == 5)
+                        {
+                            helo(pSlot, cSlot);
+                            numberOfHeloSandBagCards -=1;
+                        }
+                        if(cardType == 6)
+                        {
+                            sandBag(pSlot, cSlot);
+                            numberOfHeloSandBagCards -=1;
+                        }
                     }
                     if(numberOfHeloSandBagCards < 1)
                     {
