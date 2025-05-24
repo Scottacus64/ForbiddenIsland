@@ -1,23 +1,35 @@
-cmake_minimum_required(VERSION 3.5)
+include(${CMAKE_CURRENT_LIST_DIR}/QtProjectSetup.cmake OPTIONAL)
+
+cmake_minimum_required(VERSION 3.16)
 
 project(ForbiddenIsland VERSION 1.0 LANGUAGES CXX)
 
-# Enable debug symbols
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Enable Qt5 automatic tools (if you use Qt; otherwise remove these)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+# Find Qt with required modules
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-# Add the executable
-add_executable(ForbiddenIsland
-    ${CMAKE_SOURCE_DIR}/Game.cpp
-    ${CMAKE_SOURCE_DIR}/Main.cpp
-    ${CMAKE_SOURCE_DIR}/Deck.cpp
-    ${CMAKE_SOURCE_DIR}/Card.cpp
-    ${CMAKE_SOURCE_DIR}/Hand.cpp
-    ${CMAKE_SOURCE_DIR}/Player.cpp
+message(STATUS "Qt6Widgets include dirs: ${Qt6Widgets_INCLUDE_DIRS}")
+message(STATUS "Qt6Widgets libraries: ${Qt6Widgets_LIBRARIES}")
+
+
+# Recommended Qt setup macro — handles AUTOMOC, AUTOUIC, AUTORCC
+qt_standard_project_setup()
+
+include_directories(${Qt6Widgets_INCLUDE_DIRS})
+
+
+# Use modern executable setup that registers with Qt tools properly
+qt_add_executable(ForbiddenIsland
+    Game.cpp
+    Main.cpp
+    Deck.cpp
+    Card.cpp
+    Hand.cpp
+    Player.cpp
+    ForbiddenIslandUI.cpp
 )
+
+# Link Qt libraries
+target_link_libraries(ForbiddenIsland PRIVATE Qt6::Widgets)

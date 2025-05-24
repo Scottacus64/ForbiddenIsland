@@ -34,6 +34,7 @@ public:
     int   getActions();
     int   directionValue(int direction);
     void  setActions(int actionsChange);
+    int   getTreasureCardSlot(Card* pCard);
    
 
 

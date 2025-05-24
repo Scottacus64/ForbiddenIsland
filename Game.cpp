@@ -200,6 +200,16 @@ void Game::drawTreasureCards(int playerSlot)
         pDCard = playerUp.drawCard(pCard);
         if (pDCard != nullptr)
         {
+            if(pDCard->getTreasureValue() == 5)
+            {
+                int cardSlot = players[activePlayer].getTreasureCardSlot(pDCard);
+                helo(activePlayer, cardSlot);      
+            }
+            if(pDCard->getTreasureValue() == 6)
+            {
+                int cardSlot = players[activePlayer].getTreasureCardSlot(pDCard);
+                sandBag(activePlayer, cardSlot);
+            }
             treasureDiscard.addCard(pDCard);
         }
     }

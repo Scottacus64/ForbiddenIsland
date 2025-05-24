@@ -109,6 +109,20 @@ Card* Player::drawCard(Card* pCard)
     playerTreasureHand.addCard(pCard);
     if (playerTreasureHand.getSize() > 5)
     {
+        for(int i=0; i<playerTreasureHand.getSize(); i++)
+        {
+            Card* pCard = playerTreasureHand.getCard(i);
+            if(pCard->getTreasureValue() == 5 || pCard->getTreasureValue() == 6)
+            {
+                cout << "Play this card in this slot? " << i << " (y/n)";
+                char choice;
+                cin >> choice;
+                if(choice == 'y' || choice == 'Y')
+                {                 
+                    return pCard;
+                }
+            }
+        }
         pDCard = discardCard();
         return pDCard;
     }
@@ -226,4 +240,16 @@ int Player::getCardTreasureValue(int slot)
 {
     Card* pCard = playerTreasureHand.getCard(slot);
     return pCard->getTreasureValue();
+}
+
+
+int Player::getTreasureCardSlot(Card* pCard)
+{
+    for(int i=0; i<playerTreasureHand.getSize(); i++)
+    {
+        if(pCard == playerTreasureHand.getCard(i))
+        {
+            return i;
+        }
+    }
 }
