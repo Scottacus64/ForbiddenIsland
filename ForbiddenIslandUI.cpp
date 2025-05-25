@@ -21,6 +21,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     : QWidget(parent)
 
 {
+    m_pGame = new Game();
     QString appDir = QCoreApplication::applicationDirPath();
     QString assetPath = QDir::cleanPath(appDir + QDir::separator() + "CardPngs") + QDir::separator();
 
@@ -29,8 +30,8 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     QScreen *primaryScreen = QGuiApplication::primaryScreen();
     QRect screenGeometry = primaryScreen->geometry();
     int screenWidth = screenGeometry.width();
-    this->resize(1087, 1000);
-    this->move(((screenWidth/2) -(1087/2)), 0);
+    this->resize(2200, 1000);
+    this->move(((screenWidth/2) -(2000/2)), 0);
 
     // Create QLabel and QPushButton instances
     QLabel *c0 = new QLabel(this);
@@ -62,13 +63,12 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
 
     QFont lightLargeFont(lightFontFamily); 
     lightLargeFont.setPointSize(84);
-    QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/water.jpg";
-    water = QPixmap(path);
+
     // set up all of the card image QPixmaps
     const vector <string> cardTreasure = {"WRBC", "EWR", "FWR", "GWR", "HLWR", "LWR",  "SBWR", "WR"};
     const vector <string> cardFlood = {"FIC", "BBC", "BGC", "CAC", "CEC", "CFC", "CGC", "CPC", "CSC", "DDC", "FLC", "GGC", "HGC", "IGC", "LLC", "MMC", "OC", "PRC", "SGC", "THC", "TMC", "TPC", "TSC", "WC","WGC"};
     const vector <string> cardIsland = {"BBB", "BBF", "BGB", "BGF", "CAB", "CAF", "CEB", "CEF", "CFB", "CFF", "CGB", "CGF", "CPB", "CPF", "CSB", "CSF", "DDB", "DDF", "FLB", "FLF", "GGB", "GGF", "HGB", "HGF", "IGB", "IGF", "LLB", "LLF", "MMB", "MMF", "OB", "OF", "PRB", "PRF", "SGB", "SGF", "THB", "THF", "TMB", "TMF", "TPB", "TPF", "TSB", "TSF", "WB", "WF", "WGB", "WGF"};
-    const vector <string> cardPlayer = {"DC", "EC", "ExC", "MC", "NC", "PC",};
+    const vector <string> cardPlayer = {"DC", "EC", "ExC", "MC", "NC", "PC"};
     const vector <int> invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
     for(int i=0; i<cardTreasure.size(); i++)
     {
@@ -86,7 +86,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     {
         cardImagePlayer[i] = QPixmap(assetPath + QString::fromStdString(cardPlayer[i]) + ".png");
     }
-
+    // set up the island
     int y = 0;
     int x = 0;
     int counter = 0;
@@ -102,39 +102,121 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             x+=1;
             continue;
         }
-        string name = "iC" + to_string(i);
-        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/BBF.png";
+        string name = "iC" + to_string(counter);
+        string cardPV = m_pGame->getIslandCard(counter);
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardPV) + ".png";
         m_iC[counter] = new QPushButton(QString::fromStdString(name), this);
         m_iC[counter]->setObjectName(QString::fromStdString(name));
-        m_iC[counter]->setGeometry(QRect(220 + (x*105), 150 + (y*105), 100, 100));
-        m_iC[counter]->setIcon(QPixmap(path));//QString::fromUtf8("../../VSC/CPP/ForbiddenIsland/CardPNGs/BBF.png"))); 
+        m_iC[counter]->setGeometry(QRect(220 + (x*100), 190 + (y*100), 100, 100));
+        m_iC[counter]->setIcon(QPixmap(path));
         m_iC[counter]->setText(QString());
         m_iC[counter]->setEnabled(true);
         m_iC[counter]->setVisible(true);
         QSize iconSize(100, 100);
         m_iC[counter]->setIconSize(iconSize);
-        counter+=1;
-        
-        x+=1;
-        
+        counter+=1;     
+        x+=1;     
         //connect(m_iC[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
     }
 
-    // set up the four Ace piles at the top
-    /*for (int i = 0; i < 4; i++) 
+    // set up the four player's and treasure hands    
+    for (int player=0; player<4; player++)
     {
-        std::string name = "A" + std::to_string(i);
-        m_pA[i] = new QPushButton(QString::fromStdString(name), this);
-        m_pA[i]->setObjectName(QString::fromStdString(name));
-        m_pA[i]->setGeometry(QRect(290 + (i * 110), 50, 100, 140));
-        m_pA[i]->setIcon(QPixmap()); 
-        m_pA[i]->setText(QString());
-        m_pA[i]->setEnabled(false);
-        m_pA[i]->setVisible(false);
-        QSize iconSize(100, 140);
-        m_pA[i]->setIconSize(iconSize);
-        connect(m_pA[i], &QPushButton::clicked, this, &SolitaireUI::cardClicked);
+        for (int i = 0; i < 6; i++) 
+        {
+            std::string cardName = "P" + std::to_string(player) + std::to_string(i);
+            m_playerCards[player][i] = new QPushButton(QString::fromStdString(cardName), this);
+            m_playerCards[player][i]->setObjectName(QString::fromStdString(cardName));
+            QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/WRBC";
+            QPixmap pixmap(path);
+
+            //pixmap = pixmap.scaled(90, 126, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            if(player == 2){m_playerCards[player][i]->setGeometry(QRect(290 + (i * 100), 5, 90, 126));}
+            if(player == 0){m_playerCards[player][i]->setGeometry(QRect(290 + (i * 100), 850, 90, 126));}
+            if(player == 1){m_playerCards[player][i]->setGeometry(QRect(20, 140 + (i * 100), 126, 90));}
+            if(player == 3){m_playerCards[player][i]->setGeometry(QRect(900, 140 + (i * 100), 126, 90));}
+            if (player == 1 || player == 3) 
+            {
+                QTransform transform;
+                transform.rotate(90);
+                pixmap = pixmap.transformed(transform);
+                m_playerCards[player][i]->setIconSize(QSize(126,90));
+            }
+            else
+            {
+                m_playerCards[player][i]->setIconSize(QSize(90, 126));
+            }
+            m_playerCards[player][i]->setIcon(pixmap); 
+            m_playerCards[player][i]->setText(QString());
+            m_playerCards[player][i]->setEnabled(true);
+            m_playerCards[player][i]->setVisible(true);
+            
+            
+            //connect(m_pA[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
+        }
     }
+
+    // set up the four play cards
+    for(int i=0; i<4; i++)
+    {
+        std::string cardName = "P" + std::to_string(i);
+
+        m_player[i] = new QPushButton(QString::fromStdString(cardName), this);
+        m_player[i]->setObjectName(QString::fromStdString(cardName));
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/FIC";
+        QPixmap pixmap(path);
+        if(i == 2){m_player[i]->setGeometry(QRect(190, 5, 90, 126));}
+        if(i == 0){m_player[i]->setGeometry(QRect(190, 850, 90, 126));}
+        if(i == 1){m_player[i]->setGeometry(QRect(20, 740, 126, 90));}
+        if(i == 3){m_player[i]->setGeometry(QRect(900, 740, 126, 90));}
+        if (i == 1 || i == 3) 
+        {
+            QTransform transform;
+            transform.rotate(90);
+            pixmap = pixmap.transformed(transform);
+            QSize iconSize (126, 90);
+            m_player[i]->setIconSize(iconSize);
+        }
+        else
+        {
+            QSize iconSize(90, 126);
+            m_player[i]->setIconSize(iconSize);
+        }
+        m_player[i]->setIcon(pixmap); 
+        m_player[i]->setText(QString());
+        m_player[i]->setEnabled(false);
+        m_player[i]->setVisible(true);
+    }
+
+    // set up the flood draw and discard decks
+    for(int i=0; i<2; i++)
+    {
+        m_floodDecks[i] = new QPushButton(QString::fromStdString("fD" + i), this);
+        m_floodDecks[i]->setObjectName(QString::fromStdString("fD" + i));
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/WRBC";
+        m_floodDecks[i]->setGeometry(QRect(1300 + (i*150), 20, 90, 126));
+        m_floodDecks[i]->setIcon(QPixmap(path));
+        m_floodDecks[i]->setText(QString());
+        m_floodDecks[i]->setEnabled(false);
+        m_floodDecks[i]->setVisible(true);
+        QSize iconSize(90, 126);
+        m_floodDecks[i]->setIconSize(iconSize);
+    }
+    // set up the treaure draw and discard decks
+    for(int i=0; i<2; i++)
+    {
+        m_treasureDecks[i] = new QPushButton(QString::fromStdString("tD" + i), this);
+        m_treasureDecks[i]->setObjectName(QString::fromStdString("tD" + i));
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/FIC";
+        m_treasureDecks[i]->setGeometry(QRect(1300 + (i*150), 200, 90, 126));
+        m_treasureDecks[i]->setIcon(QPixmap(path));
+        m_treasureDecks[i]->setText(QString());
+        m_treasureDecks[i]->setEnabled(false);
+        m_treasureDecks[i]->setVisible(true);
+        QSize iconSize(90, 126);
+        m_treasureDecks[i]->setIconSize(iconSize);
+    }
+    /*
     // set up all of the columns of cards in the playfield area
     for (int k=0; k<7; k++) 
     {
@@ -278,7 +360,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
 
 ForbiddenIslandUI::~ForbiddenIslandUI()
 {
-    delete ui;
+    delete m_pGame;
 }
 
 
@@ -598,11 +680,24 @@ void ForbiddenIslandUI::disableDrawPile(int pile)
 }*/
  
 
-void ForbiddenIslandUI::paintEvent(QPaintEvent *event) 
+/*void ForbiddenIslandUI::paintEvent(QPaintEvent *event) 
 {
     QPainter painter(this);
     // Paint the green background image
     painter.drawPixmap(0, 0, width(), height(), water);
+}*/
+
+void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
+{
+    Q_UNUSED(event);
+
+    QPainter painter(this);
+    painter.fillRect(rect(), QColor("#002366")); 
+    QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/water.jpg";
+    water = QPixmap(path);
+    QRect waterArea(180, 150, 680, 680); 
+     painter.drawPixmap(waterArea, water.scaled(waterArea.size(), Qt::KeepAspectRatioByExpanding));
+
 }
 
 

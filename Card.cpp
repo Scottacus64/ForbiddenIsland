@@ -2,7 +2,7 @@
 #include "Card.h"
 #include <iostream>
 
-const vector<string> Card::pvList = {"BG", "CG", "FL", "GG", "IG", "SG",  "CE", "CS", "CP", "TP", "HG", "WG", "TM", "TS",  "BB", "CA", "CF", "DD", "LL", "MM", "Ob", "PR", "TH", "Wt" };
+const vector<string> Card::pvList = {"BG", "CG", "FL", "GG", "IG", "SG",  "CE", "CS", "CP", "TP", "HG", "WG", "TM", "TS", "BB", "CA", "CF", "DD", "LL", "MM", "Ob", "PR", "TH", "Wt" };
 
 //using namespace std;
 

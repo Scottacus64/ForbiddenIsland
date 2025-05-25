@@ -9,6 +9,9 @@
 #include <QTimer>
 #include <QTime>
 #include <QElapsedTimer>
+#include "Game.h"
+#include <string>
+#include <iostream>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ForbiddenIslandUI; }
@@ -56,6 +59,11 @@ private:
     QPixmap cardImagePlayer[6];
     QPixmap water;
     QPushButton* m_iC[24];
+    Game* m_pGame;
+    QPushButton* m_playerCards[4][6];
+    QPushButton* m_player[4];
+    QPushButton* m_floodDecks[2];
+    QPushButton* m_treasureDecks[2];
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

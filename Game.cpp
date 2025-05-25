@@ -506,7 +506,18 @@ void Game::printGameState()
 
 void Game::newGame()
 {
-    int numberOfPlayers = 0;
+    int numberOfPlayers = 2;
+    /*cout << "Enter the number of players (1–4): ";
+    while (!(cin >> numberOfPlayers) || numberOfPlayers < 1 || numberOfPlayers > 4) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input. Please enter a number between 1 and 4: ";
+    }*/
+    createPlayers(numberOfPlayers);
+    for(int i=0; i<players.size(); i++)
+    {
+        players[i].printPlayer();
+    }
     Card* pCard;
     // rebuild and shuffle the decks
     islandDeck.resetState();
@@ -543,21 +554,30 @@ void Game::newGame()
         flipFlood();
     }
     cout << endl;
-    cout << "Enter the number of players (1–4): ";
-    while (!(cin >> numberOfPlayers) || numberOfPlayers < 1 || numberOfPlayers > 4) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input. Please enter a number between 1 and 4: ";
-    }
-    createPlayers(numberOfPlayers);
-    for(int i=0; i<players.size(); i++)
-    {
-        players[i].printPlayer();
-    }
+
     gameStarted = true;
-    playerTurn();
+    //playerTurn();
 }
 
+
+string Game::getIslandCard(int position)
+{
+    Card* pCard = islandHand.getCard(position);
+    string name = pCard->getPrintValue();
+    if(pCard->getState() == 2)
+    {
+        name = name + "F";
+    }
+    if(pCard->getState() == 1)
+    {
+        name = name + "B";
+    }
+    if(pCard->getState() == 0)
+    {
+        name = "";
+    }
+    return name;
+}
 
 void Game::playerTurn()
 {

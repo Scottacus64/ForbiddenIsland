@@ -1,6 +1,6 @@
 #include "ForbiddenIslandUI.h"
 //#include "ForbiddenIsland.h"
-#include "Game.h"
+//#include "Game.h"
 
 #include <QApplication>
 

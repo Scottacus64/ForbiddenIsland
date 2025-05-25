@@ -41,6 +41,7 @@ public:
     void sandBag(int player, int cardSlot);
     void helo(int player,int cardSlot);
     void playAgain();
+    string getIslandCard(int position);
 
 private:
     Deck islandDeck;
