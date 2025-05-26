@@ -35,6 +35,7 @@ public:
     int   directionValue(int direction);
     void  setActions(int actionsChange);
     int   getTreasureCardSlot(Card* pCard);
+    string getPlayerName();
    
 
 
@@ -43,6 +44,7 @@ private:
     int  playerClass;
     int  location;
     int  playerSlot;
+    string playerName;
     Hand playerTreasureHand;
 };
 

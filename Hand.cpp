@@ -73,8 +73,15 @@ void Hand::addCardAt(Card* pCard, int slot)
 
 Card* Hand::getCard(int position)
 {
-    Card* pCard = m_hand.at(position);
-    return pCard;
+    if(position < m_hand.size())
+    {
+        Card* pCard = m_hand.at(position);
+        return pCard;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 

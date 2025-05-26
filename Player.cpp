@@ -10,8 +10,10 @@ Player::Player()
 
 Player::Player(int pc, int slot)
 {
+    vector <string> classNames = {"Engineer", "Expolorer", "Pilot", "Navigator", "Diver", "Mssenger"};
     playerSlot = slot;
     playerClass = pc;
+    playerName = classNames[pc-1];
     actions = 3;
     location = 0;
     playerTreasureHand = Hand();
@@ -157,10 +159,6 @@ Card* Player::playCardSlot(int slot)
         Card* pCard = playerTreasureHand.removeCard(slot);
         return pCard;
     }
-    else
-    {
-
-    }
 }
 
 
@@ -239,7 +237,14 @@ void Player::setActions(int actionsChange)
 int Player::getCardTreasureValue(int slot)
 {
     Card* pCard = playerTreasureHand.getCard(slot);
-    return pCard->getTreasureValue();
+    if(pCard)
+    {
+        return pCard->getTreasureValue();
+    }
+    else
+    {
+        return 8;
+    }
 }
 
 
@@ -252,4 +257,10 @@ int Player::getTreasureCardSlot(Card* pCard)
             return i;
         }
     }
+}
+
+
+string Player::getPlayerName()
+{
+    return playerName;
 }

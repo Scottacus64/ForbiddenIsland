@@ -42,6 +42,7 @@ public:
     void refreshDecks();*/
     
 public slots:
+    void dialogButtonClicked();
     /*void cardClicked();
     void easyClicked();
     void hardClicked();*/
@@ -64,6 +65,11 @@ private:
     QPushButton* m_player[4];
     QPushButton* m_floodDecks[2];
     QPushButton* m_treasureDecks[2];
+    QLabel* logo;
+    QLabel* dialog;
+    QPushButton* m_dialog[7];
+    int dialogMode = 0;
+    int squaresToFlood = 6;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

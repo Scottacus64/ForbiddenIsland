@@ -14,15 +14,17 @@ class Game
 public:
     Game();
     ~Game();
+    void createPlayers(int numberOfPlayers);
     void newGame();
     void removeValidSquare(int location);
     void printValidSquares();
     int  checkValidMove(int location, int direction);
     int  destinationValue(int location, int direction);
-    void flipFlood();
+    int  flipFlood();
     void shuffleFlood();
     void shuffleTreasure();
-    void createPlayers (int numberOfPlayers);
+    Player* getPlayer(int slot);
+    Player* getActivePlayer();
     void getTreasure(Player& player, int treasure);
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
@@ -42,6 +44,9 @@ public:
     void helo(int player,int cardSlot);
     void playAgain();
     string getIslandCard(int position);
+    int   getPlayerTreasureCard(int player, int slot);
+    Deck* getFloodDiscard();
+    Deck* getTreasureDiscard();
 
 private:
     Deck islandDeck;
@@ -66,5 +71,6 @@ private:
     int mPlayer = 100;
     bool pilotFlight = false;
     bool gameStarted = false;
+    int totalFlipped = 0;
 };
 #endif

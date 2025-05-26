@@ -16,7 +16,6 @@ Game::Game()
     treasureDeck = Deck(28, false);
     treasureDiscard = Deck(0);
     validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
-    newGame();
 }
 
 
@@ -40,21 +39,21 @@ void Game::printValidSquares()
 }
 
 
-void Game::flipFlood()
+int Game::flipFlood()
 {
     Card* pCard;
     Card* pIsleCard;
-    pCard = floodDeck.deal();
-    int id = pCard->getID();
-    pIsleCard = islandHand.getCardWithId(id);
-    pIsleCard->floodCard();
-    floodDiscard.addCard(pCard);  
-    if(floodDeck.deckSize() == 0)
+    pCard = floodDeck.deal();                                           //  get flood deck card
+    int id = pCard->getID();                                            // get the card's ID value
+    pIsleCard = islandHand.getCardWithId(id);                           // use that ID to find the card from the islandHand that matches
+    pIsleCard->floodCard();                                             // decrement the card's state value
+    floodDiscard.addCard(pCard);                                        // add the flood deck card to the discard pile
+    if(floodDeck.deckSize() == 0)                                       // if the deck gets to zero size, rebuild and shuffle
     {
         floodDiscard.recycleDeck(&floodDeck);
     }
-    int cardPosition = islandHand.getCardPosition(pIsleCard);
-    int location = islandHand.getLocationFromHandSlot(cardPosition);
+    int cardPosition = islandHand.getCardPosition(pIsleCard);           // get the slot of the islandHand slot that the card resides at
+    int location = islandHand.getLocationFromHandSlot(cardPosition);    // get the 0-36 location of the card
     cout << "\nFlooded location: " << location << "\n";
     bool loss = checkForLoss();
     if(loss == true && gameStarted == true)
@@ -62,6 +61,9 @@ void Game::flipFlood()
         cout<< "\n ***** GAME OVER *****\n";
         playAgain();
     }
+    totalFlipped +=1;
+    if(totalFlipped > 5){gameStarted = true;}
+    return cardPosition;
 }
 
 
@@ -183,7 +185,13 @@ void Game::drawTreasureCards(int playerSlot)
         }
         pCard = treasureDeck.deal();
     }
-    if(pCard->getTreasureValue() == 7)
+    if(pCard->getTreasureValue() == 7 && gameStarted == false)
+    {
+        treasureDeck.addCard(pCard);
+        treasureDeck.shuffle();
+        drawTreasureCards(playerSlot);
+    }
+    if(pCard->getTreasureValue() == 7 && gameStarted == true)
     {
         cout << "got a water rise card" << endl;
         shuffleFlood();                     //shuffle the flood discard deck and put it on top of the flood deck
@@ -506,18 +514,7 @@ void Game::printGameState()
 
 void Game::newGame()
 {
-    int numberOfPlayers = 2;
-    /*cout << "Enter the number of players (1–4): ";
-    while (!(cin >> numberOfPlayers) || numberOfPlayers < 1 || numberOfPlayers > 4) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input. Please enter a number between 1 and 4: ";
-    }*/
-    createPlayers(numberOfPlayers);
-    for(int i=0; i<players.size(); i++)
-    {
-        players[i].printPlayer();
-    }
+    totalFlipped = 0;
     Card* pCard;
     // rebuild and shuffle the decks
     islandDeck.resetState();
@@ -540,23 +537,15 @@ void Game::newGame()
     if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
         {
             pCard = islandDeck.deal();
-            islandHand.addCard(pCard);
-            islandCardPositions.push_back({pCard->getID(), i});
+            islandHand.addCard(pCard);                              // islandHand is the hand from 0-23 of card pointers
+            islandCardPositions.push_back({pCard->getID(), i});     // islandCardPositions is 0-35 vector pairs of {card ID, slot}
         }
         else
         {
-            islandCardPositions.push_back({100,i});
+            islandCardPositions.push_back({100,i});                 // pad out islandCardPositions with an ID of 100 if not a legal spot
         }   
     }
-    // sink six island cards by one degree
-    for (int i=0; i<6; i++)
-    {
-        flipFlood();
-    }
-    cout << endl;
-
-    gameStarted = true;
-    //playerTurn();
+    islandHand.printHand(1);
 }
 
 
@@ -578,6 +567,7 @@ string Game::getIslandCard(int position)
     }
     return name;
 }
+
 
 void Game::playerTurn()
 {
@@ -849,7 +839,7 @@ void Game::gameTurn()
                 printGameState();
             }
         }
-        flipFlood();
+        int location = flipFlood();
         printGameState();
         bool loss = checkForLoss();
         if(loss == true)
@@ -948,4 +938,43 @@ void Game::playAgain()
     {
         exit(0);
     }
+}
+
+
+Player* Game::getPlayer(int slot)
+{
+    if(players.size()>slot)
+    {
+        Player* pPlayer = &players[slot];
+        return pPlayer;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+int Game::getPlayerTreasureCard(int player, int slot)
+{
+    int tValue = players[player].getCardTreasureValue(slot);
+    return tValue; 
+}
+
+
+Deck* Game::getFloodDiscard()
+{
+    return &floodDiscard;
+}
+
+
+Deck* Game::getTreasureDiscard()
+{
+    return &treasureDiscard;
+}
+
+
+Player* Game::getActivePlayer()
+{
+    return &players[activePlayer];
 }
