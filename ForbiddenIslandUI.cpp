@@ -158,6 +158,33 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         m_iC[counter]->setVisible(true);
         QSize iconSize(100, 100);
         m_iC[counter]->setIconSize(iconSize);
+        int xDelta = 0;
+        int yDelta = 0;
+        for(int j=0; j<4; j++)
+        {
+            if(j==1 || j==3){xDelta = 40;}
+            else{xDelta = 0;}
+            if(j>1){yDelta = 40;}
+            string pName = "pawn" + to_string(j) + to_string(x);
+            QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(3+j) + ".png";
+            m_pawns[j][counter] = new QPushButton(QString::fromStdString(pName), this);
+            m_pawns[j][counter]->setObjectName(QString::fromStdString(name));
+            m_pawns[j][counter]->setGeometry(QRect(230+(x*100)+xDelta, 200+(y*100)+yDelta, 40, 40));
+            m_pawns[j][counter]->setText(QString());
+            QPixmap icon(path);
+            m_pawns[j][counter]->setIcon(icon);
+            m_pawns[j][counter]->setIconSize(QSize(40, 40));
+            m_pawns[j][counter]->setStyleSheet(
+            "QPushButton { "
+            "background-color: transparent; "
+            "border: none; "
+            "padding: 0px; "
+            "margin: 0px; "
+            "}"
+            );
+            m_pawns[j][counter]->setEnabled(true);
+            m_pawns[j][counter]->setVisible(true);
+        }
         counter+=1;     
         x+=1;     
         //connect(m_iC[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
@@ -387,7 +414,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
     QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
     if (clickedButton) 
     {
-        if(dialogMode == 0)
+        if(dialogMode == 0)  // Set up UI
         {
             int numberOfPlayers = 2;
             string name = clickedButton->objectName().toStdString();
@@ -471,10 +498,8 @@ void ForbiddenIslandUI::dialogButtonClicked()
             m_dialog[4]->setText(numLeft + " tiles left");
             return;
         }
-        if(dialogMode == 1)
+        if(dialogMode == 1)  // Flood tiles
         {
-            // Now flip 6 island squares
-           
             int location = m_pGame->flipFlood();
             string iName = m_pGame->getIslandCard(location);
             string name = iName + ".png";
@@ -499,6 +524,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 dialog->setText("Choose an action for: " + QString::fromStdString(pName));
                 for(int i=0; i<7; i++)
                 {
+                    m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
                     m_dialog[i]->setVisible(true);
                     m_dialog[i]->setEnabled(true);
                 }
@@ -513,9 +539,13 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 return;
             }
         }
-        if(dialogMode == 2)
+        if(dialogMode == 2)  // Players Up
         {
-
+            for(int i=0; i<7; i++)
+            {
+                m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
+            }
+            clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");
         }
     }
 }

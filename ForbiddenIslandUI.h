@@ -65,6 +65,7 @@ private:
     QPushButton* m_player[4];
     QPushButton* m_floodDecks[2];
     QPushButton* m_treasureDecks[2];
+    QPushButton* m_pawns[4][24];
     QLabel* logo;
     QLabel* dialog;
     QPushButton* m_dialog[7];
