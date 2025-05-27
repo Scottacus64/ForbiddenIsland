@@ -14,6 +14,7 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <algorithm>
+#include <regex>
 
 
 ForbiddenIslandUI::~ForbiddenIslandUI()
@@ -171,9 +172,9 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             if(j==1 || j==3){xDelta = 40;}
             else{xDelta = 0;}
             if(j>1){yDelta = 40;}
-            string pName = "pawn" + to_string(j) + to_string(x);
+            string pName = "pawn" + to_string(j) + ":" + to_string(i);
             m_pawns[j][i] = new QPushButton(QString::fromStdString(pName), this);
-            m_pawns[j][i]->setObjectName(QString::fromStdString(name));
+            m_pawns[j][i]->setObjectName(QString::fromStdString(pName));
             m_pawns[j][i]->setGeometry(QRect(230+(x*100)+xDelta, 200+(y*100)+yDelta, 40, 40));
             m_pawns[j][i]->setText(QString());
             QPixmap icon(path);
@@ -279,8 +280,10 @@ void ForbiddenIslandUI::dialogButtonClicked()
         {
             int numberOfPlayers = 2;
             string name = clickedButton->objectName().toStdString();
-            if(name == "dialogButton4"){numberOfPlayers = 3;}
-            if(name == "dialogButton5"){numberOfPlayers = 4;}
+            cout << name << endl;
+            if(name == "dB4"){numberOfPlayers = 3;}
+            if(name == "dB5"){numberOfPlayers = 4;}
+            cout << "Number of Players: " << numberOfPlayers << endl;
             m_pGame->createPlayers(numberOfPlayers);
             updatePawns();
             // set up the four player cards
@@ -381,8 +384,8 @@ void ForbiddenIslandUI::dialogButtonClicked()
             m_dialog[4]->setText(numLeft + " tiles left");
             if(squaresToFlood < 1)
             {
-                Player* activePlayer =m_pGame->getActivePlayer();
-                string pName = activePlayer->getPlayerName();
+                Player* aPlayer =m_pGame->getActivePlayer();
+                string pName = aPlayer->getPlayerName();
                 dialog->setText("Choose an action for: " + QString::fromStdString(pName));
                 for(int i=0; i<7; i++)
                 {
@@ -419,16 +422,45 @@ void ForbiddenIslandUI::dialogButtonClicked()
 
 void ForbiddenIslandUI::pawnClicked()
 {
+    QPushButton* clickedPawn = qobject_cast<QPushButton*>(sender());
+    QString pName = clickedPawn->objectName();
+    string sName = pName.toStdString();
+    regex re(R"(pawn(\d+):(\d+))");
+    smatch match;
+    int playerSlot;
+    int gridLocation;
+    if (regex_match(sName, match, re)) 
+    {
+        playerSlot = stoi(match[1].str());
+        gridLocation = stoi(match[2].str());
+        cout << "x = " << playerSlot << ", y = " << gridLocation << std::endl;
+    }
+
     if(playerAction == 0)
     {
-        cout << "Pawn clicked" << endl;
+        if(playerSlot == m_pGame->getActivePlayerSlot())
+        {
+            cout << "Active Player found!!" << endl;
+        }
+        
     }
 }
 
 
 void ForbiddenIslandUI::iTileClicked()
 {
+    QPushButton* clickedIsleTile = qobject_cast<QPushButton*>(sender());
     cout << "Isle Tile clicked" << endl;
+    QString iName = clickedIsleTile->objectName();
+    string sName = iName.toStdString();
+    regex re(R"(iC(\d+))");
+    smatch match;
+    int iLocation;
+    if (regex_match(sName, match, re))
+    {
+        iLocation = stoi(match[1].str());
+    }
+    highlightIsleTile(iLocation, 0);
 }
 
 
@@ -460,17 +492,34 @@ void ForbiddenIslandUI::updatePawns()
 }
 
 
+void ForbiddenIslandUI::highlightIsleTile(int tileLocation, int direction)
+{
+    if(oldTile > -1)
+    {
+        m_iC[oldTile]->setIcon(originalPixmap[direction]);
+    }
+    QIcon icon = m_iC[tileLocation]->icon();
+    QSize size = m_iC[tileLocation]->iconSize();
+    QPixmap currentPixmap = icon.pixmap(size);
+    originalPixmap[direction] = currentPixmap;
+    oldTile = tileLocation;
+    QPixmap highlightedPixmap = currentPixmap;
+    QPainter painter(&highlightedPixmap);
+    painter.fillRect(highlightedPixmap.rect(), QColor(255, 255, 0, 100));
+    painter.end();
+    m_iC[tileLocation]->setIcon(highlightedPixmap);
+}
+
+
 void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
-
     QPainter painter(this);
     painter.fillRect(rect(), QColor("#002366")); 
     QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/water.jpg";
     water = QPixmap(path);
     QRect waterArea(180, 150, 680, 680); 
-     painter.drawPixmap(waterArea, water.scaled(waterArea.size(), Qt::KeepAspectRatioByExpanding));
-
+    painter.drawPixmap(waterArea, water.scaled(waterArea.size(), Qt::KeepAspectRatioByExpanding));
 }
 
 
@@ -789,14 +838,6 @@ void ForbiddenIslandUI::disableDrawPile(int pile)
     }
 }*/
  
-
-/*void ForbiddenIslandUI::paintEvent(QPaintEvent *event) 
-{
-    QPainter painter(this);
-    // Paint the green background image
-    painter.drawPixmap(0, 0, width(), height(), water);
-}*/
-
 
 /*void SolitaireUI::delayTimer(int delay)
 {

@@ -29,6 +29,7 @@ public:
     ~ForbiddenIslandUI();
     void paintEvent(QPaintEvent *event);
     void updatePawns();
+    void highlightIsleTile(int tileLocation, int direction);
     /*void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);
@@ -76,6 +77,10 @@ private:
     int squaresToFlood = 6;
     vector <int> validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
     int playerAction = 9;
+    int activePlayerSlot;
+    int oldTile = -1;
+    QPixmap originalPixmap[8];
+    int newTile;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

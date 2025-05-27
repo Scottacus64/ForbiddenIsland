@@ -986,3 +986,8 @@ int Game::getNumberOfPlayers()
 {
     return players.size();
 }
+
+int Game::getActivePlayerSlot()
+{
+    return activePlayer;
+}

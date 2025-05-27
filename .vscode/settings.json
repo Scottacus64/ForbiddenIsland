@@ -73,6 +73,7 @@
         "charconv": "cpp",
         "fstream": "cpp",
         "execution": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "regex": "cpp"
     }
 }

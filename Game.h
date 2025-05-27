@@ -25,6 +25,7 @@ public:
     void shuffleTreasure();
     Player* getPlayer(int slot);
     Player* getActivePlayer();
+    int  getActivePlayerSlot();
     void getTreasure(Player& player, int treasure);
     void drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
