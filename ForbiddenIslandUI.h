@@ -59,13 +59,13 @@ private:
     QPixmap cardImageIsland[48];
     QPixmap cardImagePlayer[6];
     QPixmap water;
-    QPushButton* m_iC[24];
+    QPushButton* m_iC[36];
     Game* m_pGame;
     QPushButton* m_playerCards[4][6];
     QPushButton* m_player[4];
     QPushButton* m_floodDecks[2];
     QPushButton* m_treasureDecks[2];
-    QPushButton* m_pawns[4][24];
+    QPushButton* m_pawns[4][36];
     QLabel* logo;
     QLabel* dialog;
     QPushButton* m_dialog[7];

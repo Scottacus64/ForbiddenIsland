@@ -146,18 +146,18 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             x+=1;
             continue;
         }
-        string name = "iC" + to_string(counter);
+        string name = "iC" + to_string(i);
         string cardPV = m_pGame->getIslandCard(counter);
         QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardPV) + ".png";
-        m_iC[counter] = new QPushButton(QString::fromStdString(name), this);
-        m_iC[counter]->setObjectName(QString::fromStdString(name));
-        m_iC[counter]->setGeometry(QRect(220 + (x*100), 190 + (y*100), 100, 100));
-        m_iC[counter]->setIcon(QPixmap(path));
-        m_iC[counter]->setText(QString());
-        m_iC[counter]->setEnabled(true);
-        m_iC[counter]->setVisible(true);
+        m_iC[i] = new QPushButton(QString::fromStdString(name), this);
+        m_iC[i]->setObjectName(QString::fromStdString(name));
+        m_iC[i]->setGeometry(QRect(220 + (x*100), 190 + (y*100), 100, 100));
+        m_iC[i]->setIcon(QPixmap(path));
+        m_iC[i]->setText(QString());
+        m_iC[i]->setEnabled(true);
+        m_iC[i]->setVisible(true);
         QSize iconSize(100, 100);
-        m_iC[counter]->setIconSize(iconSize);
+        m_iC[i]->setIconSize(iconSize);
         int xDelta = 0;
         int yDelta = 0;
         for(int j=0; j<4; j++)
@@ -166,15 +166,15 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             else{xDelta = 0;}
             if(j>1){yDelta = 40;}
             string pName = "pawn" + to_string(j) + to_string(x);
-            QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(3+j) + ".png";
-            m_pawns[j][counter] = new QPushButton(QString::fromStdString(pName), this);
-            m_pawns[j][counter]->setObjectName(QString::fromStdString(name));
-            m_pawns[j][counter]->setGeometry(QRect(230+(x*100)+xDelta, 200+(y*100)+yDelta, 40, 40));
-            m_pawns[j][counter]->setText(QString());
+            //QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(3+j) + ".png";
+            m_pawns[j][i] = new QPushButton(QString::fromStdString(pName), this);
+            m_pawns[j][i]->setObjectName(QString::fromStdString(name));
+            m_pawns[j][i]->setGeometry(QRect(230+(x*100)+xDelta, 200+(y*100)+yDelta, 40, 40));
+            m_pawns[j][i]->setText(QString());
             QPixmap icon(path);
-            m_pawns[j][counter]->setIcon(icon);
-            m_pawns[j][counter]->setIconSize(QSize(40, 40));
-            m_pawns[j][counter]->setStyleSheet(
+            m_pawns[j][i]->setIcon(icon);
+            m_pawns[j][i]->setIconSize(QSize(40, 40));
+            m_pawns[j][i]->setStyleSheet(
             "QPushButton { "
             "background-color: transparent; "
             "border: none; "
@@ -182,11 +182,12 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             "margin: 0px; "
             "}"
             );
-            m_pawns[j][counter]->setEnabled(true);
-            m_pawns[j][counter]->setVisible(true);
-        }
-        counter+=1;     
-        x+=1;     
+            m_pawns[j][i]->setEnabled(false);
+            m_pawns[j][i]->setVisible(false);
+            
+        }   
+        x+=1;  
+        counter +=1;   
         //connect(m_iC[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
     }
 
@@ -421,6 +422,19 @@ void ForbiddenIslandUI::dialogButtonClicked()
             if(name == "dialogButton4"){numberOfPlayers = 3;}
             if(name == "dialogButton5"){numberOfPlayers = 4;}
             m_pGame->createPlayers(numberOfPlayers);
+            for(int i=0; i<numberOfPlayers; i++)
+            {
+                Player* player = m_pGame->getPlayer(i);
+                int loc = player->getLocation();
+                int playerClass = player->getPlayerClass();
+                cout << i << ";" << playerClass << ":" << loc << endl;
+                QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(playerClass) + ".png";
+                QPixmap pixmap3;
+                pixmap3.load(path);
+                m_pawns[i][loc]->setIcon(pixmap3);
+                m_pawns[i][loc]->setVisible(true);
+                m_pawns[i][loc]->setEnabled(true);
+            }
             // set up the four player cards
             for(int i=0; i<4; i++)
             {
