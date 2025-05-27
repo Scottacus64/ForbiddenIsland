@@ -47,6 +47,7 @@ public:
     int   getPlayerTreasureCard(int player, int slot);
     Deck* getFloodDiscard();
     Deck* getTreasureDiscard();
+    int getNumberOfPlayers();
 
 private:
     Deck islandDeck;

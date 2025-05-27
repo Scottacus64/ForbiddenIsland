@@ -28,6 +28,7 @@ public:
     ForbiddenIslandUI(QWidget *parent = nullptr);
     ~ForbiddenIslandUI();
     void paintEvent(QPaintEvent *event);
+    void updatePawns();
     /*void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);
@@ -43,6 +44,8 @@ public:
     
 public slots:
     void dialogButtonClicked();
+    void pawnClicked();
+    void iTileClicked();
     /*void cardClicked();
     void easyClicked();
     void hardClicked();*/
@@ -71,6 +74,8 @@ private:
     QPushButton* m_dialog[7];
     int dialogMode = 0;
     int squaresToFlood = 6;
+    vector <int> validSquares = {2,3,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,32,33};
+    int playerAction = 9;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

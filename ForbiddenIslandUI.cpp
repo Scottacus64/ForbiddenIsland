@@ -16,6 +16,11 @@
 #include <algorithm>
 
 
+ForbiddenIslandUI::~ForbiddenIslandUI()
+{
+    delete m_pGame;
+}
+
 
 ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     : QWidget(parent)
@@ -84,7 +89,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     for(int i=0; i<7; i++)
     {
         if(i%3 == 0 && i>0){x+=1; y=0;}
-        string name = "dialogButton" + to_string(i);
+        string name = "dB" + to_string(i);
         m_dialog[i] = new QPushButton(QString::fromStdString(name), this);
         m_dialog[i]->setObjectName(QString::fromStdString(name));
         m_dialog[i]->setGeometry(QRect(1060+(x*210), 700+(y*70), 200, 60));      
@@ -106,7 +111,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
 
     // set up all of the card image QPixmaps
     const vector <string> cardTreasure = {"WRBC", "EWR", "FWR", "GWR", "HLWR", "LWR",  "SBWR", "WR"};
-    const vector <string> cardFlood = {"FIC", "BBC", "BGC", "CAC", "CEC", "CFC", "CGC", "CPC", "CSC", "DDC", "FLC", "GGC", "HGC", "IGC", "LLC", "MMC", "OC", "PRC", "SGC", "THC", "TMC", "TPC", "TSC", "WC","WGC"};
+    const vector <string> cardFlood = {"BBC", "BGC", "CAC", "CEC", "CFC", "CGC", "CPC", "CSC", "DDC", "FLC", "GGC", "HGC", "IGC", "LLC", "MMC", "ObC", "PRC", "SGC", "THC", "TMC", "TPC", "TSC", "WtC","WGC"};
     const vector <string> cardIsland = {"BBB", "BBF", "BGB", "BGF", "CAB", "CAF", "CEB", "CEF", "CFB", "CFF", "CGB", "CGF", "CPB", "CPF", "CSB", "CSF", "DDB", "DDF", "FLB", "FLF", "GGB", "GGF", "HGB", "HGF", "IGB", "IGF", "LLB", "LLF", "MMB", "MMF", "OB", "OF", "PRB", "PRF", "SGB", "SGF", "THB", "THF", "TMB", "TMF", "TPB", "TPF", "TSB", "TSF", "WB", "WF", "WGB", "WGF"};
     const vector <string> cardPlayer = {"DC", "EC", "ExC", "MC", "NC", "PC"};
     const vector <int> invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
@@ -147,7 +152,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             continue;
         }
         string name = "iC" + to_string(i);
-        string cardPV = m_pGame->getIslandCard(counter);
+        string cardPV = m_pGame->getIslandCard(i);
         QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardPV) + ".png";
         m_iC[i] = new QPushButton(QString::fromStdString(name), this);
         m_iC[i]->setObjectName(QString::fromStdString(name));
@@ -158,6 +163,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         m_iC[i]->setVisible(true);
         QSize iconSize(100, 100);
         m_iC[i]->setIconSize(iconSize);
+        connect(m_iC[i], &QPushButton::clicked, this, &ForbiddenIslandUI::iTileClicked);  
         int xDelta = 0;
         int yDelta = 0;
         for(int j=0; j<4; j++)
@@ -166,7 +172,6 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             else{xDelta = 0;}
             if(j>1){yDelta = 40;}
             string pName = "pawn" + to_string(j) + to_string(x);
-            //QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(3+j) + ".png";
             m_pawns[j][i] = new QPushButton(QString::fromStdString(pName), this);
             m_pawns[j][i]->setObjectName(QString::fromStdString(name));
             m_pawns[j][i]->setGeometry(QRect(230+(x*100)+xDelta, 200+(y*100)+yDelta, 40, 40));
@@ -183,12 +188,12 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             "}"
             );
             m_pawns[j][i]->setEnabled(false);
-            m_pawns[j][i]->setVisible(false);
-            
+            m_pawns[j][i]->setVisible(false);  
+            connect(m_pawns[j][i], &QPushButton::clicked, this, &ForbiddenIslandUI::pawnClicked);        
         }   
         x+=1;  
         counter +=1;   
-        //connect(m_iC[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
+
     }
 
     // set up the four player's and treasure hands    
@@ -223,14 +228,9 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             m_playerCards[player][i]->setText(QString());
             m_playerCards[player][i]->setEnabled(false);
             m_playerCards[player][i]->setVisible(false);
-            
-            
             //connect(m_pA[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
         }
     }
-
-
-
     // set up the flood and treasure draw and discard decks
     for(int i=0; i<2; i++)
     {
@@ -267,146 +267,6 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         m_treasureDecks[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
     }
 
-
-    /*
-    // set up all of the columns of cards in the playfield area
-    for (int k=0; k<7; k++) 
-    {
-        for (int j=0; j<19; j++) 
-        {
-            std::string name = "C" + std::to_string(j+(k*19));
-            m_pC[j+(k*19)] = new QPushButton (QString::fromStdString(name), this);
-            m_pC[j+(k*19)]->setObjectName(QString::fromStdString(name));
-            m_pC[j+(k*19)]->setGeometry(QRect(130+(k*110), 210+(j*25), 100, 140));
-            m_pC[j+(k*19)]->setIcon(QPixmap(QString::fromUtf8("../../VSC/CPP/Solitaire/CardPNGs/13S.png")));
-            m_pC[j+(k*19)]->setText(QString());
-            m_pC[j+(k*19)]->setStyleSheet(QString::fromUtf8("border: none"));
-            m_pC[j+(k*19)]->setEnabled(false);
-            QSize iconSize(100, 140);
-            m_pC[j+(k*19)]->setIconSize(iconSize);
-            connect(m_pC[j+(k*19)], &QPushButton::clicked, this, &SolitaireUI::cardClicked);
-        }
-    }
-        // set up the deck and draw piles at the bottom
-    int j=0;
-    int k=10;    
-    for (int i = 0; i < 4; i++) 
-    {
-        if (i>0){j=110;}
-        std::string name = "D" + std::to_string(i);
-        m_pD[i] = new QPushButton(QString::fromStdString(name), this);
-        m_pD[i]->setObjectName(QString::fromStdString(name));
-        m_pD[i]->setGeometry(QRect(290+j+k, 750, 100, 140));
-        m_pD[i]->setText(QString());
-        k+=20;
-        QSize iconSize(100, 140);
-        m_pD[i]->setIconSize(iconSize);
-        connect(m_pD[i], &QPushButton::clicked, this, &SolitaireUI::cardClicked);
-    }
-    m_pD[0]->setIcon(QPixmap(cardImage[0]));
-    m_pD[0]->setEnabled(true); 
-    for(int i=1; i<4; i++)
-    {
-        m_pD[i]->setIcon(QPixmap()); 
-        m_pD[i]->setEnabled(false);
-        m_pD[i]->hide();
-    }
-
-    // set up the buttons
-    m_undo = new QPushButton("Undo", this);
-    m_undo->setGeometry(QRect(800, 120, 210, 50));
-    m_undo->setFont(boldFont);
-    m_undo->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 185, 0); text-align: left; padding-left: 10px;"); 
-    m_undo->setVisible(false);
-    connect(m_undo, &QPushButton::clicked, this, &SolitaireUI::undoPressed);
-
-    m_newGame = new QPushButton("New Game", this);
-    m_newGame->setGeometry(QRect(800, 60, 210, 50));
-    m_newGame->setFont(boldFont);
-    m_newGame->setStyleSheet("background-color: transparent; border: none; color: rgb(255, 185, 0); text-align: left; padding-left: 10px;"); 
-    m_newGame->setVisible(true);
-    connect(m_newGame, &QPushButton::clicked, this, &SolitaireUI::newGamePressed);
-
-    m_easy = new QPushButton("easy", this);
-    m_easy->setGeometry(QRect(400, 500, 200, 50));
-    m_easy->setStyleSheet("background-color: transparent; border: none; color: rgb(255,185,0);");
-    m_easy->setFont(boldFont);
-    m_easy->setText(QString("Easy Difficulty"));
-    m_easy->setVisible(false);
-    connect(m_easy, &QPushButton::clicked, this, &SolitaireUI::easyClicked);
-
-    m_startLogo = new QLabel(this);
-    m_startLogo->setGeometry(QRect(300,200,480,200));
-    m_startLogo->setStyleSheet("background-image: url(" + assetPath + "logo.png); border: none; background-position: center; background_size: contain;");
-
-    m_hard = new QPushButton("hard", this);
-    m_hard->setGeometry(QRect(400, 600, 200, 50));
-    m_hard->setStyleSheet("background-color: transparent; border: none; color: rgb(255,185,0);");
-    m_hard->setFont(boldFont);
-    m_hard->setText(QString("Hard Difficulty"));
-    m_hard->setVisible(false);
-    connect(m_hard, &QPushButton::clicked, this, &SolitaireUI::hardClicked);
-
-    m_moves = new QLabel(this);
-    m_moves->setGeometry(QRect(300,930,300,50));
-    //lightFont.setPointSize(42);
-    m_moves->setStyleSheet("QLabel { color : rgb(255,185,0); }");
-    m_moves->setFont(lightFont);
-    m_moves->setText(QString("Moves: "));
-
-    m_winMoves = new QLabel(this);
-    m_winMoves->setGeometry(QRect(250,450,300,100));
-    //m_winMoves->setStyleSheet("QLabel { color : rgb(255,185,0); }");
-    m_winMoves->setFont(lightLargeFont);
-
-    m_timer = new QLabel(this);           
-    m_timer->setGeometry(QRect(600, 930, 300, 50));
-    m_timer->setFont(lightFont);
-    m_timer->setStyleSheet("QLabel { color : rgb(255,185,0); }");
-    m_timer->setText(QString("Time: "));
-
-    m_winTime = new QLabel(this);
-    m_winTime->setGeometry(QRect(600,450,300,100));
-    //m_winTime->setStyleSheet("QLabel { color : rgb(255,185,0); }");
-    m_winTime->setFont(lightLargeFont);
-
-    m_noMovesLeft = new QLabel(this);
-    m_noMovesLeft->setGeometry(QRect(600,740,200,50));
-    m_noMovesLeft->setFont(lightFont);
-    m_noMovesLeft->setPalette(palette);
-    m_noMovesLeft->setText(QString(""));
-
-    int alignment[5][4] = {{150,575,800,100},{200,600,225,400},{425,600,150,400},{575,600,150,400},{725,600,150,400}};
-    for(int i=0; i<5; i++)
-    {
-        m_winScreen[i] = new QLabel(this);
-        m_winScreen[i]->setGeometry(QRect(alignment[i][0],alignment[i][1],alignment[i][2],alignment[i][3]));
-        m_winScreen[i]->setFont(lightFont);
-        if(i<2)
-        {m_winScreen[i]->setStyleSheet("QLabel { color : rgb(255,185,0); }");}
-        else
-        {m_winScreen[i]->setStyleSheet("QLabel { color : rgb(255,255,255); }");}
-        m_winScreen[i]->setVisible(false);
-        m_winScreen[i]->setAlignment(Qt::AlignCenter);
-        m_winScreen[i]->setText(QString());
-    }
-
-    QObject::connect(&timer, &QTimer::timeout, [&]() {
-        elapsedMilliseconds = elapsedTimer.elapsed();
-        qint64 elapsedSeconds = elapsedMilliseconds / 1000;
-        qint64 minutes = elapsedSeconds / 60;
-        qint64 seconds = elapsedSeconds % 60;
-        QString elapsedTimeStr = QString("%1:%2")
-        .arg(minutes, 1, 10, QLatin1Char('0'))  
-        .arg(seconds, 2, 10, QLatin1Char('0')); 
-        m_timer->setText("Time: " + elapsedTimeStr);
-    });
-
-    m_pSolitaire = new Solitaire();
-    for(int i=0; i<5; i++)
-    {
-        m_winScreen[i]->setVisible(true);
-    }*/
 }
 
 
@@ -422,19 +282,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
             if(name == "dialogButton4"){numberOfPlayers = 3;}
             if(name == "dialogButton5"){numberOfPlayers = 4;}
             m_pGame->createPlayers(numberOfPlayers);
-            for(int i=0; i<numberOfPlayers; i++)
-            {
-                Player* player = m_pGame->getPlayer(i);
-                int loc = player->getLocation();
-                int playerClass = player->getPlayerClass();
-                cout << i << ";" << playerClass << ":" << loc << endl;
-                QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(playerClass) + ".png";
-                QPixmap pixmap3;
-                pixmap3.load(path);
-                m_pawns[i][loc]->setIcon(pixmap3);
-                m_pawns[i][loc]->setVisible(true);
-                m_pawns[i][loc]->setEnabled(true);
-            }
+            updatePawns();
             // set up the four player cards
             for(int i=0; i<4; i++)
             {
@@ -560,14 +408,69 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
             }
             clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");
+            // Set up player actions based upon button pressed
+            playerAction = clickedButton->objectName().mid(2).toInt();
+            cout << "PlayerAction: " << playerAction << endl;
+            
         }
     }
 }
 
 
-ForbiddenIslandUI::~ForbiddenIslandUI()
+void ForbiddenIslandUI::pawnClicked()
 {
-    delete m_pGame;
+    if(playerAction == 0)
+    {
+        cout << "Pawn clicked" << endl;
+    }
+}
+
+
+void ForbiddenIslandUI::iTileClicked()
+{
+    cout << "Isle Tile clicked" << endl;
+}
+
+
+void ForbiddenIslandUI::updatePawns()
+{
+    int numberOfPlayers =m_pGame->getNumberOfPlayers();  
+    for(int i=0; i<24; i++)
+    {
+        for(int j=0; j<4; j++)
+        {
+            m_pawns[j][validSquares[i]]->setIcon(QPixmap());
+            m_pawns[j][validSquares[i]]->setEnabled(false);
+            m_pawns[j][validSquares[i]]->setVisible(false);
+        }
+    } 
+    for(int i=0; i<numberOfPlayers; i++)
+    {
+        Player* player = m_pGame->getPlayer(i);
+        int loc = player->getLocation();
+        int playerClass = player->getPlayerClass();
+        cout << i << ";" << playerClass << ":" << loc << endl;
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/P" + QString::number(playerClass) + ".png";
+        QPixmap pixmap3;
+        pixmap3.load(path);
+        m_pawns[i][loc]->setIcon(pixmap3);
+        m_pawns[i][loc]->setVisible(true);
+        m_pawns[i][loc]->setEnabled(true);
+    }
+}
+
+
+void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
+{
+    Q_UNUSED(event);
+
+    QPainter painter(this);
+    painter.fillRect(rect(), QColor("#002366")); 
+    QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/water.jpg";
+    water = QPixmap(path);
+    QRect waterArea(180, 150, 680, 680); 
+     painter.drawPixmap(waterArea, water.scaled(waterArea.size(), Qt::KeepAspectRatioByExpanding));
+
 }
 
 
@@ -893,19 +796,6 @@ void ForbiddenIslandUI::disableDrawPile(int pile)
     // Paint the green background image
     painter.drawPixmap(0, 0, width(), height(), water);
 }*/
-
-void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
-{
-    Q_UNUSED(event);
-
-    QPainter painter(this);
-    painter.fillRect(rect(), QColor("#002366")); 
-    QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/water.jpg";
-    water = QPixmap(path);
-    QRect waterArea(180, 150, 680, 680); 
-     painter.drawPixmap(waterArea, water.scaled(waterArea.size(), Qt::KeepAspectRatioByExpanding));
-
-}
 
 
 /*void SolitaireUI::delayTimer(int delay)

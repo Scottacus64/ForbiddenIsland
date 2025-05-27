@@ -63,7 +63,7 @@ int Game::flipFlood()
     }
     totalFlipped +=1;
     if(totalFlipped > 5){gameStarted = true;}
-    return cardPosition;
+    return location;
 }
 
 
@@ -98,7 +98,6 @@ void Game::createPlayers(int numberOfPlayers)
     int classValue;
     for (int i = 0; i < numberOfPlayers && !playerClasses.empty(); i++) 
     {    
-
         static std::mt19937 rng(static_cast<unsigned>(time(nullptr)));
         std::uniform_int_distribution<int> dist(0, playerClasses.size() - 1);
         int index = dist(rng);
@@ -532,18 +531,20 @@ void Game::newGame()
     }
     treasureDeck.shuffle();
     // create the island
+    int slot = 0;
     for (int i=0; i<36; i++)
     {
     if (find(validSquares.begin(), validSquares.end(), i) != validSquares.end())
-        {
-            pCard = islandDeck.deal();
-            islandHand.addCard(pCard);                              // islandHand is the hand from 0-23 of card pointers
-            islandCardPositions.push_back({pCard->getID(), i});     // islandCardPositions is 0-35 vector pairs of {card ID, slot}
-        }
-        else
-        {
-            islandCardPositions.push_back({100,i});                 // pad out islandCardPositions with an ID of 100 if not a legal spot
-        }   
+    {
+        pCard = islandDeck.deal();
+        islandHand.addCard(pCard);                              // islandHand is the hand from 0-23 of card pointers
+        islandCardPositions.push_back({pCard->getID(), slot});     // islandCardPositions is 0-35 vector pairs of {card ID, slot}
+        slot +=1;                                               // slot sets islandHand card position (0-23 to a 0-35 grid of locations
+    }
+    else
+    {
+        islandCardPositions.push_back({100,100});               // pad out islandCardPositions with an ID of 100 if not a legal spot
+    }   
     }
     islandHand.printHand(1);
 }
@@ -551,7 +552,8 @@ void Game::newGame()
 
 string Game::getIslandCard(int position)
 {
-    Card* pCard = islandHand.getCard(position);
+    int slot = islandCardPositions[position].second;
+    Card* pCard = islandHand.getCard(slot);
     string name = pCard->getPrintValue();
     if(pCard->getState() == 2)
     {
@@ -977,4 +979,10 @@ Deck* Game::getTreasureDiscard()
 Player* Game::getActivePlayer()
 {
     return &players[activePlayer];
+}
+
+
+int Game::getNumberOfPlayers()
+{
+    return players.size();
 }
