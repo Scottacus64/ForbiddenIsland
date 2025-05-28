@@ -153,7 +153,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             continue;
         }
         string name = "iC" + to_string(i);
-        string cardPV = m_pGame->getIslandCard(i);
+        string cardPV = m_pGame->getIslandCardName(i);
         QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardPV) + ".png";
         m_iC[i] = new QPushButton(QString::fromStdString(name), this);
         m_iC[i]->setObjectName(QString::fromStdString(name));
@@ -366,7 +366,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
         if(dialogMode == 1)  // Flood tiles
         {
             int location = m_pGame->flipFlood();
-            string iName = m_pGame->getIslandCard(location);
+            string iName = m_pGame->getIslandCardName(location);
             string name = iName + ".png";
             string cName = iName;     // copy the original string
             cName.pop_back();         // remove the last character
@@ -438,9 +438,25 @@ void ForbiddenIslandUI::pawnClicked()
 
     if(playerAction == 0)
     {
+        vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+        vector <int> directions = {0,2,4,6};
+        validMoves.clear();
         if(playerSlot == m_pGame->getActivePlayerSlot())
         {
             cout << "Active Player found!!" << endl;
+            Player* activePlayer = m_pGame->getActivePlayer();
+            if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+            for(int i=0; i<directions.size(); i++)
+            {
+                if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                {
+                    highlightIsleTile(gridLocation+offset[directions[i]]);
+                    validMoves.push_back(directions[i]);
+                    
+                }
+            }
+            
+            // highlight valid locations
         }
         
     }
@@ -460,7 +476,7 @@ void ForbiddenIslandUI::iTileClicked()
     {
         iLocation = stoi(match[1].str());
     }
-    highlightIsleTile(iLocation, 0);
+    updateIsleTiles();
 }
 
 
@@ -492,22 +508,38 @@ void ForbiddenIslandUI::updatePawns()
 }
 
 
-void ForbiddenIslandUI::highlightIsleTile(int tileLocation, int direction)
+void ForbiddenIslandUI::highlightIsleTile(int tileLocation)
 {
-    if(oldTile > -1)
-    {
-        m_iC[oldTile]->setIcon(originalPixmap[direction]);
-    }
     QIcon icon = m_iC[tileLocation]->icon();
-    QSize size = m_iC[tileLocation]->iconSize();
+    QSize size = m_iC[tileLocation]->iconSize(); 
     QPixmap currentPixmap = icon.pixmap(size);
-    originalPixmap[direction] = currentPixmap;
-    oldTile = tileLocation;
     QPixmap highlightedPixmap = currentPixmap;
     QPainter painter(&highlightedPixmap);
     painter.fillRect(highlightedPixmap.rect(), QColor(255, 255, 0, 100));
     painter.end();
     m_iC[tileLocation]->setIcon(highlightedPixmap);
+}
+
+
+void ForbiddenIslandUI::updateIsleTiles()
+{
+    string cardName;
+    int slot = 0;
+    for(int i=0; i<36; i++)
+    {
+        if (std::find(invalidSquares.begin(), invalidSquares.end(), i) != invalidSquares.end()) {continue;}
+        cardName = m_pGame->getIslandCardName(i);
+        if(cardName != "")
+        {
+            QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardName) + ".png";
+            m_iC[i]->setIcon(QPixmap(path));
+        }
+        else
+        {
+            m_iC[slot]->setIcon(QPixmap());
+        }
+        slot +=1;
+    }
 }
 
 

@@ -44,7 +44,7 @@ public:
     void sandBag(int player, int cardSlot);
     void helo(int player,int cardSlot);
     void playAgain();
-    string getIslandCard(int position);
+    string getIslandCardName(int position);
     int   getPlayerTreasureCard(int player, int slot);
     Deck* getFloodDiscard();
     Deck* getTreasureDiscard();

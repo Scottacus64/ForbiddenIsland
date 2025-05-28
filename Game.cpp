@@ -254,8 +254,8 @@ void Game::movePlayer(Player& player, int  direction)
 int Game::checkValidMove(int location, int direction)
 {
     int testLocation = destinationValue(location, direction);
-    if (testLocation == location){return false;}
-    if (testLocation < 0 or testLocation > 33) {return false;}
+    if (testLocation == location){return 0;}
+    if (testLocation < 0 or testLocation > 33) {return 0;}
     // diver check for sunken location
     if (find(invalidSquares.begin(), invalidSquares.end(), testLocation) != invalidSquares.end()){return 0;}
     if (find(validSquares.begin(), validSquares.end(), testLocation) != validSquares.end()) 
@@ -550,7 +550,7 @@ void Game::newGame()
 }
 
 
-string Game::getIslandCard(int position)
+string Game::getIslandCardName(int position)
 {
     int slot = islandCardPositions[position].second;
     Card* pCard = islandHand.getCard(slot);
