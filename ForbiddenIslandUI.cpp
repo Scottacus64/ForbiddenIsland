@@ -15,6 +15,13 @@
 #include <QFontDatabase>
 #include <algorithm>
 #include <regex>
+#include <vector>
+// set up all of the card image QPixmaps
+const std::vector<std::string> ForbiddenIslandUI::cardTreasure =    {"WRBC", "EWR", "FWR", "GWR", "HLWR", "LWR",  "SBWR", "WR"};
+const std::vector<std::string> ForbiddenIslandUI::cardFlood =       {"BBC", "BGC", "CAC", "CEC", "CFC", "CGC", "CPC", "CSC", "DDC", "FLC", "GGC", "HGC", "IGC", "LLC", "MMC", "ObC", "PRC", "SGC", "THC", "TMC", "TPC", "TSC", "WtC", "WGC"};
+const std::vector<std::string> ForbiddenIslandUI::cardIsland =      {"BBF", "BGF", "CAF", "CEF", "CFF", "CGF", "CPF", "CSF", "DDF", "FLF", "GGF", "HGF", "IGF", "LLF", "MMF", "ObF", "PRF", "SGF", "THF", "TMF", "TPF", "TSF", "WtF", "WGF"};
+const std::vector<std::string> ForbiddenIslandUI::cardIslandFlood = {"BBB", "BGB", "CAB", "CEB", "CFB", "CGB", "CPB", "CSB", "DDB", "FLB", "GGB", "HGB", "IGB", "LLB", "MMB", "ObB", "PRB", "SGB", "THB", "TMB", "TPB", "TSB", "WtB", "WGB"};
+const std::vector<std::string> ForbiddenIslandUI::cardPlayer =      {"DC", "EC", "ExC", "MC", "NC", "PC"};
 
 
 ForbiddenIslandUI::~ForbiddenIslandUI()
@@ -110,12 +117,6 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         connect(m_dialog[i], &QPushButton::clicked, this, &ForbiddenIslandUI::dialogButtonClicked);
     }
 
-    // set up all of the card image QPixmaps
-    const vector <string> cardTreasure = {"WRBC", "EWR", "FWR", "GWR", "HLWR", "LWR",  "SBWR", "WR"};
-    const vector <string> cardFlood = {"BBC", "BGC", "CAC", "CEC", "CFC", "CGC", "CPC", "CSC", "DDC", "FLC", "GGC", "HGC", "IGC", "LLC", "MMC", "ObC", "PRC", "SGC", "THC", "TMC", "TPC", "TSC", "WtC","WGC"};
-    const vector <string> cardIsland = {"BBB", "BBF", "BGB", "BGF", "CAB", "CAF", "CEB", "CEF", "CFB", "CFF", "CGB", "CGF", "CPB", "CPF", "CSB", "CSF", "DDB", "DDF", "FLB", "FLF", "GGB", "GGF", "HGB", "HGF", "IGB", "IGF", "LLB", "LLF", "MMB", "MMF", "OB", "OF", "PRB", "PRF", "SGB", "SGF", "THB", "THF", "TMB", "TMF", "TPB", "TPF", "TSB", "TSF", "WB", "WF", "WGB", "WGF"};
-    const vector <string> cardPlayer = {"DC", "EC", "ExC", "MC", "NC", "PC"};
-    const vector <int> invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
     for(int i=0; i<cardTreasure.size(); i++)
     {
         cardImageTreasure[i] = QPixmap(assetPath + QString::fromStdString(cardTreasure[i]) + ".png");
@@ -127,6 +128,10 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     for(int i=0; i<cardIsland.size(); i++)
     {
         cardImageIsland[i] = QPixmap(assetPath + QString::fromStdString(cardIsland[i]) + ".png");
+    }
+    for(int i=0; i<cardIslandFlood.size(); i++)
+    {
+        cardImageIslandFlood[i] = QPixmap(assetPath + QString::fromStdString(cardIslandFlood[i]) + ".png");
     }
     for(int i=0; i<cardPlayer.size(); i++)
     {
@@ -154,11 +159,15 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         }
         string name = "iC" + to_string(i);
         string cardPV = m_pGame->getIslandCardName(i);
-        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardPV) + ".png";
         m_iC[i] = new QPushButton(QString::fromStdString(name), this);
         m_iC[i]->setObjectName(QString::fromStdString(name));
         m_iC[i]->setGeometry(QRect(220 + (x*100), 190 + (y*100), 100, 100));
-        m_iC[i]->setIcon(QPixmap(path));
+        int slot = 0;
+        for(int i=0; i< cardIsland.size(); i++)
+        {
+            if(cardIsland[i] == cardPV){slot = i;}
+        }
+        m_iC[i]->setIcon(cardImageIsland[slot]);
         m_iC[i]->setText(QString());
         m_iC[i]->setEnabled(true);
         m_iC[i]->setVisible(true);
@@ -411,10 +420,37 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
             }
             clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");
-            // Set up player actions based upon button pressed
-            playerAction = clickedButton->objectName().mid(2).toInt();
-            cout << "PlayerAction: " << playerAction << endl;
-            
+            playerAction = clickedButton->objectName().mid(2).toInt();                  // Set up player actions based upon button pressed
+            validMoves.clear();
+            vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+            vector <int> directions = {0,2,4,6}; 
+            Player* activePlayer = m_pGame->getActivePlayer();
+            int gridLocation = activePlayer->getLocation();
+            if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+            if (playerAction == 0)            // move player
+            {    
+                updateIsleTiles();      
+                for(int i=0; i<directions.size(); i++)
+                {
+                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                    {
+                        highlightMove(gridLocation+offset[directions[i]]);
+                        validMoves.push_back(directions[i]);                     
+                    }
+                }
+            } 
+            if (playerAction == 1)          //shore up
+            {
+                updateIsleTiles();
+                for(int i=0; i<directions.size(); i++)
+                {
+                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                    {
+                        highlightShoreUp(gridLocation+offset[directions[i]]);
+                        validMoves.push_back(directions[i]);                     
+                    }
+                }
+            }
         }
     }
 }
@@ -450,7 +486,7 @@ void ForbiddenIslandUI::pawnClicked()
             {
                 if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
                 {
-                    highlightIsleTile(gridLocation+offset[directions[i]]);
+                    highlightMove(gridLocation+offset[directions[i]]);
                     validMoves.push_back(directions[i]);
                     
                 }
@@ -508,7 +544,7 @@ void ForbiddenIslandUI::updatePawns()
 }
 
 
-void ForbiddenIslandUI::highlightIsleTile(int tileLocation)
+void ForbiddenIslandUI::highlightMove(int tileLocation)
 {
     QIcon icon = m_iC[tileLocation]->icon();
     QSize size = m_iC[tileLocation]->iconSize(); 
@@ -521,7 +557,20 @@ void ForbiddenIslandUI::highlightIsleTile(int tileLocation)
 }
 
 
-void ForbiddenIslandUI::updateIsleTiles()
+void ForbiddenIslandUI::highlightShoreUp(int tileLocation)
+{
+    QIcon icon = m_iC[tileLocation]->icon();
+    QSize size = m_iC[tileLocation]->iconSize(); 
+    QPixmap currentPixmap = icon.pixmap(size);
+    QPixmap highlightedPixmap = currentPixmap;
+    QPainter painter(&highlightedPixmap);
+    painter.fillRect(highlightedPixmap.rect(), QColor(0, 255, 0, 100));
+    painter.end();
+    m_iC[tileLocation]->setIcon(highlightedPixmap);
+}
+
+
+void ForbiddenIslandUI::updateIsleTiles() 
 {
     string cardName;
     int slot = 0;
@@ -531,8 +580,12 @@ void ForbiddenIslandUI::updateIsleTiles()
         cardName = m_pGame->getIslandCardName(i);
         if(cardName != "")
         {
-            QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cardName) + ".png";
-            m_iC[i]->setIcon(QPixmap(path));
+            int cSlot = 0;
+            for(int j=0; j<24; j++)
+            {
+                if(cardIsland[j] == cardName){m_iC[i]->setIcon(cardImageIsland[j]);}
+                if(cardIslandFlood[j] == cardName){m_iC[i]->setIcon(cardImageIslandFlood[j]);}
+            }
         }
         else
         {

@@ -12,6 +12,7 @@
 #include "Game.h"
 #include <string>
 #include <iostream>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ForbiddenIslandUI; }
@@ -29,7 +30,8 @@ public:
     ~ForbiddenIslandUI();
     void paintEvent(QPaintEvent *event);
     void updatePawns();
-    void highlightIsleTile(int tileLocation);
+    void highlightMove(int tileLocation);
+    void highlightShoreUp(int tileLocation);
     void updateIsleTiles();
     /*void refreshUpperSection();
     void dealCards();
@@ -57,10 +59,12 @@ private:
     static const vector <string> cardTreasure;
     static const vector <string> cardFlood;
     static const vector <string> cardIsland;
+    static const vector <string> cardIslandFlood;
     static const vector <string> cardPlayer;
     QPixmap cardImageTreasure[8];
     QPixmap cardImageFlood[25];
-    QPixmap cardImageIsland[48];
+    QPixmap cardImageIsland[24];
+    QPixmap cardImageIslandFlood[24];
     QPixmap cardImagePlayer[6];
     QPixmap water;
     QPushButton* m_iC[36];
@@ -79,9 +83,6 @@ private:
     vector <int> invalidSquares = {0,1,4,5,6,11,24,29,30,31,34,35};
     int playerAction = 9;
     int activePlayerSlot;
-    int oldTile = -1;
-    QPixmap originalPixmap[8];
-    int newTile;
     vector <int> validMoves;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
