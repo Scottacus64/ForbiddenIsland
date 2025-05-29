@@ -258,6 +258,12 @@ int Game::checkValidMove(int location, int direction)
     if (testLocation < 0 or testLocation > 33) {return 0;}
     // diver check for sunken location
     if (find(invalidSquares.begin(), invalidSquares.end(), testLocation) != invalidSquares.end()){return 0;}
+    if (players[activePlayer].getPlayerClass() == 2  || players[mPlayer].getPlayerClass() == 2)  //explorer
+    {
+        if (((location == 12 || location == 18) && direction == 5) || ((location == 17 || location ==23) && (direction ==1))){return 0;}
+    }
+    if ((location == 17 && direction == 2) || (location == 18 && direction == 6)){return 0;}
+    // 12,18,17,23
     if (find(validSquares.begin(), validSquares.end(), testLocation) != validSquares.end()) 
     {
         if(players[activePlayer].getPlayerClass() == 5  || players[mPlayer].getPlayerClass() == 5) //diver
