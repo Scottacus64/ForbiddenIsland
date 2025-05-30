@@ -454,7 +454,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 dialogMode = 3;
                 return;
             }
-            clearDialogButtons();
+            //clearDialogButtons();
         }
         if(dialogMode == 3)  // Players Up
         {
@@ -469,7 +469,11 @@ void ForbiddenIslandUI::dialogButtonClicked()
             if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
             updateIsleTiles();
             if (playerAction == 0)            // move player
-            {        
+            {   
+                fly == false;
+                sendTreasure = false;
+                moveOther = false;  
+                updateActions();   
                 for(int i=0; i<directions.size(); i++)
                 {
                     if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
@@ -480,10 +484,38 @@ void ForbiddenIslandUI::dialogButtonClicked()
             } 
             if (playerAction == 1)          //shore up
             {
+                fly == false;
+                sendTreasure = false;
+                moveOther = false;  
+                updateActions();  
                 checkForShoreUp();
+            }
+            if (playerAction == 5)          //speecial ability
+            {
+                Player* activePlayer = m_pGame->getActivePlayer();  
+                int pClass = activePlayer->getPlayerClass();
+                if (pClass == 3)
+                {
+                    fly = true;
+                    updateActions();
+                }
+                if(pClass == 4)
+                {
+                    moveOther = true;
+                    updateActions();
+                }
+                if(pClass == 6)
+                {
+                    sendTreasure = true;
+                    updateActions();
+                }
             }
             if (playerAction == 6)          //end turn
             {
+                fly == false;
+                sendTreasure = false;
+                moveOther = false; 
+                updateActions();   
                 m_pGame->nextPlayer();
                 updateActions();
                 clearDialogButtons();
@@ -522,6 +554,9 @@ void ForbiddenIslandUI::updateActions()
     string pName = player->getPlayerName();
     int actions = player->getActions();
     dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));
+    if(fly == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a tile to fly there");}
+    if(moveOther == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another player to move");}
+    if(sendTreasure == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
 }
 
 
@@ -651,9 +686,18 @@ void ForbiddenIslandUI::iTileClicked()
             engineerSU = eShore;
         }
     }
+    if(playerAction == 5 && fly == true)
+    {
+        Player* player = m_pGame->getActivePlayer();
+        player->fly(iLocation);
+        int actions = player->getActions();
+        if(actions < 1){m_pGame->nextPlayer();}
+        fly = false;
+    }
     updateActions();
     updatePawns();
     clearDialogButtons();
+    updateActions();
     if(engineerSU == true)
     {
         updateIsleTiles();

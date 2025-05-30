@@ -91,6 +91,9 @@ private:
     QLabel* m_wrCard;
     QLabel* m_wrIndicator;
     bool engineerSU = false;
+    bool fly = false;
+    bool sendTreasure = false;
+    bool moveOther = false;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];
