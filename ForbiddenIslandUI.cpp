@@ -480,20 +480,9 @@ void ForbiddenIslandUI::dialogButtonClicked()
             } 
             if (playerAction == 1)          //shore up
             {
-                for(int i=0; i<directions.size(); i++)
-                {
-                    int location = gridLocation+offset[directions[i]];
-                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0 && m_pGame->getIslandCardFlood(location) == 1)
-                    {
-                        highlightShoreUp(gridLocation+offset[directions[i]]);                   
-                    }
-                }
-                if (m_pGame->checkValidMove(gridLocation,8) > 0 && m_pGame->getIslandCardFlood(gridLocation) == 1)
-                {
-                highlightShoreUp(gridLocation);
-                }
+                checkForShoreUp();
             }
-            if (playerAction == 6)      //end turn
+            if (playerAction == 6)          //end turn
             {
                 m_pGame->nextPlayer();
                 updateActions();
@@ -501,6 +490,28 @@ void ForbiddenIslandUI::dialogButtonClicked()
             }
         } 
 
+    }
+}
+
+
+void ForbiddenIslandUI::checkForShoreUp()
+{
+    Player* activePlayer = m_pGame->getActivePlayer();
+    int gridLocation = activePlayer->getLocation();
+    vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+    vector <int> directions = {0,2,4,6}; 
+    if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+    for(int i=0; i<directions.size(); i++)
+    {
+        int location = gridLocation+offset[directions[i]];
+        if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0 && m_pGame->getIslandCardFlood(location) == 1)
+        {
+            highlightShoreUp(gridLocation+offset[directions[i]]);                   
+        }
+    }
+    if (m_pGame->checkValidMove(gridLocation,8) > 0 && m_pGame->getIslandCardFlood(gridLocation) == 1)
+    {
+    highlightShoreUp(gridLocation);
     }
 }
 
@@ -524,7 +535,14 @@ void ForbiddenIslandUI::clearDialogButtons()
     switch (pClass)
             {
             case 1:
-                m_dialog[1]->setText("Shore Up x 2");
+                if (engineerSU == false)
+                { m_dialog[1]->setText("Shore Up x 2");}
+                else
+                {
+                    m_dialog[1]->setText("Shore Up x 1");
+                    checkForShoreUp();
+                    m_dialog[1]->setStyleSheet("background-color: rgb(234, 196, 146);");
+                }
                 m_dialog[5]->setVisible(false);
                 break;    
             case 2:
@@ -630,18 +648,18 @@ void ForbiddenIslandUI::iTileClicked()
             {eShore = m_pGame->shoreUp(8);}
             else
             {eShore = m_pGame->shoreUp(dir);}
-            if (eShore == true)
-            {
-                string pName = activePlayer->getPlayerName();;
-                dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another tile to Shore Up or choose another action");
-            }
-
+            engineerSU = eShore;
         }
     }
     updateActions();
     updatePawns();
     clearDialogButtons();
-    updateIsleTiles();
+    if(engineerSU == true)
+    {
+        updateIsleTiles();
+        checkForShoreUp();
+    }
+    else{updateIsleTiles();}
 }
 
 

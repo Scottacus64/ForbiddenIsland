@@ -376,11 +376,13 @@ bool Game::shoreUp(int direction)
     int start = players[activePlayer].getLocation();
     int target = destinationValue(start, direction); 
     bool validTarget = true;
+    cout << "ESU = " << engineerShoreUp << endl;
     for(int i=0; i<invalidSquares.size(); i++)
     {
         if(target == invalidSquares[i]){validTarget = false;}
     }
     if(target < 0 || target > 35){validTarget = false;}
+    cout << "valid target = " << validTarget << endl;
     if(validTarget == true)
     {
         Card* pCard = islandHand.getCardAt(target);
@@ -400,9 +402,20 @@ bool Game::shoreUp(int direction)
                 return false;
             }
         }
+        else
+        {
+            if(engineerShoreUp == true)
+            {
+                engineerShoreUp = false;
+                players[activePlayer].setActions(-1);
+                if (players[activePlayer].getActions() < 1){nextPlayer();}
+                cout << "Actions = " << players[activePlayer].getActions()  << endl;
+            }
+        }
     }
     else
     {
+
         cout << "Unable to shore up location";
         return false;
     }
