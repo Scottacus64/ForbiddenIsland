@@ -33,6 +33,8 @@ public:
     void highlightMove(int tileLocation);
     void highlightShoreUp(int tileLocation);
     void updateIsleTiles();
+    void clearDialogButtons();
+    void updateActions();
     /*void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);

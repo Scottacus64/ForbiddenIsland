@@ -10,7 +10,7 @@ Player::Player()
 
 Player::Player(int pc, int slot)
 {
-    vector <string> classNames = {"Engineer", "Expolorer", "Pilot", "Navigator", "Diver", "Mssenger"};
+    vector <string> classNames = {"Engineer", "Expolorer", "Pilot", "Navigator", "Diver", "Messenger"};
     playerSlot = slot;
     playerClass = pc;
     playerName = classNames[pc-1];

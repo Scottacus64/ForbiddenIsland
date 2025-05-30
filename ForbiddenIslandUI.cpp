@@ -60,7 +60,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     boldFont.setPointSize(42);
 
     QFont boldLargeFont(boldFontFamily);
-    boldLargeFont.setPointSize(62);
+    boldLargeFont.setPointSize(55);
 
     // Load LNLight font
     int lightFontId = QFontDatabase::addApplicationFont(assetPath + "LNLight.ttf");
@@ -247,13 +247,13 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         m_floodDecks[i] = new QPushButton(QString::fromStdString("fD") + QString::number(i), this);
         m_floodDecks[i]->setObjectName(QString::fromStdString("fD") + QString::number(i));
         QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/WRBC";
-        m_floodDecks[i]->setGeometry(QRect(1250 + (i*150), 300, 90, 126));
+        m_floodDecks[i]->setGeometry(QRect(1100 + (i*150), 300, 90, 126));
         m_floodDecks[i]->setIcon(QPixmap(path));
         m_floodDecks[i]->setText(QString());
         m_treasureDecks[i] = new QPushButton(QString::fromStdString("tD") + QString::number(i), this);
         m_treasureDecks[i]->setObjectName(QString::fromStdString("tD") + QString::number(i));
         QString path2 = QCoreApplication::applicationDirPath() + "/../CardPNGs/FIC";
-        m_treasureDecks[i]->setGeometry(QRect(1250 + (i*150), 450, 90, 126));
+        m_treasureDecks[i]->setGeometry(QRect(1100 + (i*150), 450, 90, 126));
         m_treasureDecks[i]->setIcon(QPixmap(path2));
         m_treasureDecks[i]->setText(QString());
         if(i==0)
@@ -393,14 +393,17 @@ void ForbiddenIslandUI::dialogButtonClicked()
             m_dialog[4]->setText(numLeft + " tiles left");
             if(squaresToFlood < 1)
             {
-                Player* aPlayer =m_pGame->getActivePlayer();
-                string pName = aPlayer->getPlayerName();
-                dialog->setText("Choose an action for: " + QString::fromStdString(pName));
+                updateActions();
+                int x =0;
+                int y=0;
                 for(int i=0; i<7; i++)
                 {
                     m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
                     m_dialog[i]->setVisible(true);
                     m_dialog[i]->setEnabled(true);
+                    if(i%3 == 0 && i>0){x+=1; y=0;}
+                    m_dialog[i]->setGeometry(QRect(1060+(x*210), 730+(y*70), 200, 60)); 
+                    y+=1;
                 }
                 m_dialog[0]->setText("Move");
                 m_dialog[1]->setText("Shore Up");
@@ -412,16 +415,14 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 dialogMode = 2;
                 return;
             }
+            clearDialogButtons();
         }
         if(dialogMode == 2)  // Players Up
         {
-            for(int i=0; i<7; i++)
-            {
-                m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
-            }
-            clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");
+            clearDialogButtons();
+            clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");      
             playerAction = clickedButton->objectName().mid(2).toInt();                  // Set up player actions based upon button pressed
-            validMoves.clear();
+            cout << playerAction << endl;
             vector <int> offset {-6,-5,1,7,6,5,-1,-7};
             vector <int> directions = {0,2,4,6}; 
             Player* activePlayer = m_pGame->getActivePlayer();
@@ -434,8 +435,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 {
                     if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
                     {
-                        highlightMove(gridLocation+offset[directions[i]]);
-                        validMoves.push_back(directions[i]);                     
+                        highlightMove(gridLocation+offset[directions[i]]);                 
                     }
                 }
             } 
@@ -443,15 +443,75 @@ void ForbiddenIslandUI::dialogButtonClicked()
             {
                 for(int i=0; i<directions.size(); i++)
                 {
-                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                    int location = gridLocation+offset[directions[i]];
+                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0 && m_pGame->getIslandCardFlood(location) == 1)
                     {
-                        highlightShoreUp(gridLocation+offset[directions[i]]);
-                        validMoves.push_back(directions[i]);                     
+                        highlightShoreUp(gridLocation+offset[directions[i]]);                   
                     }
                 }
+                if (m_pGame->checkValidMove(gridLocation,8) > 0 && m_pGame->getIslandCardFlood(gridLocation) == 1)
+                {
+                highlightShoreUp(gridLocation);
+                }
             }
-        }
+            if (playerAction == 6)      //end turn
+            {
+                m_pGame->nextPlayer();
+                updateActions();
+                clearDialogButtons();
+            }
+        } 
+
     }
+}
+
+
+void ForbiddenIslandUI::updateActions()
+{
+    Player* player = m_pGame->getActivePlayer();
+    string pName = player->getPlayerName();
+    int actions = player->getActions();
+    dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));
+}
+
+
+void ForbiddenIslandUI::clearDialogButtons()
+{
+    for(int i=0; i<7; i++)
+    {
+        m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
+    }
+    int pClass = m_pGame->getActivePlayer()->getPlayerClass();
+    switch (pClass)
+            {
+            case 1:
+                m_dialog[1]->setText("Shore Up x 2");
+                m_dialog[5]->setVisible(false);
+                break;    
+            case 2:
+                m_dialog[1]->setText("Shore Up");
+                m_dialog[5]->setVisible(false);
+                break;
+            case 3:
+                m_dialog[1]->setText("Shore Up");
+                m_dialog[5]->setVisible(true);
+                m_dialog[5]->setText("Fly");
+                break;
+            case 4:
+                m_dialog[1]->setText("Shore Up");
+                m_dialog[5]->setVisible(true);
+                m_dialog[5]->setText("Move Teammate x2");
+                break;
+            case 5:
+                m_dialog[1]->setText("Shore Up");
+                m_dialog[5]->setVisible(false);
+                break;
+            case 6:
+                m_dialog[1]->setText("Shore Up");
+                m_dialog[5]->setVisible(true);
+                m_dialog[5]->setText("Send Treasure");
+                break;
+            }
 }
 
 
@@ -511,7 +571,7 @@ void ForbiddenIslandUI::iTileClicked()
     {
         iLocation = stoi(match[1].str());
     }
-    if(playerAction == 0)
+    if(playerAction == 0 || playerAction == 1)
     {
         vector <int> directions = {6,5,-1,-7,-6,-5,1,7};
         int dir;
@@ -522,9 +582,26 @@ void ForbiddenIslandUI::iTileClicked()
         {
             if(delta == directions[i]){dir = i;}
         }
-        m_pGame->movePlayer(*activePlayer, dir);
+        
+        if (playerAction == 0){m_pGame->movePlayer(*activePlayer, dir);}
+        if (playerAction == 1)
+        {
+            bool eShore;
+            if(pLocation == iLocation)
+            {eShore = m_pGame->shoreUp(8);}
+            else
+            {eShore = m_pGame->shoreUp(dir);}
+            if (eShore == true)
+            {
+                string pName = activePlayer->getPlayerName();;
+                dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another tile to Shore Up or choose another action");
+            }
+
+        }
     }
+    updateActions();
     updatePawns();
+    clearDialogButtons();
     updateIsleTiles();
 }
 

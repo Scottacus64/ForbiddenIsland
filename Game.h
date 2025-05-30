@@ -37,7 +37,7 @@ public:
     bool checkForWin();
     void printGameState();
     void nextPlayer();
-    void shoreUp();
+    bool shoreUp(int direction);
     void playerTurn();
     void gameTurn();
     void checkPlayerInWater();
@@ -49,6 +49,7 @@ public:
     Deck* getFloodDiscard();
     Deck* getTreasureDiscard();
     int getNumberOfPlayers();
+    int getIslandCardFlood(int location);
 
 private:
     Deck islandDeck;
@@ -74,5 +75,6 @@ private:
     bool pilotFlight = false;
     bool gameStarted = false;
     int totalFlipped = 0;
+    bool engineerShoreUp = false;
 };
 #endif

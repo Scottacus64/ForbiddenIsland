@@ -240,8 +240,9 @@ void Game::movePlayer(Player& player, int  direction)
     if (direction == 0 or direction == 2 or direction == 4 or direction == 6 or player.getPlayerClass() == 2)
     {
         int result = checkValidMove(player.getLocation(), direction);
-        if (result == 2) {player.setLocation(direction, 0);}
-        if (result == 1) {player.setLocation(direction, 1);}
+        if (result == 2) {player.setLocation(direction, 1);}
+        if (result == 1) {player.setLocation(direction, 0);}
+        if (player.getActions() < 1){nextPlayer();}
         cout <<  "players actions = " << player.getActions() << endl;
     }
     else
@@ -254,7 +255,7 @@ void Game::movePlayer(Player& player, int  direction)
 int Game::checkValidMove(int location, int direction)
 {
     int testLocation = destinationValue(location, direction);
-    if (testLocation == location){return 0;}
+    //if (testLocation == location){return 0;}
     if (testLocation < 0 or testLocation > 33) {return 0;}
     // diver check for sunken location
     if (find(invalidSquares.begin(), invalidSquares.end(), testLocation) != invalidSquares.end()){return 0;}
@@ -263,26 +264,24 @@ int Game::checkValidMove(int location, int direction)
         if (((location == 12 || location == 18) && direction == 5) || ((location == 17 || location ==23) && (direction ==1))){return 0;}
     }
     if ((location == 17 && direction == 2) || (location == 18 && direction == 6)){return 0;}
-    // 12,18,17,23
     if (find(validSquares.begin(), validSquares.end(), testLocation) != validSquares.end()) 
     {
-        if(players[activePlayer].getPlayerClass() == 5  || players[mPlayer].getPlayerClass() == 5) //diver
+        if(islandHand.getCardAt(testLocation)->getState() == 1)
         {
-            if(islandHand.getCardAt(testLocation)->getState() == 1)
+            if(players[activePlayer].getPlayerClass()==5)
             {
-                return 2; // flooded location costs nothing
+                return 1; // flooded location costs nothing
             }
             else
             {
-                return 1;
+                return 2;
             }
         }
         else
         {
-            return 1; // all other players cost one action
+            return 2;
         }
     }
-    if (find(validSquares.begin(), validSquares.end(), testLocation) == validSquares.end()) {return 2;}
     return 0;  // can't move here
 }
 
@@ -372,52 +371,43 @@ bool Game::heloPlayers(int location)
 }
 
 
-void Game::shoreUp()
+bool Game::shoreUp(int direction)
 {
-    int engineerTurns = 1;
-    if(players[activePlayer].getPlayerClass() == 1){engineerTurns = 2;}
-    for(int i=0; i<engineerTurns; i++)
+    int start = players[activePlayer].getLocation();
+    int target = destinationValue(start, direction); 
+    bool validTarget = true;
+    for(int i=0; i<invalidSquares.size(); i++)
     {
-        int direction;
-        cout << "Enter a direction to shore up(0-7 or 8 for thr player's location):";
-        cin >> direction;
-        int start = players[activePlayer].getLocation();
-        int target = destinationValue(start, direction); 
-        bool validTarget = true;
-        for(int i=0; i<invalidSquares.size(); i++)
+        if(target == invalidSquares[i]){validTarget = false;}
+    }
+    if(target < 0 || target > 35){validTarget = false;}
+    if(validTarget == true)
+    {
+        Card* pCard = islandHand.getCardAt(target);
+        if (pCard->getState() == 1)
         {
-            if(target == invalidSquares[i]){validTarget = false;}
-        }
-        if(target < 0 || target > 35){validTarget = false;}
-        if(validTarget == true)
-        {
-            Card* pCard = islandHand.getCardAt(target);
-            if (pCard->getState() == 1)
+            pCard->setState(2);
+            if(players[activePlayer].getPlayerClass() == 1 && engineerShoreUp == false)  // check if engineer and first shore up tile
             {
-                pCard->setState(2);
-                if(players[activePlayer].getPlayerClass() == 1 && i==0)
-                {
-                    printGameState();
-                    char another;
-                    cout << "Do you want to shore up another island location (y/n)?";
-                    cin >> another;
-                    if(another != 'y' && another !='Y')
-                    {
-                        players[activePlayer].setActions(-1);
-                        return;
-                    }  
-                }
-                else
-                {
-                    players[activePlayer].setActions(-1);
-                }
+                engineerShoreUp = true;
+                return true;
+            }
+            else
+            {
+                engineerShoreUp = false;
+                players[activePlayer].setActions(-1);
+                if (players[activePlayer].getActions() < 1){nextPlayer();}
+                return false;
             }
         }
-        else
-        {
-            cout << "Unable to shore up location";
-        }
     }
+    else
+    {
+        cout << "Unable to shore up location";
+        return false;
+    }
+
+    if (players[activePlayer].getActions() < 1) {nextPlayer();}
 }
 
 
@@ -580,6 +570,7 @@ string Game::getIslandCardName(int position)
 void Game::playerTurn()
 {
     pilotFlight = false;
+    bool check;
     while(players[activePlayer].getActions() > 0)
     {
         printGameState();
@@ -604,7 +595,7 @@ void Game::playerTurn()
                 movePlayer(movingPlayer,direction);
                 break;
             case 2: //shore up
-                shoreUp();
+                check = shoreUp(0);
                 break;
             case 3: //get tresure
                 int treasure;
@@ -928,7 +919,6 @@ void Game::nextPlayer()
     if (activePlayer > (players.size()-1))
     {activePlayer = 0;}
     players[activePlayer].resetActions();
-    playerTurn();
 }
 
 
@@ -992,8 +982,17 @@ int Game::getNumberOfPlayers()
 {
     return players.size();
 }
+ 
 
 int Game::getActivePlayerSlot()
 {
     return activePlayer;
+}
+
+
+int Game::getIslandCardFlood(int location)
+{
+    int slot = islandCardPositions[location].second;
+    Card* pCard = islandHand.getCard(slot);
+    return pCard->getState();
 }
