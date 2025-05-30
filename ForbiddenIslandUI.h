@@ -35,6 +35,7 @@ public:
     void updateIsleTiles();
     void clearDialogButtons();
     void updateActions();
+    void updateWaterRise();
     /*void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);
@@ -86,6 +87,8 @@ private:
     int playerAction = 9;
     int activePlayerSlot;
     vector <int> validMoves;
+    QLabel* m_wrCard;
+    QLabel* m_wrIndicator;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

@@ -50,6 +50,8 @@ public:
     Deck* getTreasureDiscard();
     int getNumberOfPlayers();
     int getIslandCardFlood(int location);
+    void setWaterLevel(int wl);
+    int getWaterLevel();
 
 private:
     Deck islandDeck;

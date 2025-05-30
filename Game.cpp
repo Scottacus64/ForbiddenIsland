@@ -996,3 +996,15 @@ int Game::getIslandCardFlood(int location)
     Card* pCard = islandHand.getCard(slot);
     return pCard->getState();
 }
+
+
+int Game::getWaterLevel()
+{
+    return waterLevel;
+}
+
+
+void Game::setWaterLevel(int wl)
+{
+    waterLevel = wl;
+}

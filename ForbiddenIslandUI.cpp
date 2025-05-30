@@ -277,6 +277,22 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
         m_treasureDecks[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
     }
 
+    m_wrCard = new QLabel(this);
+    path = QCoreApplication::applicationDirPath() + "/../CardPNGs/wrCard.png";
+    QPixmap wrcPixmap(path);  
+    m_wrCard->setPixmap(wrcPixmap);
+    m_wrCard->setScaledContents(true);
+    m_wrCard->setGeometry(1500, 270, 116, 319);
+    m_wrCard->raise();  // Ensure it's on top
+
+    m_wrIndicator = new QLabel(this);
+    path = QCoreApplication::applicationDirPath() + "/../CardPNGs/wrIndicator.png";
+    QPixmap wriPixmap(path);  
+    m_wrIndicator->setPixmap(wriPixmap);
+    m_wrIndicator->setScaledContents(true);
+    m_wrIndicator->setGeometry(1490, 522, 46, 21);
+    m_wrIndicator->raise();  // Ensure it's on top
+
 }
 
 
@@ -362,17 +378,40 @@ void ForbiddenIslandUI::dialogButtonClicked()
                     }
                 }
             }
+            dialog->setText("Choose a Difficulty Level");
+            m_dialog[3]->setText("Novice");
+            m_dialog[4]->setText("Normal");
+            m_dialog[5]->setText("Elite");
+            m_dialog[6]->setVisible(true);
+            m_dialog[6]->setEnabled(true);
+            m_dialog[6]->setText("Legendary");
             dialogMode = 1;
+            return;
+        }
+        if (dialogMode == 1)
+        {  
+            int difficulty = 0;
+            string name = clickedButton->objectName().toStdString();
+            if(name == "dB3"){difficulty = 0;}
+            if(name == "dB4"){difficulty = 1;}
+            if(name == "dB5"){difficulty = 2;}
+            if(name == "dB6"){difficulty = 3;}
+            m_pGame->setWaterLevel(difficulty);
+
             dialog->setText("Press button to flood\nsix island tiles");
             m_dialog[3]->setEnabled(false);
             m_dialog[5]->setEnabled(false);
+            m_dialog[6]->setEnabled(false);
             m_dialog[3]->setVisible(false);
             m_dialog[5]->setVisible(false);
+            m_dialog[6]->setVisible(false);
             QString numLeft = QString::number(squaresToFlood);
             m_dialog[4]->setText(numLeft + " tiles left");
+            dialogMode = 2;
+            updateWaterRise();
             return;
         }
-        if(dialogMode == 1)  // Flood tiles
+        if(dialogMode == 2)  // Flood tiles
         {
             int location = m_pGame->flipFlood();
             string iName = m_pGame->getIslandCardName(location);
@@ -412,12 +451,12 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 m_dialog[4]->setText("Get Treasure");
                 m_dialog[5]->setText("Use Special Ability");
                 m_dialog[6]->setText("End Turn");
-                dialogMode = 2;
+                dialogMode = 3;
                 return;
             }
             clearDialogButtons();
         }
-        if(dialogMode == 2)  // Players Up
+        if(dialogMode == 3)  // Players Up
         {
             clearDialogButtons();
             clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");      
@@ -683,6 +722,14 @@ void ForbiddenIslandUI::updateIsleTiles()
         }
         slot +=1;
     }
+}
+
+
+void ForbiddenIslandUI::updateWaterRise()
+{
+    vector <int> wrY = {522,495,470,444,418,390,364,339,314,288};
+    int wl = m_pGame->getWaterLevel();
+    m_wrIndicator->setGeometry(1490, wrY[wl], 46, 21);
 }
 
 
