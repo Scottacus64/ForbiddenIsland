@@ -214,10 +214,6 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             std::string cardName = "P" + std::to_string(player) + std::to_string(i);
             m_playerCards[player][i] = new QPushButton(QString::fromStdString(cardName), this);
             m_playerCards[player][i]->setObjectName(QString::fromStdString(cardName));
-            //QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/WRBC";
-            //QPixmap pixmap(path);
-
-            //pixmap = pixmap.scaled(90, 126, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
             if(player == 2){m_playerCards[player][i]->setGeometry(QRect(290 + (i * 100), 5, 90, 126));}
             if(player == 0){m_playerCards[player][i]->setGeometry(QRect(290 + (i * 100), 850, 90, 126));}
             if(player == 1){m_playerCards[player][i]->setGeometry(QRect(20, 640 - (i * 100), 126, 90));}
@@ -226,7 +222,6 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             {
                 QTransform transform;
                 transform.rotate(90);
-                //pixmap = pixmap.transformed(transform);
                 m_playerCards[player][i]->setIconSize(QSize(126,90));
                 m_playerCards[player][i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
             }
@@ -234,11 +229,10 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
             {
                 m_playerCards[player][i]->setIconSize(QSize(90, 126));
             }
-            //m_playerCards[player][i]->setIcon(pixmap); 
             m_playerCards[player][i]->setText(QString());
             m_playerCards[player][i]->setEnabled(false);
             m_playerCards[player][i]->setVisible(false);
-            //connect(m_pA[i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
+            connect(m_playerCards[player][i], &QPushButton::clicked, this, &ForbiddenIslandUI::cardClicked);
         }
     }
     // set up the flood and treasure draw and discard decks
@@ -351,7 +345,8 @@ void ForbiddenIslandUI::dialogButtonClicked()
                     m_player[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
                 }
                 m_player[i]->setIcon(pixmap); 
-                m_player[i]->setText(QString());     
+                m_player[i]->setText(QString());   
+                connect(m_player[i], &QPushButton::clicked, this, &ForbiddenIslandUI::playerClicked);  
             }
             // deal 2 treasure cards to each player
             for(int i=0; i<2; i++)
@@ -359,7 +354,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 for(int p=0; p<numberOfPlayers; p++)
                 {
                     m_pGame->drawTreasureCards(p);
-                    int tValue =m_pGame->getPlayerTreasureCard(p,i);
+                    int tValue = m_pGame->getPlayerTreasureCard(p,i);
                     if(tValue < 7)
                     {
                         string cName = "T" + to_string(tValue);
@@ -556,7 +551,8 @@ void ForbiddenIslandUI::updateActions()
     dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));
     if(fly == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a tile to fly there");}
     if(moveOther == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another player to move");}
-    if(sendTreasure == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
+    if(sendTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
+    if(sendTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
 }
 
 
@@ -806,4 +802,60 @@ void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
     painter.drawPixmap(waterArea, water.scaled(waterArea.size(), Qt::KeepAspectRatioByExpanding));
 }
 
+
+int ForbiddenIslandUI::playerClicked()
+{
+    QPushButton* playerClicked = qobject_cast<QPushButton*>(sender());
+    QString iName = playerClicked->objectName();
+    string sName = iName.toStdString();
+    receivingPlayer =  sName[1] - '0';
+    cout << "Player Clicked: " << receivingPlayer << endl;
+}
+
+int ForbiddenIslandUI::cardClicked()
+{
+    QPushButton* cardClicked = qobject_cast<QPushButton*>(sender());
+    QString iName = cardClicked->objectName();
+    string sName = iName.toStdString();
+    int cardNumber= sName.back() - '0';   
+    cout << "Card number: " << cardNumber << endl;
+    m_pGame->sendTreasure(receivingPlayer, cardNumber);
+    updateCards();
+}
+
+
+void ForbiddenIslandUI::updateCards()
+{
+    int numberOfPlayers = m_pGame->getNumberOfPlayers();
+    for(int i=0; i<4; i++)
+    {
+        for(int j=0; j<6; j++)
+        {
+            m_playerCards[i][j]->setVisible(false);
+            m_playerCards[i][j]->setEnabled(false);
+        }
+    }
+    for(int p=0; p<numberOfPlayers; p++)
+    {
+        int hSize = m_pGame->getPlayerHandSize(p);
+        for(int i=0; i<hSize; i++)
+            {     
+                int tValue = m_pGame->getPlayerTreasureCard(p,i);
+                string cName = "T" + to_string(tValue);
+                QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
+                QPixmap pixmap(path);
+                if(p==1 || p==3)
+                {
+                    QTransform transform;
+                    transform.rotate(90);
+                    pixmap = pixmap.transformed(transform);
+                }
+                m_playerCards[p][i]->setIcon(pixmap); 
+                m_playerCards[p][i]->setText(QString());
+                m_playerCards[p][i]->setEnabled(true);
+                m_playerCards[p][i]->setVisible(true);
+        }
+            
+    }
+}
 

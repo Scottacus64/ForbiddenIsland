@@ -52,6 +52,8 @@ public:
     int getIslandCardFlood(int location);
     void setWaterLevel(int wl);
     int getWaterLevel();
+    void sendTreasure(int playerNumber, int slot);
+    int getPlayerHandSize(int player);
 
 private:
     Deck islandDeck;
