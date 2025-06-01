@@ -184,12 +184,14 @@ void Game::drawTreasureCards(int playerSlot)
         }
         pCard = treasureDeck.deal();
     }
+
     if(pCard->getTreasureValue() == 7 && gameStarted == false)
     {
         treasureDeck.addCard(pCard);
         treasureDeck.shuffle();
         drawTreasureCards(playerSlot);
     }
+
     if(pCard->getTreasureValue() == 7 && gameStarted == true)
     {
         cout << "got a water rise card" << endl;
@@ -202,10 +204,11 @@ void Game::drawTreasureCards(int playerSlot)
             playAgain();
         }
     }
-    else
+    
+    if(pCard->getTreasureValue() < 7)
     {
         pDCard = playerUp.drawCard(pCard);
-        if (pDCard != nullptr)
+        /*if (pDCard != nullptr)
         {
             if(pDCard->getTreasureValue() == 5)
             {
@@ -218,7 +221,7 @@ void Game::drawTreasureCards(int playerSlot)
                 sandBag(activePlayer, cardSlot);
             }
             treasureDiscard.addCard(pDCard);
-        }
+        }*/
     }
 }
 

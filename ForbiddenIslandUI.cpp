@@ -17,7 +17,7 @@
 #include <regex>
 #include <vector>
 // set up all of the card image QPixmaps
-const std::vector<std::string> ForbiddenIslandUI::cardTreasure =    {"WRBC", "EWR", "FWR", "GWR", "HLWR", "LWR",  "SBWR", "WR"};
+const std::vector<std::string> ForbiddenIslandUI::cardTreasure =    {"WRBC", "T1", "T2", "T3", "T4", "T5", "T6", "T7"};
 const std::vector<std::string> ForbiddenIslandUI::cardFlood =       {"BBC", "BGC", "CAC", "CEC", "CFC", "CGC", "CPC", "CSC", "DDC", "FLC", "GGC", "HGC", "IGC", "LLC", "MMC", "ObC", "PRC", "SGC", "THC", "TMC", "TPC", "TSC", "WtC", "WGC"};
 const std::vector<std::string> ForbiddenIslandUI::cardIsland =      {"BBF", "BGF", "CAF", "CEF", "CFF", "CGF", "CPF", "CSF", "DDF", "FLF", "GGF", "HGF", "IGF", "LLF", "MMF", "ObF", "PRF", "SGF", "THF", "TMF", "TPF", "TSF", "WtF", "WGF"};
 const std::vector<std::string> ForbiddenIslandUI::cardIslandFlood = {"BBB", "BGB", "CAB", "CEB", "CFB", "CGB", "CPB", "CSB", "DDB", "FLB", "GGB", "HGB", "IGB", "LLB", "MMB", "ObB", "PRB", "SGB", "THB", "TMB", "TPB", "TSB", "WtB", "WGB"};
@@ -355,22 +355,21 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 {
                     m_pGame->drawTreasureCards(p);
                     int tValue = m_pGame->getPlayerTreasureCard(p,i);
-                    if(tValue < 7)
+                    //string cName = "T" + to_string(tValue);
+                    //QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
+                    //QPixmap pixmap(path);
+                    cout << "Player" << p << " tValue: " << tValue  << endl;
+                    QPixmap pixmap = cardImageTreasure[tValue];
+                    if(p==1 || p==3)
                     {
-                        string cName = "T" + to_string(tValue);
-                        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
-                        QPixmap pixmap(path);
-                        if(p==1 || p==3)
-                        {
-                            QTransform transform;
-                            transform.rotate(90);
-                            pixmap = pixmap.transformed(transform);
-                        }
-                        m_playerCards[p][i]->setIcon(pixmap); 
-                        m_playerCards[p][i]->setText(QString());
-                        m_playerCards[p][i]->setEnabled(true);
-                        m_playerCards[p][i]->setVisible(true);
+                        QTransform transform;
+                        transform.rotate(90);
+                        pixmap = pixmap.transformed(transform);
                     }
+                    m_playerCards[p][i]->setIcon(pixmap); 
+                    m_playerCards[p][i]->setText(QString());
+                    m_playerCards[p][i]->setEnabled(true);
+                    m_playerCards[p][i]->setVisible(true);
                 }
             }
             dialog->setText("Choose a Difficulty Level");
@@ -810,6 +809,8 @@ int ForbiddenIslandUI::playerClicked()
     string sName = iName.toStdString();
     receivingPlayer =  sName[1] - '0';
     cout << "Player Clicked: " << receivingPlayer << endl;
+    if(sendTreasure ==  true){playerPicked = true;}
+    updateActions();
 }
 
 int ForbiddenIslandUI::cardClicked()
@@ -821,6 +822,13 @@ int ForbiddenIslandUI::cardClicked()
     cout << "Card number: " << cardNumber << endl;
     m_pGame->sendTreasure(receivingPlayer, cardNumber);
     updateCards();
+    if(playerPicked == true)
+    {
+        sendTreasure = false;
+        playerPicked = false;
+    }
+    updateActions();
+    clearDialogButtons();
 }
 
 
@@ -841,9 +849,10 @@ void ForbiddenIslandUI::updateCards()
         for(int i=0; i<hSize; i++)
             {     
                 int tValue = m_pGame->getPlayerTreasureCard(p,i);
-                string cName = "T" + to_string(tValue);
-                QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
-                QPixmap pixmap(path);
+                //string cName = "T" + to_string(tValue);
+                //QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
+                //QPixmap pixmap(path);
+                QPixmap pixmap = cardImageTreasure[tValue];
                 if(p==1 || p==3)
                 {
                     QTransform transform;

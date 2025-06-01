@@ -39,6 +39,7 @@ public:
     void checkForShoreUp();
     int cardClicked();
     void updateCards();
+    int playerClicked();
     /*void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);
@@ -96,7 +97,6 @@ private:
     bool fly = false;
     bool sendTreasure = false;
     bool moveOther = false;
-    int playerClicked();
     bool playerPicked = false;
     int receivingPlayer;
     /*QPushButton* m_pA[4];

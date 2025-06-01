@@ -243,6 +243,7 @@ int Player::getCardTreasureValue(int slot)
     }
     else
     {
+        cout << "No card!" << endl;
         return 8;
     }
 }
