@@ -243,6 +243,7 @@ void Game::movePlayer(Player& player, int  direction)
     if (direction == 0 or direction == 2 or direction == 4 or direction == 6 or player.getPlayerClass() == 2)
     {
         int result = checkValidMove(player.getLocation(), direction);
+        if(player.getPlayerClass() != players[activePlayer].getPlayerClass()){result = 1;}
         if (result == 2) {player.setLocation(direction, 1);}
         if (result == 1) {player.setLocation(direction, 0);}
         if (player.getActions() < 1){nextPlayer();}
@@ -413,6 +414,7 @@ bool Game::shoreUp(int direction)
                 players[activePlayer].setActions(-1);
                 if (players[activePlayer].getActions() < 1){nextPlayer();}
                 cout << "Actions = " << players[activePlayer].getActions()  << endl;
+                return true;
             }
         }
     }
@@ -421,9 +423,7 @@ bool Game::shoreUp(int direction)
 
         cout << "Unable to shore up location";
         return false;
-    }
-
-    if (players[activePlayer].getActions() < 1) {nextPlayer();}
+    }   
 }
 
 

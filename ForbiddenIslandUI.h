@@ -37,9 +37,9 @@ public:
     void updateActions();
     void updateWaterRise();
     void checkForShoreUp();
-    int cardClicked();
+    void cardClicked();
     void updateCards();
-    int playerClicked();
+    void playerClicked();
     /*void refreshUpperSection();
     void dealCards();
     void updateDecks(int deck, int dCards);
@@ -99,6 +99,8 @@ private:
     bool moveOther = false;
     bool playerPicked = false;
     int receivingPlayer;
+    int mSlot;
+    bool firstMove = false;
     /*QPushButton* m_pA[4];
     QPushButton* m_pC[133];
     QPushButton* m_pD[4];

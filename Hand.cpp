@@ -49,6 +49,7 @@ Card* Hand::removeValue(int value)
             return pCard;
         }
     }
+    return nullptr;
 }
 
 
@@ -273,6 +274,7 @@ int Hand::getLocationFromHandSlot(int slot)
             break;
         }
     }  
+    return 0;
 }
 
 Card* Hand::getCardWithId(int id)

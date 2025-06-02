@@ -74,7 +74,9 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
 
     // Create QLabel and QPushButton instances
     logo = new QLabel(this);
-    QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/fiLogo.png";
+    QString path = QCoreApplication::applicationDirPath() + "/CardPNGs/fiLogo.png";
+    qDebug() << QCoreApplication::applicationDirPath();
+    qDebug() << path;
     QPixmap logoPixmap(path);  
     logo->setPixmap(logoPixmap);
     logo->setScaledContents(true);
@@ -272,7 +274,7 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     }
 
     m_wrCard = new QLabel(this);
-    path = QCoreApplication::applicationDirPath() + "/../CardPNGs/wrCard.png";
+    path = QCoreApplication::applicationDirPath() + "/CardPNGs/wrCard.png";
     QPixmap wrcPixmap(path);  
     m_wrCard->setPixmap(wrcPixmap);
     m_wrCard->setScaledContents(true);
@@ -464,7 +466,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
             updateIsleTiles();
             if (playerAction == 0)            // move player
             {   
-                fly == false;
+                fly = false;
                 sendTreasure = false;
                 moveOther = false;  
                 updateActions();   
@@ -472,13 +474,14 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 {
                     if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
                     {
+                        int pSlot = m_pGame->getActivePlayerSlot();
                         highlightMove(gridLocation+offset[directions[i]]);                 
                     }
                 }
             } 
             if (playerAction == 1)          //shore up
             {
-                fly == false;
+                fly = false;
                 sendTreasure = false;
                 moveOther = false;  
                 updateActions();  
@@ -506,7 +509,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
             }
             if (playerAction == 6)          //end turn
             {
-                fly == false;
+                fly = false;
                 sendTreasure = false;
                 moveOther = false; 
                 updateActions();   
@@ -549,9 +552,11 @@ void ForbiddenIslandUI::updateActions()
     int actions = player->getActions();
     dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));
     if(fly == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a tile to fly there");}
-    if(moveOther == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another player to move");}
+    if(moveOther == true && firstMove == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another player to move");}
+    if(moveOther == true && firstMove == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nMove the player again");}
     if(sendTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
     if(sendTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
+
 }
 
 
@@ -611,6 +616,8 @@ void ForbiddenIslandUI::pawnClicked()
     smatch match;
     int playerSlot;
     int gridLocation;
+    vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+    vector <int> directions = {0,2,4,6};
     if (regex_match(sName, match, re)) 
     {
         playerSlot = stoi(match[1].str());
@@ -619,29 +626,44 @@ void ForbiddenIslandUI::pawnClicked()
     }
 
     if(playerAction == 0)
-    {
-        vector <int> offset {-6,-5,1,7,6,5,-1,-7};
-        vector <int> directions = {0,2,4,6};
+    {   
         validMoves.clear();
-        if(playerSlot == m_pGame->getActivePlayerSlot())
+        if(moveOther == false)
         {
-            cout << "Active Player found!!" << endl;
-            Player* activePlayer = m_pGame->getActivePlayer();
-            if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
-            for(int i=0; i<directions.size(); i++)
+            if(playerSlot == m_pGame->getActivePlayerSlot())
             {
-                if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                cout << "Active Player found!!" << endl;
+                Player* activePlayer = m_pGame->getActivePlayer();
+                if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+                for(int i=0; i<directions.size(); i++)
                 {
-                    highlightMove(gridLocation+offset[directions[i]]);
-                    validMoves.push_back(directions[i]);
-                    
+                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                    {
+                        highlightMove(gridLocation+offset[directions[i]]);
+                        validMoves.push_back(directions[i]);
+                        
+                    }
                 }
             }
-            
-            // highlight valid locations
         }
-        
     }
+    if(playerAction == 5)
+    {
+        Player* movingPlayer = m_pGame->getPlayer(playerSlot);
+        mSlot = playerSlot;
+        cout << "Player slot: " << playerSlot << endl;
+        //highlightMove(gridLocation+offset[gridLocation], playerSlot);
+        if(movingPlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+        for(int i=0; i<directions.size(); i++)
+        {
+            if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+            {
+                highlightMove(gridLocation+offset[directions[i]]);
+            }
+        }
+    }
+    
+
 }
 
 
@@ -654,15 +676,16 @@ void ForbiddenIslandUI::iTileClicked()
     regex re(R"(iC(\d+))");
     smatch match;
     int iLocation;
+    vector <int> directions = {6,5,-1,-7,-6,-5,1,7};
+    int dir;
+    Player* activePlayer = m_pGame->getActivePlayer();
     if (regex_match(sName, match, re))
     {
         iLocation = stoi(match[1].str());
     }
     if(playerAction == 0 || playerAction == 1)
     {
-        vector <int> directions = {6,5,-1,-7,-6,-5,1,7};
-        int dir;
-        Player* activePlayer = m_pGame->getActivePlayer();
+
         int pLocation = activePlayer->getLocation();
         int delta = pLocation - iLocation;
         for(int i=0; i<8; i++) 
@@ -681,12 +704,65 @@ void ForbiddenIslandUI::iTileClicked()
             engineerSU = eShore;
         }
     }
+
+    if (playerAction == 5)
+    {
+        cout << "FirstMove: " << firstMove << endl;
+        Player* movingPlayer = m_pGame->getPlayer(mSlot);
+        int mpLocation = movingPlayer->getLocation();
+        int mdelta = mpLocation - iLocation;
+        for(int i=0; i<8; i++) 
+        {
+            if(mdelta == directions[i]){dir = i;}
+        }  
+        m_pGame->movePlayer(*movingPlayer, dir);
+        int loc = movingPlayer->getLocation();
+
+        if(firstMove == true)
+        {
+            int actions = activePlayer->getActions();
+            actions -=1;
+            moveOther = false;
+            if(actions < 1)
+            {m_pGame->nextPlayer();}
+            else
+            {
+                activePlayer->setActions(-1);
+            }
+        }
+        else
+        {
+            vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+            vector <int> directions = {0,2,4,6};
+            if(movingPlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+            updateIsleTiles();
+            updatePawns();
+            for(int i=0; i<directions.size(); i++)
+            {
+                if (m_pGame->checkValidMove(loc,directions[i]) > 0)
+                {
+                    highlightMove(loc+offset[directions[i]]);
+                }
+            }
+            updateActions();
+            firstMove =! firstMove;
+            return;
+        }
+        firstMove =! firstMove;
+        updateActions();
+
+    }
+   
     if(playerAction == 5 && fly == true)
     {
         Player* player = m_pGame->getActivePlayer();
         player->fly(iLocation);
         int actions = player->getActions();
-        if(actions < 1){m_pGame->nextPlayer();}
+        actions -=1;
+        if(actions < 1)
+        {m_pGame->nextPlayer();}
+        else
+        {player->setActions(actions);}
         fly = false;
     }
     updateActions();
@@ -700,6 +776,7 @@ void ForbiddenIslandUI::iTileClicked()
     }
     else{updateIsleTiles();}
 }
+
 
 
 void ForbiddenIslandUI::updatePawns()
@@ -732,6 +809,7 @@ void ForbiddenIslandUI::updatePawns()
 
 void ForbiddenIslandUI::highlightMove(int tileLocation)
 {
+    cout << "in HL" << endl;
     QIcon icon = m_iC[tileLocation]->icon();
     QSize size = m_iC[tileLocation]->iconSize(); 
     QPixmap currentPixmap = icon.pixmap(size);
@@ -802,7 +880,7 @@ void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
 }
 
 
-int ForbiddenIslandUI::playerClicked()
+void ForbiddenIslandUI::playerClicked()
 {
     QPushButton* playerClicked = qobject_cast<QPushButton*>(sender());
     QString iName = playerClicked->objectName();
@@ -813,12 +891,13 @@ int ForbiddenIslandUI::playerClicked()
     updateActions();
 }
 
-int ForbiddenIslandUI::cardClicked()
+void ForbiddenIslandUI::cardClicked()
 {
     QPushButton* cardClicked = qobject_cast<QPushButton*>(sender());
     QString iName = cardClicked->objectName();
     string sName = iName.toStdString();
-    int cardNumber= sName.back() - '0';   
+    int cardNumber= sName.back() - '0';  
+    if(playerPicked == false){return;} 
     cout << "Card number: " << cardNumber << endl;
     m_pGame->sendTreasure(receivingPlayer, cardNumber);
     updateCards();
@@ -828,6 +907,7 @@ int ForbiddenIslandUI::cardClicked()
         playerPicked = false;
     }
     updateActions();
+    receivingPlayer = 9;
     clearDialogButtons();
 }
 

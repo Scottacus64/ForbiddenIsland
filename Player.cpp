@@ -159,6 +159,7 @@ Card* Player::playCardSlot(int slot)
         Card* pCard = playerTreasureHand.removeCard(slot);
         return pCard;
     }
+    return nullptr;
 }
 
 
@@ -258,6 +259,7 @@ int Player::getTreasureCardSlot(Card* pCard)
             return i;
         }
     }
+    return 0;
 }
 
 
