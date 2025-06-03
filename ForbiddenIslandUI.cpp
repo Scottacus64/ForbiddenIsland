@@ -487,6 +487,36 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 updateActions();  
                 checkForShoreUp();
             }
+            if(playerAction == 2)           //give treasure
+            {
+                sameTile.clear();
+                for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
+                {
+                    Player* tPlayer = m_pGame->getPlayer(i);
+                    Player* activePlayer = m_pGame->getActivePlayer();
+                    if(tPlayer->getLocation() == activePlayer->getLocation())
+                    {
+                        sameTile.push_back(i);
+                    }
+                }
+                if(sameTile.size() > 1)
+                {
+                    giveTreasure = true;
+                    updateActions();
+                }
+                else
+                {
+                    clearDialogButtons();
+                }
+            }
+            if(playerAction == 3)           //play card
+            {
+
+            }
+            if(playerAction == 4)           //get treasure
+            {
+
+            }
             if (playerAction == 5)          //speecial ability
             {
                 Player* activePlayer = m_pGame->getActivePlayer();  
@@ -556,7 +586,9 @@ void ForbiddenIslandUI::updateActions()
     if(moveOther == true && firstMove == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nMove the player again");}
     if(sendTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
     if(sendTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
-
+    if(giveTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
+    if(giveTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
+    
 }
 
 
@@ -647,7 +679,7 @@ void ForbiddenIslandUI::pawnClicked()
             }
         }
     }
-    if(playerAction == 5)
+    if(moveOther == true)
     {
         Player* movingPlayer = m_pGame->getPlayer(playerSlot);
         mSlot = playerSlot;
@@ -661,8 +693,13 @@ void ForbiddenIslandUI::pawnClicked()
             }
         }
     }
-    
-
+       if(sendTreasure == true)
+    {
+        receivingPlayer =  playerSlot;
+        cout << "Player Clicked: " << receivingPlayer << endl;
+        if(sendTreasure ==  true){playerPicked = true;}
+        updateActions();
+    }
 }
 
 
@@ -704,7 +741,7 @@ void ForbiddenIslandUI::iTileClicked()
         }
     }
 
-    if (playerAction == 5)
+    if (playerAction == 5 && moveOther == true)
     {
         cout << "FirstMove: " << firstMove << endl;
         Player* movingPlayer = m_pGame->getPlayer(mSlot);
@@ -757,11 +794,8 @@ void ForbiddenIslandUI::iTileClicked()
         Player* player = m_pGame->getActivePlayer();
         player->fly(iLocation);
         int actions = player->getActions();
-        actions -=1;
         if(actions < 1)
         {m_pGame->nextPlayer();}
-        else
-        {player->setActions(actions);}
         fly = false;
     }
     updateActions();
@@ -775,7 +809,6 @@ void ForbiddenIslandUI::iTileClicked()
     }
     else{updateIsleTiles();}
 }
-
 
 
 void ForbiddenIslandUI::updatePawns()
@@ -882,30 +915,35 @@ void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
 void ForbiddenIslandUI::playerClicked()
 {
     QPushButton* clickedPlayer = qobject_cast<QPushButton*>(sender());
+    QString pName = clickedPlayer->objectName();
+    string sName = pName.toStdString();
     if(sendTreasure == true)
     {
-        QPushButton* playerClicked = qobject_cast<QPushButton*>(sender());
-        QString iName = playerClicked->objectName();
-        string sName = iName.toStdString();
-        receivingPlayer =  sName[1] - '0';
-        cout << "Player Clicked: " << receivingPlayer << endl;
+        receivingPlayer = sName[1] - '0';
         if(sendTreasure ==  true){playerPicked = true;}
+        updateActions();
+    }
+    if(giveTreasure == true)
+    {
+        receivingPlayer = sName[1] - '0';
+        bool pHere = false;
+        for (int i=0; i<sameTile.size(); i++)
+        {
+            cout << sameTile[i] << ":" << receivingPlayer << endl;
+            if(sameTile[i] == receivingPlayer)
+            {
+                pHere = true;
+            }
+        }
+        if(giveTreasure ==  true && pHere == true){playerPicked = true;}
         updateActions();
     }
     if(moveOther == true)
     {
         vector <int> directions = {0,2,4,6};
-        vector <int> offset {-6,-5,1,7,6,5,-1,-7};
-        int player;
-        int playerSlot;
-        QString pName = clickedPlayer->objectName();
-        string sName = pName.toStdString();
-        cout << "sName: " << sName << endl;
-        char c = sName[1];              
-        player = c - '0'; 
-        cout << "Player: " << player << endl;
-        mSlot = player;
-        Player* movingPlayer = m_pGame->getPlayer(player);
+        vector <int> offset {-6,-5,1,7,6,5,-1,-7};           
+        mSlot = sName[1] - '0';
+        Player* movingPlayer = m_pGame->getPlayer(mSlot);
         int gridLocation = movingPlayer->getLocation();
         if(movingPlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
         for(int i=0; i<directions.size(); i++)
@@ -926,11 +964,12 @@ void ForbiddenIslandUI::cardClicked()
     string sName = iName.toStdString();
     int cardNumber= sName.back() - '0';  
     if(playerPicked == false){return;} 
-    cout << "Card number: " << cardNumber << endl;
+    cout << "Card number: " << cardNumber << " receiving player " << receivingPlayer << endl;
     m_pGame->sendTreasure(receivingPlayer, cardNumber);
     updateCards();
     if(playerPicked == true)
     {
+        giveTreasure = false;
         sendTreasure = false;
         playerPicked = false;
     }

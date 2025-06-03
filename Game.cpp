@@ -1027,18 +1027,19 @@ void Game::setWaterLevel(int wl)
 
 void Game::sendTreasure(int playerNumber, int slot)
 {
-    if(players[activePlayer].getPlayerClass() == 6 && players[activePlayer].getHandSize() > 0)
+    if(players[activePlayer].getHandSize() > 0)
+    {
+        if(playerNumber != activePlayer)
         {
-            if(playerNumber != activePlayer)
+            if (slot < players[activePlayer].getHandSize())
             {
-                if (slot < players[activePlayer].getHandSize())
-                {
-                    transferTreasure(players[activePlayer], players[playerNumber], slot);
-                    players[activePlayer].setActions(-1);
-                }
+                transferTreasure(players[activePlayer], players[playerNumber], slot);
+                players[activePlayer].setActions(-1);
+                if(players[activePlayer].getActions() < 1){nextPlayer();}
             }
-            else {cout << "Can't transfer treasure \n";}
-        }   
+        }
+        else {cout << "Can't transfer treasure \n";}
+    }   
 }
 
 

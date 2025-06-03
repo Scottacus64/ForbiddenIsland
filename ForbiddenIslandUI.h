@@ -40,26 +40,12 @@ public:
     void cardClicked();
     void updateCards();
     void playerClicked();
-    /*void refreshUpperSection();
-    void dealCards();
-    void updateDecks(int deck, int dCards);
-    void postWin();
-    void enableDrawPile(int pile, int id);
-    void disableDrawPile(int pile);
-
-    void autoFinish();
-    void delayTimer(int delay);
-    void undoPressed();
-    void newGamePressed();
-    void refreshDecks();*/
+ 
     
 public slots:
     void dialogButtonClicked();
     void pawnClicked();
     void iTileClicked();
-    /*void cardClicked();
-    void easyClicked();
-    void hardClicked();*/
 
 private:
     Ui::ForbiddenIslandUI *ui;
@@ -96,35 +82,13 @@ private:
     bool engineerSU = false;
     bool fly = false;
     bool sendTreasure = false;
+    bool giveTreasure = false;
+    vector <int> sameTile;
     bool moveOther = false;
     bool playerPicked = false;
     int receivingPlayer;
     int mSlot;
     bool firstMove = false;
-    /*QPushButton* m_pA[4];
-    QPushButton* m_pC[133];
-    QPushButton* m_pD[4];
-    QPushButton* m_undo;
-    QPushButton* m_newGame;
-    QPushButton* m_easy;
-    QPushButton* m_hard;
-    QTimer elapsedTime;
-    QLabel* m_startLogo;
-    QLabel* m_moves;
-    QLabel* m_winMoves;
-    QLabel* m_timer;
-    QLabel* m_winTime;
-    QLabel* m_noMovesLeft;
-    QLabel* m_winScreen[5];
-    QTimer timer;
-    QElapsedTimer elapsedTimer;
-    //Solitaire* m_pSolitaire;
-    int cardsDelt = 0;
-    bool gameStarted = false;
-    qint64 elapsedMilliseconds;
-    int seconds;
-    std::vector<int> timeVec;
-    std::vector<int> moveVec;
-    bool win = false;*/
+
 };
 #endif // FORBIDDENISLAND_H
