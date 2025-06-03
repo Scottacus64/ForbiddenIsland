@@ -55,6 +55,7 @@ public:
     void sendTreasure(int playerNumber, int slot);
     int getPlayerHandSize(int player);
 
+
 private:
     Deck islandDeck;
     Deck floodDeck;

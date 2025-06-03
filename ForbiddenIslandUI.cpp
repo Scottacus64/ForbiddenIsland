@@ -652,7 +652,6 @@ void ForbiddenIslandUI::pawnClicked()
         Player* movingPlayer = m_pGame->getPlayer(playerSlot);
         mSlot = playerSlot;
         cout << "Player slot: " << playerSlot << endl;
-        //highlightMove(gridLocation+offset[gridLocation], playerSlot);
         if(movingPlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
         for(int i=0; i<directions.size(); i++)
         {
@@ -882,14 +881,43 @@ void ForbiddenIslandUI::paintEvent(QPaintEvent* event)
 
 void ForbiddenIslandUI::playerClicked()
 {
-    QPushButton* playerClicked = qobject_cast<QPushButton*>(sender());
-    QString iName = playerClicked->objectName();
-    string sName = iName.toStdString();
-    receivingPlayer =  sName[1] - '0';
-    cout << "Player Clicked: " << receivingPlayer << endl;
-    if(sendTreasure ==  true){playerPicked = true;}
-    updateActions();
+    QPushButton* clickedPlayer = qobject_cast<QPushButton*>(sender());
+    if(sendTreasure == true)
+    {
+        QPushButton* playerClicked = qobject_cast<QPushButton*>(sender());
+        QString iName = playerClicked->objectName();
+        string sName = iName.toStdString();
+        receivingPlayer =  sName[1] - '0';
+        cout << "Player Clicked: " << receivingPlayer << endl;
+        if(sendTreasure ==  true){playerPicked = true;}
+        updateActions();
+    }
+    if(moveOther == true)
+    {
+        vector <int> directions = {0,2,4,6};
+        vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+        int player;
+        int playerSlot;
+        QString pName = clickedPlayer->objectName();
+        string sName = pName.toStdString();
+        cout << "sName: " << sName << endl;
+        char c = sName[1];              
+        player = c - '0'; 
+        cout << "Player: " << player << endl;
+        mSlot = player;
+        Player* movingPlayer = m_pGame->getPlayer(player);
+        int gridLocation = movingPlayer->getLocation();
+        if(movingPlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+        for(int i=0; i<directions.size(); i++)
+        {
+            if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+            {
+                highlightMove(gridLocation+offset[directions[i]]);
+            }
+        }
+    }
 }
+
 
 void ForbiddenIslandUI::cardClicked()
 {
