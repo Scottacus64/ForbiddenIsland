@@ -40,6 +40,7 @@ public:
     void cardClicked();
     void updateCards();
     void playerClicked();
+    void treasureClicked();
  
     
 public slots:
@@ -54,11 +55,13 @@ private:
     static const vector <string> cardIsland;
     static const vector <string> cardIslandFlood;
     static const vector <string> cardPlayer;
+    static const vector <string> treasure;
     QPixmap cardImageTreasure[8];
     QPixmap cardImageFlood[25];
     QPixmap cardImageIsland[24];
     QPixmap cardImageIslandFlood[24];
     QPixmap cardImagePlayer[6];
+    QPixmap treasureImage[4];
     QPixmap water;
     QPushButton* m_iC[36];
     Game* m_pGame;
@@ -67,6 +70,7 @@ private:
     QPushButton* m_floodDecks[2];
     QPushButton* m_treasureDecks[2];
     QPushButton* m_pawns[4][36];
+    QPushButton* m_treasure[4];
     QLabel* logo;
     QLabel* dialog;
     QPushButton* m_dialog[7];
@@ -86,9 +90,10 @@ private:
     vector <int> sameTile;
     bool moveOther = false;
     bool playerPicked = false;
-    int receivingPlayer;
-    int mSlot;
+    int  receivingPlayer;
+    int  mSlot;
     bool firstMove = false;
-
+    bool getTreasure = false;
+    int  treasureValue;
 };
 #endif // FORBIDDENISLAND_H

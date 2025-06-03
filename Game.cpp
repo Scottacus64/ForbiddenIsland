@@ -1025,6 +1025,7 @@ void Game::setWaterLevel(int wl)
     waterLevel = wl;
 }
 
+
 void Game::sendTreasure(int playerNumber, int slot)
 {
     if(players[activePlayer].getHandSize() > 0)
