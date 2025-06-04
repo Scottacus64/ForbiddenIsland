@@ -328,53 +328,6 @@ int Game::destinationValue(int location, int direction)
 }
 
 
-bool Game::heloPlayers(int location)
-{
-    bool canHelo = false;
-    vector<Player*>startPlayers;
-    for(int i=0; i<players.size(); i++)
-    {
-        Player& p = players[i];
-        if (p.getLocation() == location)
-        {
-            startPlayers.push_back(&p);
-            canHelo = true;
-        }
-    }
-    cout << "These players are in this location: ";
-    for (int i=0; i<startPlayers.size(); i++)
-    {
-        cout << startPlayers[i]->getPlayerClass() << ", ";
-    }
-    cout << endl;
-    for (int i=0; i<startPlayers.size(); i++)
-    {
-        char move;
-        cout << "do you want to move player " << startPlayers[i]->getPlayerClass() << " (y/n)" ;
-        cin >> move;
-        if (move != 'Y' && move != 'y')
-        {
-            startPlayers.erase(startPlayers.begin() + i);
-        }
-    }
-    cout << "startPlayers = ";
-    for (int i=0; i<startPlayers.size(); i++)
-    {
-        cout << startPlayers[i]->getPlayerClass() << ", ";
-    }
-    cout << endl;
-    cout << "where to helo to: ";
-    int destination;
-    cin >> destination;
-    for (int i=0; i<startPlayers.size(); i++)
-    {
-        startPlayers[i]->fly(destination);
-    }
-    updatePlayerLocations();
-    return canHelo;
-}
-
-
 bool Game::shoreUp(int direction)
 {
     int start = players[activePlayer].getLocation();
@@ -662,7 +615,7 @@ void Game::playerTurn()
                             cout << "Enter a location to fly to: ";
                             int destination;
                             cin >> destination;
-                            players[activePlayer].fly(destination);
+                            players[activePlayer].fly(destination, false);
                             pilotFlight = true;
                             players[activePlayer].setActions(-1);
                         }
@@ -774,16 +727,8 @@ void Game::helo(int player, int cardSlot)
         cout << "\n******** WIN!!! *********\n";
         playAgain();
     }
-    cout << "Enter a location to helicopter from: ";
-    int hLocation;
-    cin >> hLocation;
-    bool canHelo;
-    canHelo = heloPlayers(hLocation);
-    if(canHelo == true)
-    {
-        Card* pCard = players[player].playCardSlot(cardSlot);
-        treasureDiscard.addCard(pCard);
-    }
+    Card* pCard = players[player].playCardSlot(cardSlot);
+    treasureDiscard.addCard(pCard);
 }
 
 
@@ -881,7 +826,7 @@ void Game::checkPlayerInWater()
                 canMove = true;
                 cout << "choose destination to fly to: ";
                 cin >> location;
-                players[i].fly(location);
+                players[i].fly(location, false);
             }
             else
             {

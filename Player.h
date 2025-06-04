@@ -15,7 +15,7 @@ public:
     void  setLocation(int direction, int cost);
     int   shoreUp(int direction);
     int   canGetTreasure(int treasure);
-    void  fly(int destination);
+    void  fly(int destination, bool helo);
     Card* giveTreasureCard(int treasureSlot);
     void  getTreasureCard(Card* pCard);
     int   getCardTreasureValue(int slot);

@@ -636,7 +636,7 @@ void ForbiddenIslandUI::updateActions()
     if(giveTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
     if(getTreasure == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nChoose a treasure to get");}
     if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");}
-    if(helo == true && heloFrom > 0){dialog->setText("Choose a location to Helocopter To");}
+    if(helo == true && heloFrom > 0){dialog->setText("Choose players to Helocopter\nThen select a destination");}
     if(sandBag == true){dialog->setText("Choose a location to Sandbag");}
 }
 
@@ -706,7 +706,7 @@ void ForbiddenIslandUI::pawnClicked()
         cout << "x = " << playerSlot << ", y = " << gridLocation << std::endl;
     }
 
-    if(playerAction == 0)
+    if(playerAction == 0 && heloPlayers.size() == 0)
     {   
         validMoves.clear();
         if(moveOther == false)
@@ -728,6 +728,7 @@ void ForbiddenIslandUI::pawnClicked()
             }
         }
     }
+
     if(moveOther == true)
     {
         Player* movingPlayer = m_pGame->getPlayer(playerSlot);
@@ -742,12 +743,37 @@ void ForbiddenIslandUI::pawnClicked()
             }
         }
     }
-       if(sendTreasure == true)
+
+    if(sendTreasure == true)
     {
         receivingPlayer =  playerSlot;
         cout << "Player Clicked: " << receivingPlayer << endl;
         if(sendTreasure ==  true){playerPicked = true;}
         updateActions();
+    }
+
+    if(heloPlayers.size() > 0)
+    {
+        for(int i=0; i<heloPlayers.size(); i++)
+        {
+            if(playerSlot == heloPlayers[i])
+            {
+                bool dup = false;
+                for(int j=0; j<heloGroup.size(); j++)
+                {
+                    if(heloGroup[j] == playerSlot)
+                    {dup = true;}
+                }
+                if(dup == false)
+                {heloGroup.push_back(playerSlot);}
+            }
+        }
+        cout << "Players to helo = " ;
+        for(int i=0; i<heloGroup.size(); i++)
+        {
+            cout << heloGroup[i] << "," ;
+        }
+        cout << endl;
     }
 }
 
@@ -841,7 +867,7 @@ void ForbiddenIslandUI::iTileClicked()
     if(playerAction == 4 && fly == true)
     {
         Player* player = m_pGame->getActivePlayer();
-        player->fly(iLocation);
+        player->fly(iLocation, false);
         int actions = player->getActions();
         if(actions < 1)
         {m_pGame->nextPlayer();}
@@ -850,12 +876,33 @@ void ForbiddenIslandUI::iTileClicked()
 
     if(helo == true && heloFrom < 1)
     {
+        heloPlayers.clear();
+        Player* player;
+        for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
+        {
+            player = m_pGame->getPlayer(i);
+            int pLocation = player->getLocation();
+            if(pLocation == iLocation)
+            {
+                heloPlayers.push_back(i);
+            }
+        }
+        if(heloPlayers.size() > 0){heloFrom = iLocation;}
+        updateActions();
+    } 
 
-    }
-
-    if(helo == true && heloFrom > 0)
+    if(helo == true && heloGroup.size() > 0)
     {
-
+        for(int i=0; i<heloGroup.size(); i++)
+        {
+            Player* player = m_pGame->getPlayer(heloGroup[i]);
+            player->fly(iLocation, true);
+        }
+        m_pGame->helo(heloPlayer, heloSlot);
+        heloGroup.clear();
+        helo = false;
+        updateCards();
+        updateActions();
     }
 
     if(sandBag == true)
@@ -1043,7 +1090,12 @@ void ForbiddenIslandUI::cardClicked()
     int player =  sName[1] - '0';;
     cout << sName << " Player: " << player << " Slot: " << slot << endl;
     int cardValue = m_pGame->getPlayerTreasureCard(player, slot);
-    if(cardValue == 5){helo = true;}
+    if(cardValue == 5)
+    {
+        heloPlayer = player;
+        heloSlot = slot;
+        helo = true;
+    }
     if(cardValue == 6)
     {
         sandBag = true;

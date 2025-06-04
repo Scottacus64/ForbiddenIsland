@@ -53,10 +53,10 @@ int Player::canGetTreasure(int treasure)
 }
 
 
-void Player::fly(int destination)
+void Player::fly(int destination, bool helo)
 {
     location = destination;
-    actions -=1;
+    if(helo == false){actions -=1;}
 }
 
 

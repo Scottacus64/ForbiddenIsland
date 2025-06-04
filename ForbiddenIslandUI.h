@@ -99,6 +99,9 @@ private:
     int heloPlayer;
     int heloSlot;
     int  heloFrom = 0;
+    bool heloPlayersSelected = false;
+    vector <int> heloGroup;
+    vector <int> heloPlayers;
     bool sandBag = false;
     int sandBagPlayer;
     int sandBagSlot;

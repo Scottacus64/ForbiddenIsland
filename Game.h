@@ -31,7 +31,6 @@ public:
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
     int  getPlayerStartLocation(Player& player);
     void movePlayer(Player& player, int direction);
-    bool heloPlayers(int location);
     void updatePlayerLocations();
     bool checkForLoss();
     bool checkForWin();
