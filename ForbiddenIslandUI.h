@@ -41,6 +41,9 @@ public:
     void updateCards();
     void playerClicked();
     void treasureClicked();
+    void setDMode3();
+    void setDMode4();
+    void floodTiles();
  
     
 public slots:
@@ -105,5 +108,7 @@ private:
     bool sandBag = false;
     int sandBagPlayer;
     int sandBagSlot;
+    int cardsDrawn = 0;
+    bool waterRise = false;
 };
 #endif // FORBIDDENISLAND_H

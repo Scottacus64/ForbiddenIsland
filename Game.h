@@ -27,7 +27,7 @@ public:
     Player* getActivePlayer();
     int  getActivePlayerSlot();
     void getTreasure(Player& player, int treasure);
-    void drawTreasureCards(int playerSlot);
+    bool drawTreasureCards(int playerSlot);
     void transferTreasure (Player& givePlayer, Player& takePlayer, int cardSlot);
     int  getPlayerStartLocation(Player& player);
     void movePlayer(Player& player, int direction);
@@ -53,6 +53,8 @@ public:
     int getWaterLevel();
     void sendTreasure(int playerNumber, int slot);
     int getPlayerHandSize(int player);
+    bool getNextUp();
+    void setNextUp(bool nextUp);
 
 
 private:
@@ -80,5 +82,6 @@ private:
     bool gameStarted = false;
     int totalFlipped = 0;
     bool engineerShoreUp = false;
+    bool nextUp = false;
 };
 #endif

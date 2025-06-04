@@ -165,8 +165,9 @@ void Game::getTreasure(Player& player, int treasure)
 }
 
 
-void Game::drawTreasureCards(int playerSlot)
+bool Game::drawTreasureCards(int playerSlot)
 {
+    bool wrDrawn = false;
     Player& playerUp = players[playerSlot];
     Card* pDCard;
     Card* pCard;
@@ -189,7 +190,7 @@ void Game::drawTreasureCards(int playerSlot)
     {
         treasureDeck.addCard(pCard);
         treasureDeck.shuffle();
-        drawTreasureCards(playerSlot);
+        bool dc = drawTreasureCards(playerSlot);
     }
 
     if(pCard->getTreasureValue() == 7 && gameStarted == true)
@@ -203,26 +204,14 @@ void Game::drawTreasureCards(int playerSlot)
             cout << "\n ***** GAME OVER *****\n";
             playAgain();
         }
+        wrDrawn = true;
     }
     
     if(pCard->getTreasureValue() < 7)
     {
         pDCard = playerUp.drawCard(pCard);
-        /*if (pDCard != nullptr)
-        {
-            if(pDCard->getTreasureValue() == 5)
-            {
-                int cardSlot = players[activePlayer].getTreasureCardSlot(pDCard);
-                helo(activePlayer, cardSlot);      
-            }
-            if(pDCard->getTreasureValue() == 6)
-            {
-                int cardSlot = players[activePlayer].getTreasureCardSlot(pDCard);
-                sandBag(activePlayer, cardSlot);
-            }
-            treasureDiscard.addCard(pDCard);
-        }*/
     }
+    return wrDrawn;
 }
 
 
@@ -519,6 +508,7 @@ string Game::getIslandCardName(int position)
     int slot = islandCardPositions[position].second;
     Card* pCard = islandHand.getCard(slot);
     string name = pCard->getPrintValue();
+    cout << "Flooded card: " << pCard->getPrintValue()  << "State: " << pCard->getState() << endl;
     if(pCard->getState() == 2)
     {
         name = name + "F";
@@ -527,179 +517,13 @@ string Game::getIslandCardName(int position)
     {
         name = name + "B";
     }
-    if(pCard->getState() == 0)
-    {
-        name = "";
-    }
     return name;
 }
 
 
 void Game::playerTurn()
 {
-    pilotFlight = false;
-    bool check;
-    while(players[activePlayer].getActions() > 0)
-    {
-        printGameState();
-        int playerChoice;
-        while (!(cin >> playerChoice) || playerChoice < 1 || playerChoice > 7) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number between 1 and 6: ";
-        }
-        Player& movingPlayer = players[activePlayer];
-        switch (playerChoice)
-        {
-            case 1: // move
-                int direction;
-                cout << "Enter a direction to move (0-7)";
-                while (!(cin >> direction) || direction < 0 || direction > 7) 
-                {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << "Invalid input. Please enter a number between 0 and 7: ";
-                }  
-                movePlayer(movingPlayer,direction);
-                break;
-            case 2: //shore up
-                check = shoreUp(0);
-                break;
-            case 3: //get tresure
-                int treasure;
-                cout << "Enter a treasure to capture (1-4):";
-                cin >> treasure;
-                getTreasure(players[activePlayer], treasure);
-                break;
-            case 4: //play card
-                int cardSlot;
-                cout << "Enter a card slot to play (0-4):";
-                if (!(cin >> cardSlot) || cardSlot < 0 || cardSlot > players[activePlayer].getHandSize()-1) 
-                {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << "Invalid input.\n";
-                    break; // now this breaks the switch case
-                }
-                int cardTValue;
-                cardTValue = players[activePlayer].getCardTreasureValue(cardSlot);
-                if(cardTValue == 5) // helo
-                {
-                    helo(activePlayer, cardSlot);
-                    players[activePlayer].setActions(-1);
-                }
-                if (cardTValue == 6) //sandbag
-                {
-                    sandBag(activePlayer, cardSlot, 2);
-                    players[activePlayer].setActions(-1);
-                }
-                break;
-            case 5: //special ability
-                cout << "Special Abilities \n"
-                "1) Fly (Pilot)\n"
-                "2) Send Treasure Card (Messenger)\n"
-                "3) Move Other Player (Navigator)\n"
-                "4) Return to Main Menu\n";
-                int option;
-                while (!(cin >> option) || option < 0 || option > 4)
-                {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << "Invalid input. Please enter a number between 1 and 5: ";
-                }
-                switch (option)
-                {
-                    case 1: // fly
-                        if(players[activePlayer].getPlayerClass() == 3 && pilotFlight == false)
-                        {
-                            cout << "Enter a location to fly to: ";
-                            int destination;
-                            cin >> destination;
-                            players[activePlayer].fly(destination, false);
-                            pilotFlight = true;
-                            players[activePlayer].setActions(-1);
-                        }
-                        else
-                        {
-                            cout << "Cannot fly this turn" << endl;
-                        }
-                        break;
-                    case 2: // send treasure
-                        if(players[activePlayer].getPlayerClass() == 6 && players[activePlayer].getHandSize() > 0)
-                        {
-                            int receivingPlayer;
-                            cout << "Enter a player number to give the card to: ";
-                            cin >> receivingPlayer;
-                            if(receivingPlayer != activePlayer && receivingPlayer > -1 && receivingPlayer < players.size())
-                            {
-                                int treasureSlot;
-                                cout << "Which treasure to give: ";
-                                cin >> treasureSlot;
-                                if (treasureSlot > -1 && treasureSlot < players[activePlayer].getHandSize())
-                                {
-                                    transferTreasure(players[activePlayer], players[receivingPlayer], treasureSlot);
-                                    players[activePlayer].setActions(-1);
-                                }
-                            }
-                            else {cout << "Can't transfer treasure \n";}
-                        }
-                        break;
-                    case 3: // move other player
-                        if(players[activePlayer].getPlayerClass() == 4)
-                        {
-                            cout << "Enter the player to move:";
-                            cin >> mPlayer;
-                            if(mPlayer != activePlayer && mPlayer > -1 && mPlayer < players.size())
-                            {
-                                for(int i=0; i<2; i++)
-                                {
-                                    if(i>0)
-                                    {
-                                        char moveAgain;
-                                        cout << "Move player again (y/n)?";
-                                        cin >> moveAgain;
-                                        if(moveAgain != 'y' && moveAgain != 'Y')
-                                        {
-                                            break;
-                                        }
-                                    }
-                                    int direction;
-                                    cout << "Enter a direction: ";
-                                    cin >> direction;
-                                    movePlayer(players[mPlayer], direction);
-                                    printGameState();
-                                }
-                                players[activePlayer].setActions(-1);
-                            }
-                        }
-                        break;
-                    case 4: // return to main menu
-                        break;
-                }
-                break;  
-            case 6: // end turn
-                players[activePlayer].setActions(0); 
-                break;
-            case 7: // give treasure card
-                {
-                    int rPlayer;
-                    int slot;
-                    cout << "\nPlayer to give card to: ";
-                    cin >> rPlayer;
-                    cout << "Slot of card to give: ";
-                    cin >> slot;
-                    transferTreasure(players[activePlayer], players[rPlayer], slot);
-                    players[activePlayer].setActions(-1);
-                    break;
-                }
-        }
-    }
-    for (int i=0; i<2; i++)
-    {
-        drawTreasureCards(activePlayer);
-        printGameState();
-    }
-    gameTurn();
+   
 }
 
 
@@ -852,7 +676,7 @@ void Game::checkPlayerInWater()
                 cout << "Enter a direction to swim: ";
                 int direction;
                 cin >> direction;
-                movePlayer(players[i],direction);
+                //movePlayer(players[i],direction);
             }
             else
             {
@@ -876,6 +700,7 @@ void Game::nextPlayer()
     if (activePlayer > (players.size()-1))
     {activePlayer = 0;}
     players[activePlayer].resetActions();
+    nextUp = true;
 }
 
 
@@ -988,4 +813,16 @@ void Game::sendTreasure(int playerNumber, int slot)
 int Game::getPlayerHandSize(int player)
 {
     return players[player].getHandSize();
+}
+
+
+bool Game::getNextUp()
+{
+    return nextUp;
+}
+
+
+void Game::setNextUp(bool nUp)
+{
+    nextUp = nUp;
 }

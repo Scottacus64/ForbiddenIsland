@@ -375,11 +375,11 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 connect(m_player[i], &QPushButton::clicked, this, &ForbiddenIslandUI::playerClicked);  
             }
             // deal 2 treasure cards to each player
-            for(int i=0; i<4; i++)
+            for(int i=0; i<2; i++)
             {
                 for(int p=0; p<numberOfPlayers; p++)
                 {
-                    m_pGame->drawTreasureCards(p);
+                    bool wrDrawn = m_pGame->drawTreasureCards(p);
                     int tValue = m_pGame->getPlayerTreasureCard(p,i);
                     cout << "Player" << p << " tValue: " << tValue  << endl;
                     QPixmap pixmap = cardImageTreasure[tValue];
@@ -444,47 +444,17 @@ void ForbiddenIslandUI::dialogButtonClicked()
         }
         if(dialogMode == 2)  // Flood tiles
         {
-            int location = m_pGame->flipFlood();
-            string iName = m_pGame->getIslandCardName(location);
-            string name = iName + ".png";
-            string cName = iName;     // copy the original string
-            cName.pop_back();         // remove the last character
-            cName += "C.png";         // append "C.png"
-            cout << cName << endl;
-            QString path2 = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(name);
-            m_iC[location]->setIcon(QPixmap(path2));
-
-            QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
-            m_treasureDecks[1]->setVisible(true);
-            m_treasureDecks[1]->setEnabled(true);
-            m_treasureDecks[1]->setIcon(QPixmap(path));
+            floodTiles();
             squaresToFlood -=1;
             QString numLeft = QString::number(squaresToFlood);
             m_dialog[1]->setText(numLeft + " tiles left");
             if(squaresToFlood < 1)
             {
                 updateActions();
-                int x =0;
-                int y=0;
-                for(int i=0; i<6; i++)
-                {
-                    m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
-                    m_dialog[i]->setVisible(true);
-                    m_dialog[i]->setEnabled(true);
-                    if(i%3 == 0 && i>0){x+=1; y=0;}
-                    m_dialog[i]->setGeometry(QRect(1170+(x*210), 730+(y*70), 200, 60)); 
-                    y+=1;
-                }
-                m_dialog[0]->setText("Move");
-                m_dialog[1]->setText("Shore Up");
-                m_dialog[2]->setText("Give Treasure");
-                m_dialog[3]->setText("Get Treasure");
-                m_dialog[4]->setText("Use Special Ability");
-                m_dialog[5]->setText("End Turn");
+                setDMode3();
                 dialogMode = 3;
                 return;
             }
-            //clearDialogButtons();
         }
         if(dialogMode == 3)  // Players Up
         {
@@ -590,12 +560,93 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 moveOther = false; 
                 updateActions();   
                 m_pGame->nextPlayer();
-                updateActions();
                 clearDialogButtons();
+                dialogMode = 4;
+                setDMode4();
             }
+            return;
         } 
+        if(dialogMode == 4)
+        {
+            int pSlot = m_pGame->getNumberOfPlayers()-1;
+            int apSlot = m_pGame->getActivePlayerSlot();
 
+            if(apSlot > 0){pSlot = apSlot - 1;}
+            int handSize = m_pGame->getPlayerHandSize(pSlot);
+            if(waterRise == false)
+            {
+                bool wrDrawn = m_pGame->drawTreasureCards(pSlot);
+                updateCards();
+                if (wrDrawn == true)
+                {
+                    
+                    m_playerCards[pSlot][handSize]->setVisible(true);
+                    m_playerCards[pSlot][handSize]->setIcon(cardImageTreasure[7]);
+                    waterRise = true;
+                    m_dialog[1]->setText("Raise Water");
+                }
+                else
+                {
+                    updateIsleTiles();
+                    cardsDrawn +=1;
+                    wrDrawn = false;
+                }
+                updateActions();
+            }
+            else
+            {
+                floodTiles();
+                cardsDrawn +=1;
+                m_playerCards[pSlot][handSize]->setVisible(false);
+                updateWaterRise();
+                updateIsleTiles();
+                updateActions();
+                waterRise = false;
+                
+            }
+            
+            
+            if(cardsDrawn > 1)
+            {
+                cardsDrawn = 0;
+                dialogMode = 3;
+                setDMode3();
+            }
+        }
     }
+}
+
+
+void ForbiddenIslandUI::floodTiles()
+{
+    int location = m_pGame->flipFlood();
+    cout << "location: " << location << endl;
+    string iName = m_pGame->getIslandCardName(location);
+    cout << "iName: " << iName << endl;
+    bool state0 = false;
+    if(iName.length()<3){state0 = true;}
+    if(state0 == true)
+    {
+        string cName = iName + "C.png";
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
+        m_treasureDecks[1]->setIcon(QPixmap(path));
+        m_iC[location]->setVisible(false);
+    }
+    else
+    {
+        string name = iName + ".png";
+        cout << "Name: " << name << endl;
+        string cName = iName;     // copy the original string
+        cName.pop_back();         // remove the last character
+        cName += "C.png";         // append "C.png"
+        cout << "cName: " << cName << endl;
+        QString path2 = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(name);
+        m_iC[location]->setIcon(QPixmap(path2));
+        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
+        m_treasureDecks[1]->setIcon(QPixmap(path));
+    }
+    m_treasureDecks[1]->setVisible(true);
+    m_treasureDecks[1]->setEnabled(true);
 }
 
 
@@ -638,6 +689,8 @@ void ForbiddenIslandUI::updateActions()
     if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");}
     if(helo == true && heloFrom > 0){dialog->setText("Choose players to Helocopter\nThen select a destination");}
     if(sandBag == true){dialog->setText("Choose a location to Sandbag");}
+    if(dialogMode == 4 && waterRise == false){"Draw a Card";}
+    if(dialogMode == 4 && waterRise == true){"Water Rises!";}
 }
 
 
@@ -804,7 +857,16 @@ void ForbiddenIslandUI::iTileClicked()
             if(delta == directions[i]){dir = i;}
         }
         
-        if (playerAction == 0){m_pGame->movePlayer(*activePlayer, dir);}
+        if (playerAction == 0)
+        {
+            m_pGame->movePlayer(*activePlayer, dir);
+            bool nextUp = m_pGame->getNextUp();
+            if (nextUp == true)
+            {
+                dialogMode = 4;
+                setDMode4();
+            }
+        }
         if (playerAction == 1)
         {
             bool eShore;
@@ -813,6 +875,12 @@ void ForbiddenIslandUI::iTileClicked()
             else
             {eShore = m_pGame->shoreUp(dir);}
             engineerSU = eShore;
+            bool nextUp = m_pGame->getNextUp();
+            if (nextUp == true)
+            {
+                dialogMode = 4;
+                setDMode4();
+            }
         }
     }
 
@@ -835,10 +903,20 @@ void ForbiddenIslandUI::iTileClicked()
             actions -=1;
             moveOther = false;
             if(actions < 1)
-            {m_pGame->nextPlayer();}
+            {
+                m_pGame->nextPlayer();
+                dialogMode = 4;
+                setDMode4();
+            }
             else
             {
                 activePlayer->setActions(-1);
+                bool nextUp = m_pGame->getNextUp();
+                if (nextUp == true)
+                {
+                    dialogMode = 4;
+                    setDMode4();
+                }
             }
         }
         else
@@ -869,8 +947,12 @@ void ForbiddenIslandUI::iTileClicked()
         Player* player = m_pGame->getActivePlayer();
         player->fly(iLocation, false);
         int actions = player->getActions();
-        if(actions < 1)
-        {m_pGame->nextPlayer();}
+        bool nextUp = m_pGame->getNextUp();
+        if (nextUp == true)
+        {
+            dialogMode = 4;
+            setDMode4();
+        }
         fly = false;
     }
 
@@ -1105,6 +1187,12 @@ void ForbiddenIslandUI::cardClicked()
     updateActions();
     if(playerPicked == false){return;} 
     m_pGame->sendTreasure(receivingPlayer, slot);
+    bool nextUp = m_pGame->getNextUp();
+    if (nextUp == true)
+    {
+        dialogMode = 4;
+        setDMode4();
+    }
     updateCards();
     if(playerPicked == true)
     {
@@ -1165,7 +1253,51 @@ void ForbiddenIslandUI::treasureClicked()
         Player* activePlayer = m_pGame->getActivePlayer();
         m_pGame->getTreasure(*activePlayer, treasureValue);
         updateCards();
+        bool nextUp = m_pGame->getNextUp();
+        if (nextUp == true)
+        {
+            dialogMode = 4;
+            setDMode4();
+        }
         m_treasure[tNumber]->setIcon(treasureImage[tNumber]);
     }
 
+}
+
+
+void ForbiddenIslandUI::setDMode3()
+{
+    int x =0;
+    int y=0;
+    for(int i=0; i<6; i++)
+    {
+        m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);");
+        m_dialog[i]->setVisible(true);
+        m_dialog[i]->setEnabled(true);
+        if(i%3 == 0 && i>0){x+=1; y=0;}
+        m_dialog[i]->setGeometry(QRect(1170+(x*210), 730+(y*70), 200, 60)); 
+        y+=1;
+    }
+    m_dialog[0]->setText("Move");
+    m_dialog[1]->setText("Shore Up");
+    m_dialog[2]->setText("Give Treasure");
+    m_dialog[3]->setText("Get Treasure");
+    m_dialog[4]->setText("Use Special Ability");
+    m_dialog[5]->setText("End Turn");
+    clearDialogButtons();
+}
+
+
+void ForbiddenIslandUI::setDMode4()
+{
+    for(int i=0; i<6; i++)
+    {
+        m_dialog[i]->setEnabled(false);
+        m_dialog[i]->setVisible(false);
+    }
+    m_dialog[1]->setGeometry(1270,800,150,60);
+    m_dialog[1]->setText("Draw a Card");
+    m_dialog[1]->setVisible(true);
+    m_dialog[1]->setEnabled(true);
+    dialog->setText("Draw Two Cards");
 }
