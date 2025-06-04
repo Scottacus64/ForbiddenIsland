@@ -358,7 +358,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 if (i == 1 || i == 3) 
                 {
                     QTransform transform;
-                    transform.rotate(-90);
+                    transform.rotate(90);
                     pixmap = pixmap.transformed(transform);
                     QSize iconSize (126, 90);
                     m_player[i]->setIconSize(iconSize);
@@ -581,7 +581,17 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 {
                     
                     m_playerCards[pSlot][handSize]->setVisible(true);
+                    m_playerCards[pSlot][handSize]->setEnabled(true);
                     m_playerCards[pSlot][handSize]->setIcon(cardImageTreasure[7]);
+                    if(pSlot == 1 || pSlot == 3)
+                    {
+                        QTransform transform;
+                        transform.rotate(90);
+                        QPixmap pixmap = cardImageTreasure[7];
+                        pixmap = pixmap.transformed(transform);
+                        QSize iconSize (126, 90);   
+                        m_playerCards[pSlot][handSize]->setIcon(pixmap);      
+                    }
                     waterRise = true;
                     m_dialog[1]->setText("Raise Water");
                 }
@@ -590,6 +600,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                     updateIsleTiles();
                     cardsDrawn +=1;
                     wrDrawn = false;
+                    updateActions();
                 }
                 updateActions();
             }
@@ -598,14 +609,12 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 floodTiles();
                 cardsDrawn +=1;
                 m_playerCards[pSlot][handSize]->setVisible(false);
+                m_playerCards[pSlot][handSize]->setEnabled(false);
                 updateWaterRise();
                 updateIsleTiles();
                 updateActions();
-                waterRise = false;
-                
-            }
-            
-            
+                waterRise = false;     
+            }          
             if(cardsDrawn > 1)
             {
                 cardsDrawn = 0;
