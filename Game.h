@@ -41,7 +41,7 @@ public:
     void playerTurn();
     void gameTurn();
     void checkPlayerInWater();
-    void sandBag(int player, int cardSlot);
+    void sandBag(int player, int cardSlot, int location);
     void helo(int player,int cardSlot);
     void playAgain();
     string getIslandCardName(int position);

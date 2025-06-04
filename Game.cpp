@@ -420,7 +420,6 @@ bool Game::shoreUp(int direction)
     }
     else
     {
-
         cout << "Unable to shore up location";
         return false;
     }   
@@ -638,7 +637,7 @@ void Game::playerTurn()
                 }
                 if (cardTValue == 6) //sandbag
                 {
-                    sandBag(activePlayer, cardSlot);
+                    sandBag(activePlayer, cardSlot, 2);
                     players[activePlayer].setActions(-1);
                 }
                 break;
@@ -751,11 +750,8 @@ void Game::playerTurn()
 }
 
 
-void Game::sandBag(int player, int cardSlot)
+void Game::sandBag(int player, int cardSlot, int location)
 {
-    cout << "Enter a location to sandbag: ";
-    int location;
-    cin >> location;
     Card* pCard = islandHand.getCardAt(location);
     if (pCard->getState() == 1)
     {
@@ -838,7 +834,7 @@ void Game::gameTurn()
                         }
                         if(cardType == 6)
                         {
-                            sandBag(pSlot, cSlot);
+                            sandBag(pSlot, cSlot, 2);
                             numberOfHeloSandBagCards -=1;
                         }
                     }

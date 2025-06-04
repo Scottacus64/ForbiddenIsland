@@ -95,5 +95,12 @@ private:
     bool firstMove = false;
     bool getTreasure = false;
     int  treasureValue;
+    bool helo = false;
+    int heloPlayer;
+    int heloSlot;
+    int  heloFrom = 0;
+    bool sandBag = false;
+    int sandBagPlayer;
+    int sandBagSlot;
 };
 #endif // FORBIDDENISLAND_H

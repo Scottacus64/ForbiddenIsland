@@ -375,7 +375,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 connect(m_player[i], &QPushButton::clicked, this, &ForbiddenIslandUI::playerClicked);  
             }
             // deal 2 treasure cards to each player
-            for(int i=0; i<2; i++)
+            for(int i=0; i<4; i++)
             {
                 for(int p=0; p<numberOfPlayers; p++)
                 {
@@ -635,6 +635,9 @@ void ForbiddenIslandUI::updateActions()
     if(giveTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
     if(giveTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
     if(getTreasure == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nChoose a treasure to get");}
+    if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");}
+    if(helo == true && heloFrom > 0){dialog->setText("Choose a location to Helocopter To");}
+    if(sandBag == true){dialog->setText("Choose a location to Sandbag");}
 }
 
 
@@ -844,6 +847,34 @@ void ForbiddenIslandUI::iTileClicked()
         {m_pGame->nextPlayer();}
         fly = false;
     }
+
+    if(helo == true && heloFrom < 1)
+    {
+
+    }
+
+    if(helo == true && heloFrom > 0)
+    {
+
+    }
+
+    if(sandBag == true)
+    {
+        int iState = m_pGame->getIslandCardFlood(iLocation);
+        if(iState == 1)
+        {
+            m_pGame->sandBag(sandBagPlayer, sandBagSlot, iLocation);
+            sandBag = false;
+        }
+        else
+        {
+            sandBag = false;
+        }
+        updateCards();
+        updateIsleTiles();
+        updateActions();
+    }
+
     updateActions();
     updatePawns();
     clearDialogButtons();
@@ -1008,10 +1039,20 @@ void ForbiddenIslandUI::cardClicked()
     QPushButton* cardClicked = qobject_cast<QPushButton*>(sender());
     QString iName = cardClicked->objectName();
     string sName = iName.toStdString();
-    int cardNumber= sName.back() - '0';  
+    int slot = sName.back() - '0';
+    int player =  sName[1] - '0';;
+    cout << sName << " Player: " << player << " Slot: " << slot << endl;
+    int cardValue = m_pGame->getPlayerTreasureCard(player, slot);
+    if(cardValue == 5){helo = true;}
+    if(cardValue == 6)
+    {
+        sandBag = true;
+        sandBagPlayer = player;
+        sandBagSlot = slot;
+    }
+    updateActions();
     if(playerPicked == false){return;} 
-    cout << "Card number: " << cardNumber << " receiving player " << receivingPlayer << endl;
-    m_pGame->sendTreasure(receivingPlayer, cardNumber);
+    m_pGame->sendTreasure(receivingPlayer, slot);
     updateCards();
     if(playerPicked == true)
     {
