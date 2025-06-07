@@ -43,6 +43,7 @@ public:
     void treasureClicked();
     void setDMode3();
     void setDMode4();
+    void setDMode5();
     void floodTiles();
  
     
@@ -110,5 +111,6 @@ private:
     int sandBagSlot;
     int cardsDrawn = 0;
     bool waterRise = false;
+    int numberOfFloods;
 };
 #endif // FORBIDDENISLAND_H

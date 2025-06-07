@@ -235,7 +235,7 @@ void Game::movePlayer(Player& player, int  direction)
         if(player.getPlayerClass() != players[activePlayer].getPlayerClass()){result = 1;}
         if (result == 2) {player.setLocation(direction, 1);}
         if (result == 1) {player.setLocation(direction, 0);}
-        if (player.getActions() < 1){nextPlayer();}
+        if (player.getActions() < 1){nextUp = true;}
         cout <<  "players actions = " << player.getActions() << endl;
     }
     else
@@ -344,17 +344,17 @@ bool Game::shoreUp(int direction)
             {
                 engineerShoreUp = false;
                 players[activePlayer].setActions(-1);
-                if (players[activePlayer].getActions() < 1){nextPlayer();}
+                if (players[activePlayer].getActions() < 1){nextUp = true;}
                 return false;
             }
         }
         else
         {
-            if(engineerShoreUp == true)
+            if(engineerShoreUp == true)     // engineer has already shored up and there is nothing else to shore up
             {
                 engineerShoreUp = false;
                 players[activePlayer].setActions(-1);
-                if (players[activePlayer].getActions() < 1){nextPlayer();}
+                if (players[activePlayer].getActions() < 1){nextUp = true;}
                 cout << "Actions = " << players[activePlayer].getActions()  << endl;
                 return true;
             }
@@ -558,78 +558,7 @@ void Game::helo(int player, int cardSlot)
 
 void Game::gameTurn()
 {
-    vector<int>floodDrawNumber = {2,2,3,3,3,4,4,5,5};
-    int cardsToDraw = floodDrawNumber[waterLevel];
-    for(int i=0; i<cardsToDraw; i++)
-    {
-        char choice;
-        int numberOfHeloSandBagCards = 0;
-        for(int i=0; i<players.size(); i++)
-        {
-            int handSize = players[i].getHandSize();
-            if(handSize > 0)
-            {
-                for(int j=0; j<handSize; j++)
-                {
-                    if(players[i].getCardTreasureValue(j) > 4)
-                    {
-                        numberOfHeloSandBagCards +=1;
-                    }
-                }
-            }
-        }
-        bool keepLooping = true;
-        if(numberOfHeloSandBagCards > 0)
-            {while(keepLooping == true)
-            {
-                cout << "Do you want to play any helicopter or sand bag cards(y/n)?";
-                cin >> choice;
-                if(choice == 'y' or choice == 'Y')
-                {
-                    int pSlot;
-                    int cSlot;
-                    cout << "Enter a player slot: ";
-                    cin >> pSlot;
-                    cout << "Enter a card slot: ";
-                    cin >> cSlot;
-                    if(cSlot < players[pSlot].getHandSize())
-                    {
-                        Card* pCard = players[pSlot].lookAtCardSlot(cSlot);
-                        int cardType = pCard->getTreasureValue();
-                        if(cardType == 5)
-                        {
-                            helo(pSlot, cSlot);
-                            numberOfHeloSandBagCards -=1;
-                        }
-                        if(cardType == 6)
-                        {
-                            sandBag(pSlot, cSlot, 2);
-                            numberOfHeloSandBagCards -=1;
-                        }
-                    }
-                    if(numberOfHeloSandBagCards < 1)
-                    {
-                        keepLooping = false;
-                    }
-                }
-                else
-                {
-                    keepLooping = false;
-                }
-                printGameState();
-            }
-        }
-        int location = flipFlood();
-        printGameState();
-        bool loss = checkForLoss();
-        if(loss == true)
-        {
-            cout<< "\n ***** GAME OVER *****\n";
-            playAgain();
-        }
-        checkPlayerInWater();
-    }
-    nextPlayer();
+   
 }
 
 
@@ -700,7 +629,7 @@ void Game::nextPlayer()
     if (activePlayer > (players.size()-1))
     {activePlayer = 0;}
     players[activePlayer].resetActions();
-    nextUp = true;
+    nextUp = false;
 }
 
 
@@ -801,8 +730,6 @@ void Game::sendTreasure(int playerNumber, int slot)
             if (slot < players[activePlayer].getHandSize())
             {
                 transferTreasure(players[activePlayer], players[playerNumber], slot);
-                players[activePlayer].setActions(-1);
-                if(players[activePlayer].getActions() < 1){nextPlayer();}
             }
         }
         else {cout << "Can't transfer treasure \n";}
