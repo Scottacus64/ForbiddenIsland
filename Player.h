@@ -22,8 +22,8 @@ public:
     void  printPlayer();
     void  printHand();
     int   getHandSize();
-    Card* drawCard(Card* pCard);
-    Card* discardCard();
+    void drawCard(Card* pCard);
+    void discardCard(int slot);
     Card* playCardSlot(int slot);
     Card* lookAtCardSlot(int slot);
     Card* discardAllTreasureOfType(int type);

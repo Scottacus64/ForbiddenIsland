@@ -38,14 +38,11 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
     m_pGame = new Game();
     QString appDir = QCoreApplication::applicationDirPath();
     QString assetPath = QDir::cleanPath(appDir + QDir::separator() + "CardPngs") + QDir::separator();
-
-    //ui->setupUi(this);
     this->setObjectName("ForbiddenIslandUI");
     QScreen *primaryScreen = QGuiApplication::primaryScreen();
     QRect screenGeometry = primaryScreen->geometry();
     int screenWidth = screenGeometry.width();
     this->resize(2100, 1000);
-    //this->move(((screenWidth/2) -(2100/2)), 0);
 
     // set up the FG font
     QFont font("Franklin Gothic Medium");
@@ -322,324 +319,362 @@ void ForbiddenIslandUI::dialogButtonClicked()
     QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
     if (clickedButton) 
     {
-        if(dialogMode == 0)  // Set up UI
+        if(tooManyCards == true)
         {
-            int numberOfPlayers = 2;
+            for(int i=0; i<5; i++)
+            {
+                m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);"); 
+            }
+            clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);"); 
             string name = clickedButton->objectName().toStdString();
-            cout << name << endl;
-            if(name == "dB4"){numberOfPlayers = 3;}
-            if(name == "dB5"){numberOfPlayers = 4;}
-            m_pGame->createPlayers(numberOfPlayers);
-            updatePawns();
-            // set up the four player cards
-            for(int i=0; i<4; i++)
+            if(name == "dB1")
             {
-                QPixmap pixmap;
-                std::string cardName = "P" + std::to_string(i);
-                Player* pPlayer = m_pGame->getPlayer(i);
-                m_player[i] = new QPushButton(QString::fromStdString(cardName), this);
-                m_player[i]->setObjectName(QString::fromStdString(cardName));
-                if(pPlayer){
-                    int playerClass = pPlayer->getPlayerClass();
-                    QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/C" + QString::number(playerClass) + ".png";
-                    pixmap.load(path);
-                    m_player[i]->setEnabled(true);
-                    m_player[i]->setVisible(true);
-                }
-                else
-                {
-                    m_player[i]->setEnabled(false);
-                    m_player[i]->setVisible(true);
-                }
-                if(i == 2){m_player[i]->setGeometry(QRect(190, 5, 90, 126));}
-                if(i == 0){m_player[i]->setGeometry(QRect(190, 850, 90, 126));}
-                if(i == 1){m_player[i]->setGeometry(QRect(20, 740, 126, 90));}
-                if(i == 3){m_player[i]->setGeometry(QRect(900, 740, 126, 90));}
-                if (i == 1 || i == 3) 
-                {
-                    QTransform transform;
-                    transform.rotate(90);
-                    pixmap = pixmap.transformed(transform);
-                    QSize iconSize (126, 90);
-                    m_player[i]->setIconSize(iconSize);
-                    m_player[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
-                }
-                else
-                {
-                    QSize iconSize(90, 126);
-                    m_player[i]->setIconSize(iconSize);
-                    m_player[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
-                }
-                m_player[i]->setIcon(pixmap); 
-                m_player[i]->setText(QString());   
-                connect(m_player[i], &QPushButton::clicked, this, &ForbiddenIslandUI::playerClicked);  
-            }
-            // deal 2 treasure cards to each player
-            for(int i=0; i<2; i++)
-            {
-                for(int p=0; p<numberOfPlayers; p++)
-                {
-                    bool wrDrawn = m_pGame->drawTreasureCards(p);
-                    int tValue = m_pGame->getPlayerTreasureCard(p,i);
-                    cout << "Player" << p << " tValue: " << tValue  << endl;
-                    QPixmap pixmap = cardImageTreasure[tValue];
-                    if(p==1 || p==3)
-                    {
-                        QTransform transform;
-                        transform.rotate(90);
-                        pixmap = pixmap.transformed(transform);
-                    }
-                    m_playerCards[p][i]->setIcon(pixmap); 
-                    m_playerCards[p][i]->setText(QString());
-                    m_playerCards[p][i]->setEnabled(true);
-                    m_playerCards[p][i]->setVisible(true);
-                }
-            }
-            int x=0;
-            int y=0;
-            for(int i=0; i<6; i++)
-            {
-                if(i%3 == 0 && i>0){x+=1; y=0;}
-                m_dialog[i]->setVisible(true);
-                m_dialog[i]->setEnabled(true);
-                m_dialog[i]->setGeometry(QRect(1160+(x*210), 700+(y*70), 200, 60)); 
-                y+=1;  
-            }
-            dialog->setText("Choose a Difficulty Level");
-            m_dialog[0]->setText("Novice");
-            m_dialog[1]->setText("Normal");
-            m_dialog[2]->setText("Elite");
-            m_dialog[3]->setText("Legendary");
-            m_dialog[4]->setEnabled(false);
-            m_dialog[4]->setVisible(false);
-            m_dialog[5]->setEnabled(false);
-            m_dialog[5]->setVisible(false);
-            dialogMode = 1;
-            return;
-        }
-
-        if (dialogMode == 1)
-        {  
-            int difficulty = 0;
-            string name = clickedButton->objectName().toStdString();
-            if(name == "dB0"){difficulty = 0;}
-            if(name == "dB1"){difficulty = 1;}
-            if(name == "dB2"){difficulty = 2;}
-            if(name == "dB3"){difficulty = 3;}
-            m_pGame->setWaterLevel(difficulty);
-
-            dialog->setText("Press button to flood\nsix island tiles");
-            for(int i=0; i<6; i++)
-            {
-                m_dialog[i]->setEnabled(false);
-                m_dialog[i]->setVisible(false);
-            }
-            m_dialog[1]->setEnabled(true);
-            m_dialog[1]->setVisible(true);
-            QString numLeft = QString::number(squaresToFlood);
-            m_dialog[1]->setGeometry(1300,750,150,60);
-            m_dialog[1]->setText(numLeft + " tiles left");
-            dialogMode = 2;
-            updateWaterRise();
-            return;
-        }
-
-        if(dialogMode == 2)  // Flood tiles
-        {
-            floodTiles();
-            squaresToFlood -=1;
-            QString numLeft = QString::number(squaresToFlood);
-            m_dialog[1]->setText(numLeft + " tiles left");
-            if(squaresToFlood < 1)
-            {
-                updateActions();
-                setDMode3();
-                dialogMode = 3;
-                return;
-            }
-        }
-
-        if(dialogMode == 3)  // Players Up
-        {
-            clearDialogButtons();
-            clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");      
-            playerAction = clickedButton->objectName().mid(2).toInt();                  // Set up player actions based upon button pressed
-            cout << playerAction << endl;
-            vector <int> offset {-6,-5,1,7,6,5,-1,-7};
-            vector <int> directions = {0,2,4,6}; 
-            Player* activePlayer = m_pGame->getActivePlayer();
-            int gridLocation = activePlayer->getLocation();
-            if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
-            updateIsleTiles();
-            if (playerAction == 0)            // move player
-            {   
-                fly = false;
-                sendTreasure = false;
-                moveOther = false;  
-                updateActions();   
-                for(int i=0; i<directions.size(); i++)
-                {
-                    if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
-                    {
-                        int pSlot = m_pGame->getActivePlayerSlot();
-                        highlightMove(gridLocation+offset[directions[i]]);                 
-                    }
-                }
-            } 
-            if (playerAction == 1)          //shore up
-            {
-                fly = false;
-                sendTreasure = false;
-                moveOther = false;  
-                updateActions();  
-                checkForShoreUp();
-            }
-            if(playerAction == 2)           //give treasure
-            {
-                sameTile.clear();
-                for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
-                {
-                    Player* tPlayer = m_pGame->getPlayer(i);
-                    Player* activePlayer = m_pGame->getActivePlayer();
-                    if(tPlayer->getLocation() == activePlayer->getLocation())
-                    {
-                        sameTile.push_back(i);
-                    }
-                }
-                if(sameTile.size() > 1)
-                {
-                    giveTreasure = true;
-                    updateActions();
-                }
-                else
-                {
-                    clearDialogButtons();
-                }
-            }
-            if(playerAction == 3)           //get treasure
-            {
-                vector <int> pHand;
-                getTreasure = false;
-                for(int i=0; i<activePlayer->getHandSize(); i++)
-                {
-                    int cValue = activePlayer->getCardTreasureValue(i);
-                    pHand.push_back(cValue);
-                }
-                std::unordered_map<int, int> counts;
-                for (int val : pHand) 
-                {
-                    counts[val]++;
-                    if (counts[val] >= 4) 
-                    {
-                        getTreasure = true;
-                        treasureValue = val;
-                    }
-                }    
-                updateActions();
-            }
-            if (playerAction == 4)          //speecial ability
-            {
-                int pClass = activePlayer->getPlayerClass();
-                if (pClass == 3)
-                {
-                    fly = true;
-                    updateActions();
-                }
-                if(pClass == 4)
-                {
-                    moveOther = true;
-                    updateActions();
-                }
-                if(pClass == 6)
-                {
-                    sendTreasure = true;
-                    updateActions();
-                }
-            }
-            if (playerAction == 5)          //end turn
-            {
-                fly = false;
-                sendTreasure = false;
-                moveOther = false; 
-                updateActions();   
-                clearDialogButtons();
-                m_pGame->nextPlayer();
-                dialogMode = 4;
-                setDMode4();
-            }
-            return;
-        } 
-
-        if(dialogMode == 4)                             // draw cards
-        {
-            int apSlot = m_pGame->getActivePlayerSlot();
-
-            int handSize = m_pGame->getPlayerHandSize(apSlot);
-            if(waterRise == false)
-            {
-                bool wrDrawn = m_pGame->drawTreasureCards(apSlot);
-                updateCards();
-                if (wrDrawn == true)
-                {
-                    
-                    m_playerCards[apSlot][handSize]->setVisible(true);
-                    m_playerCards[apSlot][handSize]->setEnabled(true);
-                    m_playerCards[apSlot][handSize]->setIcon(cardImageTreasure[7]);
-                    if(apSlot == 1 || apSlot == 3)
-                    {
-                        QTransform transform;
-                        transform.rotate(90);
-                        QPixmap pixmap = cardImageTreasure[7];
-                        pixmap = pixmap.transformed(transform);
-                        QSize iconSize (126, 90);   
-                        m_playerCards[apSlot][handSize]->setIcon(pixmap);      
-                    }
-                    waterRise = true;
-                    m_dialog[1]->setText("Raise Water"); 
-                }
-                else
-                {
-                    updateIsleTiles();
-                    cardsDrawn +=1;
-                    wrDrawn = false;
-                }
+                tooManyChoice = 0;  // play card
             }
             else
+            {   
+                tooManyChoice = 1;  // discard card
+            }
+        }
+        else
+        {
+            if(dialogMode == 0)  // Set up UI
+            {
+                int numberOfPlayers = 2;
+                string name = clickedButton->objectName().toStdString();
+                cout << name << endl;
+                if(name == "dB4"){numberOfPlayers = 3;}
+                if(name == "dB5"){numberOfPlayers = 4;}
+                m_pGame->createPlayers(numberOfPlayers);
+                updatePawns();
+                // set up the four player cards
+                for(int i=0; i<4; i++)
+                {
+                    QPixmap pixmap;
+                    std::string cardName = "P" + std::to_string(i);
+                    Player* pPlayer = m_pGame->getPlayer(i);
+                    m_player[i] = new QPushButton(QString::fromStdString(cardName), this);
+                    m_player[i]->setObjectName(QString::fromStdString(cardName));
+                    if(pPlayer){
+                        int playerClass = pPlayer->getPlayerClass();
+                        QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/C" + QString::number(playerClass) + ".png";
+                        pixmap.load(path);
+                        m_player[i]->setEnabled(true);
+                        m_player[i]->setVisible(true);
+                    }
+                    else
+                    {
+                        m_player[i]->setEnabled(false);
+                        m_player[i]->setVisible(true);
+                    }
+                    if(i == 2){m_player[i]->setGeometry(QRect(190, 5, 90, 126));}
+                    if(i == 0){m_player[i]->setGeometry(QRect(190, 850, 90, 126));}
+                    if(i == 1){m_player[i]->setGeometry(QRect(20, 740, 126, 90));}
+                    if(i == 3){m_player[i]->setGeometry(QRect(900, 740, 126, 90));}
+                    if (i == 1 || i == 3) 
+                    {
+                        QTransform transform;
+                        transform.rotate(90);
+                        pixmap = pixmap.transformed(transform);
+                        QSize iconSize (126, 90);
+                        m_player[i]->setIconSize(iconSize);
+                        m_player[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
+                    }
+                    else
+                    {
+                        QSize iconSize(90, 126);
+                        m_player[i]->setIconSize(iconSize);
+                        m_player[i]->setStyleSheet("border: none; padding: 0px; margin: 0px;");
+                    }
+                    m_player[i]->setIcon(pixmap); 
+                    m_player[i]->setText(QString());   
+                    connect(m_player[i], &QPushButton::clicked, this, &ForbiddenIslandUI::playerClicked);  
+                }
+                // deal 2 treasure cards to each player
+                for(int i=0; i<5; i++)
+                {
+                    for(int p=0; p<numberOfPlayers; p++)
+                    {
+                        bool wrDrawn = m_pGame->drawTreasureCards(p);
+                        int tValue = m_pGame->getPlayerTreasureCard(p,i);
+                        cout << "Player" << p << " tValue: " << tValue  << endl;
+                        QPixmap pixmap = cardImageTreasure[tValue];
+                        if(p==1 || p==3)
+                        {
+                            QTransform transform;
+                            transform.rotate(90);
+                            pixmap = pixmap.transformed(transform);
+                        }
+                        m_playerCards[p][i]->setIcon(pixmap); 
+                        m_playerCards[p][i]->setText(QString());
+                        m_playerCards[p][i]->setEnabled(true);
+                        m_playerCards[p][i]->setVisible(true);
+                    }
+                }
+                int x=0;
+                int y=0;
+                for(int i=0; i<6; i++)
+                {
+                    if(i%3 == 0 && i>0){x+=1; y=0;}
+                    m_dialog[i]->setVisible(true);
+                    m_dialog[i]->setEnabled(true);
+                    m_dialog[i]->setGeometry(QRect(1160+(x*210), 700+(y*70), 200, 60)); 
+                    y+=1;  
+                }
+                dialog->setText("Choose a Difficulty Level");
+                m_dialog[0]->setText("Novice");
+                m_dialog[1]->setText("Normal");
+                m_dialog[2]->setText("Elite");
+                m_dialog[3]->setText("Legendary");
+                m_dialog[4]->setEnabled(false);
+                m_dialog[4]->setVisible(false);
+                m_dialog[5]->setEnabled(false);
+                m_dialog[5]->setVisible(false);
+                dialogMode = 1;
+                return;
+            }
+            // Flood 6 tiles
+            if (dialogMode == 1)
+            {  
+                int difficulty = 0;
+                string name = clickedButton->objectName().toStdString();
+                if(name == "dB0"){difficulty = 0;}
+                if(name == "dB1"){difficulty = 1;}
+                if(name == "dB2"){difficulty = 2;}
+                if(name == "dB3"){difficulty = 3;}
+                m_pGame->setWaterLevel(difficulty);
+                dialog->setText("Press button to flood\nsix island tiles");
+                clearButtons();
+                m_dialog[1]->setEnabled(true);
+                m_dialog[1]->setVisible(true);
+                QString numLeft = QString::number(squaresToFlood);
+                m_dialog[1]->setGeometry(1300,750,150,60);
+                m_dialog[1]->setText(numLeft + " tiles left");
+                dialogMode = 2;
+                updateWaterRise();
+                return;
+            }
+
+            if(dialogMode == 2)  // Flood tiles
             {
                 floodTiles();
-                cardsDrawn +=1;
-                m_playerCards[apSlot][handSize]->setVisible(false);
-                m_playerCards[apSlot][handSize]->setEnabled(false);
-                updateWaterRise();
-                updateIsleTiles();
-                updateActions();
-                waterRise = false;   
-                m_dialog[1]->setText("Draw a Card");
-            }          
-            if(cardsDrawn > 1)
-            {
-                m_pGame->nextPlayer();
-                cardsDrawn = 0;
-                dialogMode = 5;
-                updateWaterRise();
-                setDMode5();
+                squaresToFlood -=1;
+                QString numLeft = QString::number(squaresToFlood);
+                m_dialog[1]->setText(numLeft + " tiles left");
+                if(squaresToFlood < 1)
+                {
+                    updateActions();
+                    setDMode3();
+                    dialogMode = 3;
+                    return;
+                }
             }
-            updateActions();
-            return;
-        }
 
-        if(dialogMode == 5)                                 // flood tiles
-        {
-            dialog->setText("Flood " + QString::number(numberOfFloods) + " Island Tiles");
-            floodTiles();
-            numberOfFloods -=1;
-            if(numberOfFloods < 1)
+            if(dialogMode == 3)  // Players Up
             {
-                updateWaterRise();
-                dialogMode = 3;
-                setDMode3();
+                clearDialogButtons();
+                clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);");      
+                playerAction = clickedButton->objectName().mid(2).toInt();                  // Set up player actions based upon button pressed
+                vector <int> offset {-6,-5,1,7,6,5,-1,-7};
+                vector <int> directions = {0,2,4,6}; 
+                Player* activePlayer = m_pGame->getActivePlayer();
+                int gridLocation = activePlayer->getLocation();
+                if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
+                updateIsleTiles();
+                if (playerAction == 0)            // move player
+                {   
+                    fly = false;
+                    sendTreasure = false;
+                    moveOther = false;  
+                    updateActions();   
+                    for(int i=0; i<directions.size(); i++)
+                    {
+                        if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                        {
+                            int pSlot = m_pGame->getActivePlayerSlot();
+                            highlightMove(gridLocation+offset[directions[i]]);                 
+                        }
+                    }
+                } 
+                if (playerAction == 1)          //shore up
+                {
+                    fly = false;
+                    sendTreasure = false;
+                    moveOther = false;  
+                    updateActions();  
+                    checkForShoreUp();
+                }
+                if(playerAction == 2)           //give treasure
+                {
+                    sameTile.clear();
+                    for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
+                    {
+                        Player* tPlayer = m_pGame->getPlayer(i);
+                        Player* activePlayer = m_pGame->getActivePlayer();
+                        if(tPlayer->getLocation() == activePlayer->getLocation())
+                        {
+                            sameTile.push_back(i);
+                        }
+                    }
+                    if(sameTile.size() > 1)
+                    {
+                        giveTreasure = true;
+                        updateActions();
+                    }
+                    else
+                    {
+                        clearDialogButtons();
+                    }
+                }
+                if(playerAction == 3)           //get treasure
+                {
+                    vector <int> pHand;
+                    getTreasure = false;
+                    for(int i=0; i<activePlayer->getHandSize(); i++)
+                    {
+                        int cValue = activePlayer->getCardTreasureValue(i);
+                        pHand.push_back(cValue);
+                    }
+                    std::unordered_map<int, int> counts;
+                    for (int val : pHand) 
+                    {
+                        counts[val]++;
+                        if (counts[val] >= 4) 
+                        {
+                            getTreasure = true;
+                            treasureValue = val;
+                        }
+                    }    
+                    updateActions();
+                }
+                if (playerAction == 4)          //speecial ability
+                {
+                    int pClass = activePlayer->getPlayerClass();
+                    if (pClass == 3)
+                    {
+                        fly = true;
+                        updateActions();
+                    }
+                    if(pClass == 4)
+                    {
+                        moveOther = true;
+                        updateActions();
+                    }
+                    if(pClass == 6)
+                    {
+                        sendTreasure = true;
+                        updateActions();
+                    }
+                }
+                if (playerAction == 5)          //end turn
+                {
+                    fly = false;
+                    sendTreasure = false;
+                    moveOther = false; 
+                    updateActions();   
+                    clearDialogButtons();
+                    dialogMode = 4;
+                    setDMode4();
+                }
+                return;
+            } 
+
+            if(dialogMode == 4)                             // draw cards
+            {
+                clickedButton->setStyleSheet("background-color: rgb(234, 196, 146);"); 
+                //playerAction = clickedButton->objectName().mid(2).toInt(); 
+                cout << "In mode 4" << endl;
+                int apSlot = m_pGame->getActivePlayerSlot();
+                int handSize = m_pGame->getPlayerHandSize(apSlot);
+ 
+                if(waterRise == false)  // used because one click will draw the card (waterRise = false) and the second click will play and clear it for a WR
+                {
+                    bool wrDrawn = m_pGame->drawTreasureCards(apSlot);
+                    updateCards();
+                    if (wrDrawn == true)    // this means a WR card has been drawn
+                    {
+                        
+                        m_playerCards[apSlot][handSize]->setVisible(true);
+                        m_playerCards[apSlot][handSize]->setEnabled(true);
+                        m_playerCards[apSlot][handSize]->setIcon(cardImageTreasure[7]);
+                        if(apSlot == 1 || apSlot == 3)
+                        {
+                            QTransform transform;
+                            transform.rotate(90);
+                            QPixmap pixmap = cardImageTreasure[7];
+                            pixmap = pixmap.transformed(transform);
+                            QSize iconSize (126, 90);   
+                            m_playerCards[apSlot][handSize]->setIcon(pixmap);      
+                        }
+                        waterRise = true;
+                        m_dialog[1]->setText("Raise Water"); 
+                    }
+                    else        // any other treasure card has been drawn
+                    {
+                        updateIsleTiles();
+                        cardsDrawn +=1;
+                        wrDrawn = false;
+                    }
+                }
+                else        // WR card was drawn on the last click now time to raise water and clear the card from the player's hand
+                {
+                    cardsDrawn +=1;
+                    m_playerCards[apSlot][handSize]->setVisible(false);
+                    m_playerCards[apSlot][handSize]->setEnabled(false);
+                    updateWaterRise();
+                    updateIsleTiles();
+                    updateActions();
+                    waterRise = false;   
+                    m_dialog[1]->setText("Draw a Card");
+                }  
+                handSize = m_pGame->getPlayerHandSize(apSlot);   
+                cout << "Hand Size: " << handSize << endl;
+                if(handSize > 5 && tooManyCards == false)   //first time through and too many cards
+                {
+                    tooManyCards = true;
+                    tooManyPlayer = apSlot;
+                    setDiscardMode();
+                    return;
+                }     
+                if(cardsDrawn > 1 && helo == false && sandBag == false)      // end turn
+                {
+                    cout << "in cardsDrawn > 1" << endl;
+                    cardsDrawn = 0;
+                    dialogMode = 5;
+                    updateWaterRise();
+                    setDMode5();
+                }
+                updateActions();
+                return;
+            }
+
+            if(dialogMode == 5)                                 // flood tiles
+            {
+                cout << "In Dm 5" << endl;
+                dialog->setText("Flood " + QString::number(numberOfFloods) + " Island Tiles");
+                floodTiles();
+                numberOfFloods -=1;
+                if(numberOfFloods < 1)
+                {
+                    m_pGame->nextPlayer();
+                    updateWaterRise();
+                    dialogMode = 3;
+                    setDMode3();
+                }
             }
         }
+    }
+}
+
+
+void ForbiddenIslandUI::clearButtons()
+{
+    for(int i=0; i<6; i++)
+    {
+        m_dialog[i]->setEnabled(false);
+        m_dialog[i]->setVisible(false);
+        m_dialog[i]->setText("");
+        m_dialog[i]->setStyleSheet("background-color: rgb(255, 255, 255);"); 
     }
 }
 
@@ -701,6 +736,7 @@ void ForbiddenIslandUI::checkForShoreUp()
 
 void ForbiddenIslandUI::updateActions()
 {
+    cout << "UA" << endl;
     Player* player = m_pGame->getActivePlayer();
     string pName = player->getPlayerName();
     int actions = player->getActions();
@@ -713,11 +749,13 @@ void ForbiddenIslandUI::updateActions()
     if(giveTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
     if(giveTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
     if(getTreasure == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nChoose a treasure to get");}
-    if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");}
-    if(helo == true && heloFrom > 0){dialog->setText("Choose players to Helocopter\nThen select a destination");}
-    if(sandBag == true){dialog->setText("Choose a location to Sandbag");}
-    if(dialogMode == 4 && waterRise == false){dialog->setText("Draw a Card");}
-    if(dialogMode == 4 && waterRise == true){dialog->setText("Water Rises!");} 
+    if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");m_dialog[1]->setText("Helocopter");return;}
+    if(helo == true && heloFrom > 0){dialog->setText("Choose players to Helocopter\nThen select a destination");m_dialog[1]->setText("Helocopter");return;}
+    if(sandBag == true){dialog->setText("Choose a location to Sandbag");m_dialog[1]->setText("Sand Bag");return;}
+    if(dialogMode == 4 && waterRise == false && tooManyCards == false){dialog->setText("Draw a Card");m_dialog[1]->setText("Draw a Card");}
+    if(dialogMode == 4 && waterRise == true && tooManyCards == false){dialog->setText("Water Rises!");} 
+    if(dialogMode == 4 && tooManyCards == true && tooManyChoice > 2){dialog->setText("Play or Discard?");}
+    if(dialogMode == 4 && tooManyCards == true && tooManyChoice < 2){dialog->setText("Choose a Card");}
 }
 
 
@@ -874,6 +912,8 @@ void ForbiddenIslandUI::iTileClicked()
     {
         iLocation = stoi(match[1].str());
     }
+    cout << "iLocation = " << iLocation << endl;
+    cout << "helo = " << helo << " sandbag = " << sandBag << " heloFrom = " << heloFrom << endl;
     if(playerAction == 0 || playerAction == 1)
     {
 
@@ -971,32 +1011,35 @@ void ForbiddenIslandUI::iTileClicked()
         fly = false;
     }
 
+
     if(helo == true && heloFrom < 1)
     {
-        heloPlayers.clear();
-        Player* player;
-        for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
-        {
-            player = m_pGame->getPlayer(i);
-            int pLocation = player->getLocation();
-            if(pLocation == iLocation)
-            {
-                heloPlayers.push_back(i);
-            }
-        }
-        if(heloPlayers.size() > 0){heloFrom = iLocation;}
-        updateActions();
+        cout << "In helo sub" << endl;
+        heloStart(iLocation);
     } 
 
     if(helo == true && heloGroup.size() > 0)
     {
-        for(int i=0; i<heloGroup.size(); i++)
+        heloEnd(iLocation);
+        if(tooManyCards == true)
         {
-            Player* player = m_pGame->getPlayer(heloGroup[i]);
-            player->fly(iLocation, true);
+            Player* player = m_pGame->getPlayer(tooManyPlayer);
+            //player->discardCard(tmSlot);
+            cout << "CardsDrawn: " << cardsDrawn << endl;
+            if (cardsDrawn > 1)
+            {
+                tooManyCards = false;
+                cardsDrawn = 0;
+                dialogMode = 5;
+                updateWaterRise();
+                setDMode5();
+            }
+            else
+            {
+                tooManyCards = false;
+                setDMode4();
+            }
         }
-        m_pGame->helo(heloPlayer, heloSlot);
-        heloGroup.clear();
         helo = false;
         updateCards();
         updateActions();
@@ -1005,10 +1048,31 @@ void ForbiddenIslandUI::iTileClicked()
     if(sandBag == true)
     {
         int iState = m_pGame->getIslandCardFlood(iLocation);
+        cout << "iState = " << iState << endl;
         if(iState == 1)
         {
             m_pGame->sandBag(sandBagPlayer, sandBagSlot, iLocation);
             sandBag = false;
+            cout << "in iState1 if " << tooManyCards << endl;
+            if(tooManyCards == true)
+            {
+                cout << "CardsDrawn: " << cardsDrawn << endl;
+                Player* player = m_pGame->getPlayer(tooManyPlayer);
+                //player->discardCard(tmSlot);
+                if (cardsDrawn > 1)
+                {
+                    tooManyCards = false;
+                    cardsDrawn = 0;
+                    dialogMode = 5;
+                    updateWaterRise();
+                    setDMode5();
+                }
+                else
+                {
+                    tooManyCards = false;
+                    setDMode4();
+                }
+            }
         }
         else
         {
@@ -1021,7 +1085,6 @@ void ForbiddenIslandUI::iTileClicked()
 
     updateActions();
     updatePawns();
-   // clearDialogButtons();
     updateActions();
     if(engineerSU == true)
     {
@@ -1029,6 +1092,40 @@ void ForbiddenIslandUI::iTileClicked()
         checkForShoreUp();
     }
     else{updateIsleTiles();}
+}
+
+
+void ForbiddenIslandUI::heloStart(int iLocation)
+{
+    cout << "helo start" << endl;
+    heloPlayers.clear();
+    Player* player;
+    for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
+    {
+        player = m_pGame->getPlayer(i);
+        int pLocation = player->getLocation();
+        if(pLocation == iLocation)
+        {
+            heloPlayers.push_back(i);
+        }
+    }
+    if(heloPlayers.size() > 0){heloFrom = iLocation;}
+    updateActions();
+}
+
+
+void ForbiddenIslandUI::heloEnd(int iLocation)
+{
+    for(int i=0; i<heloGroup.size(); i++)
+    {
+        Player* player = m_pGame->getPlayer(heloGroup[i]);
+        player->fly(iLocation, true);
+    }
+    m_pGame->helo(heloPlayer, heloSlot);
+    heloGroup.clear();
+    helo = false;
+    updateCards();
+    updateActions();
 }
 
 
@@ -1189,37 +1286,97 @@ void ForbiddenIslandUI::cardClicked()
     int player =  sName[1] - '0';;
     cout << sName << " Player: " << player << " Slot: " << slot << endl;
     int cardValue = m_pGame->getPlayerTreasureCard(player, slot);
-    if(cardValue == 5)
+    if(tooManyCards == true)
     {
-        heloPlayer = player;
-        heloSlot = slot;
-        helo = true;
+        if(tooManyChoice == 0 && cardValue > 4) // tooManyChoice 0 = play, 1 = discard, 9 = default
+        {
+            if(cardValue == 5)
+            {
+                heloPlayer = player;
+                heloSlot = slot;
+                helo = true;
+                tmSlot = slot;
+                setDMode4();
+                updateActions();
+                return;
+            }
+            if(cardValue == 6)
+            {
+                sandBag = true;
+                sandBagPlayer = player;
+                sandBagSlot = slot;
+                tmSlot = slot;
+                setDMode4();
+                updateActions();
+                return;
+            }
+        }
+        else
+        {
+            Player* player = m_pGame->getPlayer(tooManyPlayer);
+            player->discardCard(slot);
+        }
+        if(cardsDrawn == 1)
+        {
+            setDMode4();
+        }
+        else
+        {
+            setDMode5();
+        }
+        updateCards();
+        updateActions();
+        tooManyCards = false;
+        tooManyChoice = 9;
     }
-    if(cardValue == 6)
+    else
     {
-        sandBag = true;
-        sandBagPlayer = player;
-        sandBagSlot = slot;
+        if(cardValue == 5)
+        {
+            heloPlayer = player;
+            heloSlot = slot;
+            helo = true;
+        }
+        if(cardValue == 6)
+        {
+            sandBag = true;
+            sandBagPlayer = player;
+            sandBagSlot = slot;
+            
+        }
+        updateActions();
+        if(playerPicked == false){return;} 
+        m_pGame->sendTreasure(receivingPlayer, slot);
+        if(m_pGame->getPlayer(receivingPlayer)->getHandSize() > 5)
+        {
+            tooManyCards = true;
+            tooManyPlayer = player;
+        }
+        updateCards();
+        if(playerPicked == true)
+        {
+            giveTreasure = false;
+            sendTreasure = false;
+            playerPicked = false;
+        }
+        updateActions();
+        receivingPlayer = 9;
+        Player* activePlayer = m_pGame->getActivePlayer();
+        activePlayer->setActions(-1);
+        bool nextUp = m_pGame->getNextUp();
+        if (nextUp == true)
+        {
+            dialogMode = 4;
+            setDMode4();
+        }
     }
-    updateActions();
-    if(playerPicked == false){return;} 
-    m_pGame->sendTreasure(receivingPlayer, slot);
-    updateCards();
-    if(playerPicked == true)
+    if(cardsDrawn > 1)
     {
-        giveTreasure = false;
-        sendTreasure = false;
-        playerPicked = false;
-    }
-    updateActions();
-    receivingPlayer = 9;
-    Player* activePlayer = m_pGame->getActivePlayer();
-    activePlayer->setActions(-1);
-    bool nextUp = m_pGame->getNextUp();
-    if (nextUp == true)
-    {
-        dialogMode = 4;
-        setDMode4();
+        cout << "in cardsDrawn > 1" << endl;
+        cardsDrawn = 0;
+        dialogMode = 5;
+        setDMode5();
+        return;
     }
 }
 
@@ -1241,9 +1398,6 @@ void ForbiddenIslandUI::updateCards()
         for(int i=0; i<hSize; i++)
             {     
                 int tValue = m_pGame->getPlayerTreasureCard(p,i);
-                //string cName = "T" + to_string(tValue);
-                //QString path = QCoreApplication::applicationDirPath() + "/../CardPNGs/" + QString::fromStdString(cName);
-                //QPixmap pixmap(path);
                 QPixmap pixmap = cardImageTreasure[tValue];
                 if(p==1 || p==3)
                 {
@@ -1307,28 +1461,49 @@ void ForbiddenIslandUI::setDMode3()
     m_dialog[4]->setText("Use Special Ability");
     m_dialog[5]->setText("End Turn");
     dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));
-    //clearDialogButtons();
     updateActions();
 }
 
 
 void ForbiddenIslandUI::setDMode4()
 {
-    for(int i=0; i<6; i++)
-    {
-        m_dialog[i]->setEnabled(false);
-        m_dialog[i]->setVisible(false);
-    }
+    clearButtons();
     m_dialog[1]->setGeometry(1300,750,150,60);
     m_dialog[1]->setText("Draw a Card");
     m_dialog[1]->setVisible(true);
     m_dialog[1]->setEnabled(true);
-    dialog->setText("Draw Two Cards");
+    if(cardsDrawn == 1)
+    {
+        dialog->setText("Draw a Card");
+    }
+    else
+    {
+        dialog->setText("Draw Two Cards");
+    }
 }
 
 
 void ForbiddenIslandUI::setDMode5()
 {
+    clearButtons();
     dialog->setText("Flood " + QString::number(numberOfFloods) + " Island Tiles");
+    m_dialog[1]->setEnabled(true);
+    m_dialog[1]->setVisible(true);
+    m_dialog[1]->setGeometry(QRect(1275, 730, 200, 60)); 
     m_dialog[1]->setText("Press to Flood");
+}
+
+
+void ForbiddenIslandUI::setDiscardMode()
+{
+    clearButtons();
+    dialog->setText("Too many Cards");
+    m_dialog[1]->setText("Play");
+    m_dialog[1]->setVisible(true);
+    m_dialog[1]->setEnabled(true);
+    m_dialog[1]->setGeometry(QRect(1170, 730, 200, 60)); 
+    m_dialog[4]->setText("Discard");
+    m_dialog[4]->setVisible(true);
+    m_dialog[4]->setEnabled(true);
+    m_dialog[4]->setGeometry(QRect(1380, 730, 200, 60)); 
 }

@@ -105,51 +105,26 @@ int Player::getHandSize()
 }
 
 
-Card* Player::drawCard(Card* pCard)
+void Player::drawCard(Card* pCard)
 {
     Card* pDCard;
     playerTreasureHand.addCard(pCard);
-    if (playerTreasureHand.getSize() > 5)
-    {
-        for(int i=0; i<playerTreasureHand.getSize(); i++)
-        {
-            Card* pCard = playerTreasureHand.getCard(i);
-            if(pCard->getTreasureValue() == 5 || pCard->getTreasureValue() == 6)
-            {
-                cout << "Play this card in this slot? " << i << " (y/n)";
-                char choice;
-                cin >> choice;
-                if(choice == 'y' || choice == 'Y')
-                {                 
-                    return pCard;
-                }
-            }
-        }
-        pDCard = discardCard();
-        return pDCard;
-    }
-    else
-    {
-        return nullptr;
-    }
 }
 
 
-Card* Player::discardCard()
+void Player::discardCard(int slot)
 {
-    cout << endl;
-    playerTreasureHand.printHand(0);
-    cout << endl;
-    cout << "Enter 0-5 to discard a card" << endl;
-    int choice;
-    cin >> choice;
-    Card* pCard = playerTreasureHand.removeCard(choice);
-    cout << endl;
-    playerTreasureHand.printHand(0);
-    cout << endl;
-    return pCard;
-}
+    cout << "PlayerTreasureHand size = " << playerTreasureHand.getSize() << endl;
+    cout << "PlayerSlot = " <<  playerSlot << endl;
+    if(playerTreasureHand.getSize() >= (slot+1))
+    {
+        Card* pCard = playerTreasureHand.removeCard(slot);
+        cout << endl;
+        playerTreasureHand.printHand(0);
+        cout << endl;
+    }
 
+}
 
 Card* Player::playCardSlot(int slot)
 {

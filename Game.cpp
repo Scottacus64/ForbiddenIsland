@@ -174,6 +174,7 @@ bool Game::drawTreasureCards(int playerSlot)
     if(treasureDeck.deckSize() > 0)
     {
         pCard = treasureDeck.deal();
+        cout << "Card value = " << pCard->getPrintValue() << endl;
     }
     else
     {
@@ -184,6 +185,7 @@ bool Game::drawTreasureCards(int playerSlot)
             treasureDeck.addCard(dCard);
         }
         pCard = treasureDeck.deal();
+        cout << "Card value = " << pCard->getPrintValue() << endl;
     }
 
     if(pCard->getTreasureValue() == 7 && gameStarted == false)
@@ -209,7 +211,7 @@ bool Game::drawTreasureCards(int playerSlot)
     
     if(pCard->getTreasureValue() < 7)
     {
-        pDCard = playerUp.drawCard(pCard);
+        playerUp.drawCard(pCard);
     }
     return wrDrawn;
 }
@@ -219,11 +221,6 @@ void Game::transferTreasure(Player& givePlayer, Player& takePlayer, int cardSlot
 {
     Card* pCard = givePlayer.giveTreasureCard(cardSlot);
     takePlayer.getTreasureCard(pCard);
-    if(takePlayer.getHandSize() > 5)
-    {
-        Card* pDCard = takePlayer.discardCard();
-        treasureDiscard.addCard(pDCard);
-    }
 }
 
 
@@ -508,7 +505,6 @@ string Game::getIslandCardName(int position)
     int slot = islandCardPositions[position].second;
     Card* pCard = islandHand.getCard(slot);
     string name = pCard->getPrintValue();
-    cout << "Flooded card: " << pCard->getPrintValue()  << "State: " << pCard->getState() << endl;
     if(pCard->getState() == 2)
     {
         name = name + "F";

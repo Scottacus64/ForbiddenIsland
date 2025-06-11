@@ -44,7 +44,11 @@ public:
     void setDMode3();
     void setDMode4();
     void setDMode5();
+    void setDiscardMode();
     void floodTiles();
+    void clearButtons();
+    void heloStart(int iLocation);
+    void heloEnd(int iLocation);
  
     
 public slots:
@@ -112,5 +116,10 @@ private:
     int cardsDrawn = 0;
     bool waterRise = false;
     int numberOfFloods;
+    bool tooManyCards = false;
+    int tooManyPlayer = 9;
+    int tooManyChoice = 9;
+    int tooManyLoop = 0;
+    int tmSlot;
 };
 #endif // FORBIDDENISLAND_H
