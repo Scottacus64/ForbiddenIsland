@@ -46,8 +46,12 @@ int Game::flipFlood()
     pCard = floodDeck.deal();                                           //  get flood deck card
     int id = pCard->getID();                                            // get the card's ID value
     pIsleCard = islandHand.getCardWithId(id);                           // use that ID to find the card from the islandHand that matches
-    pIsleCard->floodCard();                                             // decrement the card's state value
-    floodDiscard.addCard(pCard);                                        // add the flood deck card to the discard pile
+    int state = pIsleCard->floodCard();                                 // decrement the card's state value
+    if(state == 0)
+    {floodOut.addCard(pCard);}
+    else
+    {floodDiscard.addCard(pCard);}                                      // add the flood deck card to the discard pile
+    cout << "floodDeck: " << floodDeck.deckSize() << " floodDiscard: " << floodDiscard.deckSize() << " floodOut: " << floodOut.deckSize() << endl;
     if(floodDeck.deckSize() == 0)                                       // if the deck gets to zero size, rebuild and shuffle
     {
         floodDiscard.recycleDeck(&floodDeck);
@@ -150,17 +154,12 @@ void Game::getTreasure(Player& player, int treasure)
         }
         islandTreasure.erase(remove(islandTreasure.begin(), islandTreasure.end(), treasure), islandTreasure.end());
         playerTreasure.push_back(treasure);
-        cout << "player treasure = ";
-        for (int i=0; i<playerTreasure.size(); i++)
-        {
-            cout << playerTreasure[i] << " ";
-        }
-        cout << endl;
-        cout << "island treasure = ";
         for (int i=0; i<islandTreasure.size(); i++)
         {
             cout << islandTreasure[i] << " ";
         }
+        player.setActions(-1);
+        if (player.getActions() < 1){nextUp = true;}
     }
 }
 
@@ -234,10 +233,6 @@ void Game::movePlayer(Player& player, int  direction)
         if (result == 1) {player.setLocation(direction, 0);}
         if (player.getActions() < 1){nextUp = true;}
         cout <<  "players actions = " << player.getActions() << endl;
-    }
-    else
-    {
-        cout << "can't move that direction" << endl;
     }
 }
 
@@ -404,6 +399,7 @@ bool Game::checkForWin()
 
 bool Game::checkForLoss()
 {
+    cout << "Check for loss" << endl;
     int fire = 0;
     int water = 0;
     int wind = 0;
@@ -415,9 +411,10 @@ bool Game::checkForLoss()
         if(pCard->getTreasureValue() == 1 && pCard->getState() > 0){fire +=1;}
         if(pCard->getTreasureValue() == 2 && pCard->getState() > 0){water +=1;}
         if(pCard->getTreasureValue() == 3 && pCard->getState() > 0){wind +=1;}
-        if(pCard->getTreasureValue() == 4 && pCard->getState() > 0){earth +=1;}
+        if(pCard->getTreasureValue() == 4 && pCard->getState() > 0){earth +=1; cout << "Earth: " << i << ", " << endl;}
         if(pCard->getPrintValue() == "FL" && pCard->getState() == 0){loss = true;}
-    }
+    } 
+    cout << "fire " << fire << " water " << water << " wind " << wind << " earth " << earth << endl;
     if((fire == 0 && find(playerTreasure.begin(), playerTreasure.end(), 1) == playerTreasure.end())){loss = true;}
     if((water == 0 && find(playerTreasure.begin(), playerTreasure.end(), 2) == playerTreasure.end())){loss = true;}
     if((wind == 0 && find(playerTreasure.begin(), playerTreasure.end(), 3) == playerTreasure.end())){loss = true;}
@@ -728,7 +725,6 @@ void Game::sendTreasure(int playerNumber, int slot)
                 transferTreasure(players[activePlayer], players[playerNumber], slot);
             }
         }
-        else {cout << "Can't transfer treasure \n";}
     }   
 }
 
@@ -748,4 +744,10 @@ bool Game::getNextUp()
 void Game::setNextUp(bool nUp)
 {
     nextUp = nUp;
+}
+
+
+bool Game::getGameStarted()
+{
+    return gameStarted;
 }

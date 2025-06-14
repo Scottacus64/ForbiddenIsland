@@ -7,7 +7,15 @@ const vector<string> Card::pvList = {"BG", "CG", "FL", "GG", "IG", "SG",  "CE", 
 //using namespace std;
 
 Card::Card()
-{  
+{ 
+    faceValue = 100;
+    actualValue = 100;
+    id = 100;
+    treasureValue = 100;
+    characterValue = 100;
+    printValue = 100;
+    faceUp = true;
+    state = 100; 
 }
 
 Card::Card(int fv, int av, int idn, string pv, int tv, int cv)
@@ -108,10 +116,11 @@ void Card::printAV()
     cout << actualValue;
 }
 
-void Card::floodCard()
+int Card::floodCard()
 {
     state-=1;
     if(state<0){state = 0;}
+    return state;
 }
 
 

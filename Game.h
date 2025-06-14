@@ -55,6 +55,7 @@ public:
     int getPlayerHandSize(int player);
     bool getNextUp();
     void setNextUp(bool nextUp);
+    bool getGameStarted();
 
 
 private:

@@ -23,7 +23,7 @@ public:
     string getPrintValue();
     int  getBlackRed();
     static const vector<string> pvList;
-    void floodCard();
+    int floodCard();
     void shoreUpCard();
     void setState(int newState);
     int  getState();

@@ -126,6 +126,7 @@ void Player::discardCard(int slot)
 
 }
 
+
 Card* Player::playCardSlot(int slot)
 {
     if(slot < playerTreasureHand.getSize())

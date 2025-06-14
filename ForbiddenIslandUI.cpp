@@ -316,9 +316,17 @@ ForbiddenIslandUI::ForbiddenIslandUI(QWidget *parent)
 
 void ForbiddenIslandUI::dialogButtonClicked()
 {
+    cout << "too many cards = " << tooManyCards << endl;
     QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
     if (clickedButton) 
     {
+        sandBag = false;
+        helo = false;
+        Player* activePlayer = m_pGame->getActivePlayer();
+        if(m_pGame->getGameStarted() == true)
+        {
+            if(activePlayer->getActions() < 1){setDMode4(); return;}
+        }
         if(tooManyCards == true)
         {
             for(int i=0; i<5; i++)
@@ -391,7 +399,7 @@ void ForbiddenIslandUI::dialogButtonClicked()
                     connect(m_player[i], &QPushButton::clicked, this, &ForbiddenIslandUI::playerClicked);  
                 }
                 // deal 2 treasure cards to each player
-                for(int i=0; i<5; i++)
+                for(int i=0; i<2; i++)
                 {
                     for(int p=0; p<numberOfPlayers; p++)
                     {
@@ -433,8 +441,8 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 dialogMode = 1;
                 return;
             }
-            // Flood 6 tiles
-            if (dialogMode == 1)
+            
+            if (dialogMode == 1)    // Flood 6 tiles
             {  
                 int difficulty = 0;
                 string name = clickedButton->objectName().toStdString();
@@ -481,100 +489,133 @@ void ForbiddenIslandUI::dialogButtonClicked()
                 int gridLocation = activePlayer->getLocation();
                 if(activePlayer->getPlayerClass() == 2){directions = {0,1,2,3,4,5,6,7};}
                 updateIsleTiles();
-                if (playerAction == 0)            // move player
-                {   
-                    fly = false;
-                    sendTreasure = false;
-                    moveOther = false;  
-                    updateActions();   
-                    for(int i=0; i<directions.size(); i++)
+                int actions = activePlayer->getActions();
+                cout << "Player Actions = " << actions << endl;
+                if(actions > 0) 
+                {
+                    if(engineerSU == true)
                     {
-                        if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                        engineerSU = false;
+                        activePlayer->setActions(-1);
+                    }
+                    if (playerAction == 0)            // move player
+                    {   
+                        fly = false;
+                        helo = false;
+                        sandBag = false;
+                        giveTreasure = false;
+                        sendTreasure = false;
+                        moveOther = false;  
+                        updateActions();   
+                        for(int i=0; i<directions.size(); i++)
                         {
-                            int pSlot = m_pGame->getActivePlayerSlot();
-                            highlightMove(gridLocation+offset[directions[i]]);                 
+                            if (m_pGame->checkValidMove(gridLocation,directions[i]) > 0)
+                            {
+                                int pSlot = m_pGame->getActivePlayerSlot();
+                                highlightMove(gridLocation+offset[directions[i]]);                 
+                            }
                         }
                     }
-                } 
-                if (playerAction == 1)          //shore up
-                {
-                    fly = false;
-                    sendTreasure = false;
-                    moveOther = false;  
-                    updateActions();  
-                    checkForShoreUp();
-                }
-                if(playerAction == 2)           //give treasure
-                {
-                    sameTile.clear();
-                    for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
+                    if (playerAction == 1)          //shore up
                     {
-                        Player* tPlayer = m_pGame->getPlayer(i);
-                        Player* activePlayer = m_pGame->getActivePlayer();
-                        if(tPlayer->getLocation() == activePlayer->getLocation())
+                        fly = false;
+                        helo = false;
+                        sandBag = false;
+                        giveTreasure = false;
+                        sendTreasure = false;
+                        moveOther = false;  
+                        updateActions();  
+                        checkForShoreUp();
+                    }
+                    if(playerAction == 2)           //give treasure
+                    {
+                        fly = false;
+                        helo = false;
+                        sandBag = false;
+                        moveOther = false;
+                        updateActions(); 
+                        sameTile.clear();
+                        for(int i=0; i<m_pGame->getNumberOfPlayers(); i++)
                         {
-                            sameTile.push_back(i);
+                            Player* tPlayer = m_pGame->getPlayer(i);
+                            Player* activePlayer = m_pGame->getActivePlayer();
+                            if(tPlayer->getLocation() == activePlayer->getLocation())
+                            {
+                                sameTile.push_back(i);
+                            }
+                        }
+                        if(sameTile.size() > 1)
+                        {
+                            giveTreasure = true;
+                            updateActions();
+                        }
+                        else
+                        {
+                            clearDialogButtons();
                         }
                     }
-                    if(sameTile.size() > 1)
+                    if(playerAction == 3)           //get treasure
                     {
-                        giveTreasure = true;
-                        updateActions();
-                    }
-                    else
-                    {
-                        clearDialogButtons();
-                    }
-                }
-                if(playerAction == 3)           //get treasure
-                {
-                    vector <int> pHand;
-                    getTreasure = false;
-                    for(int i=0; i<activePlayer->getHandSize(); i++)
-                    {
-                        int cValue = activePlayer->getCardTreasureValue(i);
-                        pHand.push_back(cValue);
-                    }
-                    std::unordered_map<int, int> counts;
-                    for (int val : pHand) 
-                    {
-                        counts[val]++;
-                        if (counts[val] >= 4) 
+                        fly = false;
+                        helo = false;
+                        sandBag = false;
+                        sendTreasure = false;
+                        giveTreasure = false;
+                        moveOther = false;
+                        updateActions(); 
+                        vector <int> pHand;
+                        getTreasure = false;
+                        for(int i=0; i<activePlayer->getHandSize(); i++)
                         {
-                            getTreasure = true;
-                            treasureValue = val;
+                            int cValue = activePlayer->getCardTreasureValue(i);
+                            pHand.push_back(cValue);
                         }
-                    }    
-                    updateActions();
+                        std::unordered_map<int, int> counts;
+                        for (int val : pHand) 
+                        {
+                            counts[val]++;
+                            if (counts[val] >= 4) 
+                            {
+                                getTreasure = true;
+                                treasureValue = val;
+                            }
+                        }    
+                        updateActions();
+                    }
+                    if (playerAction == 4)          //speecial ability
+                    {
+                        fly = false;
+                        helo = false;
+                        sandBag = false;
+                        giveTreasure = false;
+                        sendTreasure = false;
+                        moveOther = false;
+                        updateActions(); 
+                        int pClass = activePlayer->getPlayerClass();
+                        if (pClass == 3)
+                        {
+                            fly = true;
+                            updateActions();
+                        }
+                        if(pClass == 4)
+                        {
+                            moveOther = true;
+                            updateActions();
+                        }
+                        if(pClass == 6)
+                        {
+                            sendTreasure = true;
+                            updateActions();
+                        }
+                    }
+                    if (playerAction == 5)          //end turn
+                    {
+                        endTurn();
+                    }
                 }
-                if (playerAction == 4)          //speecial ability
+                else
                 {
-                    int pClass = activePlayer->getPlayerClass();
-                    if (pClass == 3)
-                    {
-                        fly = true;
-                        updateActions();
-                    }
-                    if(pClass == 4)
-                    {
-                        moveOther = true;
-                        updateActions();
-                    }
-                    if(pClass == 6)
-                    {
-                        sendTreasure = true;
-                        updateActions();
-                    }
-                }
-                if (playerAction == 5)          //end turn
-                {
-                    fly = false;
-                    sendTreasure = false;
-                    moveOther = false; 
-                    updateActions();   
-                    clearDialogButtons();
-                    dialogMode = 4;
-                    setDMode4();
+                    endTurn();
                 }
                 return;
             } 
@@ -667,6 +708,22 @@ void ForbiddenIslandUI::dialogButtonClicked()
 }
 
 
+void ForbiddenIslandUI:: endTurn()
+{
+    Player* activePlayer = m_pGame->getActivePlayer();
+    fly = false;
+    helo = false;
+    sandBag = false;
+    sendTreasure = false;
+    moveOther = false;
+    updateActions();   
+    clearDialogButtons();
+    dialogMode = 4;
+    setDMode4();
+    activePlayer->setActions(-3);
+}
+
+
 void ForbiddenIslandUI::clearButtons()
 {
     for(int i=0; i<6; i++)
@@ -729,7 +786,7 @@ void ForbiddenIslandUI::checkForShoreUp()
     }
     if (m_pGame->checkValidMove(gridLocation,8) > 0 && m_pGame->getIslandCardFlood(gridLocation) == 1)
     {
-    highlightShoreUp(gridLocation);
+        highlightShoreUp(gridLocation);
     }
 }
 
@@ -740,7 +797,7 @@ void ForbiddenIslandUI::updateActions()
     Player* player = m_pGame->getActivePlayer();
     string pName = player->getPlayerName();
     int actions = player->getActions();
-    if(dialogMode == 3){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));}
+    if(dialogMode == 3 && tooManyCards == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));}
     if(fly == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a tile to fly there");}
     if(moveOther == true && firstMove == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick another player to move");}
     if(moveOther == true && firstMove == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nMove the player again");}
@@ -749,8 +806,9 @@ void ForbiddenIslandUI::updateActions()
     if(giveTreasure == true && playerPicked == false){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a Player to receive");}
     if(giveTreasure == true && playerPicked == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nClick a treasure to give");}
     if(getTreasure == true){dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nChoose a treasure to get");}
-    if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");m_dialog[1]->setText("Helocopter");return;}
-    if(helo == true && heloFrom > 0){dialog->setText("Choose players to Helocopter\nThen select a destination");m_dialog[1]->setText("Helocopter");return;}
+    if(helo == true && heloFrom < 1){dialog->setText("Choose a location to Helocopter From");return;}
+    if(helo == true && heloFrom > 0 && heloGroup.size() < 1){dialog->setText("Choose players to Helocopter\nThen select a destination");return;}
+    if(helo == true && heloFrom > 0 && heloGroup.size() > 0){heloPlayersDisplay();return;}
     if(sandBag == true){dialog->setText("Choose a location to Sandbag");m_dialog[1]->setText("Sand Bag");return;}
     if(dialogMode == 4 && waterRise == false && tooManyCards == false){dialog->setText("Draw a Card");m_dialog[1]->setText("Draw a Card");}
     if(dialogMode == 4 && waterRise == true && tooManyCards == false){dialog->setText("Water Rises!");} 
@@ -886,13 +944,15 @@ void ForbiddenIslandUI::pawnClicked()
                 {heloGroup.push_back(playerSlot);}
             }
         }
-        cout << "Players to helo = " ;
-        for(int i=0; i<heloGroup.size(); i++)
-        {
-            cout << heloGroup[i] << "," ;
-        }
+
         cout << endl;
     }
+    cout << "Players to helo = " ;
+    for(int i=0; i<heloGroup.size(); i++)
+    {
+        cout << heloGroup[i] << "," ;
+    }
+    updateActions();
 }
 
 
@@ -914,7 +974,7 @@ void ForbiddenIslandUI::iTileClicked()
     }
     cout << "iLocation = " << iLocation << endl;
     cout << "helo = " << helo << " sandbag = " << sandBag << " heloFrom = " << heloFrom << endl;
-    if(playerAction == 0 || playerAction == 1)
+    if((playerAction == 0 || playerAction == 1) && activePlayer->getActions() > 0)
     {
 
         int pLocation = activePlayer->getLocation();
@@ -935,11 +995,10 @@ void ForbiddenIslandUI::iTileClicked()
             if(pLocation == iLocation)
             {
                 eShore = m_pGame->shoreUp(8);
-                return;
             }
             else
             {eShore = m_pGame->shoreUp(dir);}
-            engineerSU = eShore;
+            if(activePlayer->getPlayerClass() == 1){engineerSU = eShore;}
         }
             bool nextUp = m_pGame->getNextUp();
             if (nextUp == true)
@@ -1001,8 +1060,9 @@ void ForbiddenIslandUI::iTileClicked()
     {
         Player* activePlayer = m_pGame->getActivePlayer();
         activePlayer->fly(iLocation, false);
-        activePlayer->setActions(-1);
         bool nextUp = m_pGame->getNextUp();
+        int actions = activePlayer->getActions();
+        if(actions < 1){m_pGame->setNextUp(true);}
         if (nextUp == true)             //the game class cannot change dialog modes, it sets nextUp which can be gotten by the UI to know if the turn is ended
         {
             dialogMode = 4;
@@ -1040,23 +1100,18 @@ void ForbiddenIslandUI::iTileClicked()
                 setDMode4();
             }
         }
+        clearDialogButtons();
         helo = false;
-        updateCards();
-        updateActions();
     }
 
     if(sandBag == true)
     {
         int iState = m_pGame->getIslandCardFlood(iLocation);
-        cout << "iState = " << iState << endl;
         if(iState == 1)
         {
             m_pGame->sandBag(sandBagPlayer, sandBagSlot, iLocation);
-            sandBag = false;
-            cout << "in iState1 if " << tooManyCards << endl;
             if(tooManyCards == true)
             {
-                cout << "CardsDrawn: " << cardsDrawn << endl;
                 Player* player = m_pGame->getPlayer(tooManyPlayer);
                 //player->discardCard(tmSlot);
                 if (cardsDrawn > 1)
@@ -1074,18 +1129,14 @@ void ForbiddenIslandUI::iTileClicked()
                 }
             }
         }
-        else
-        {
-            sandBag = false;
-        }
-        updateCards();
-        updateIsleTiles();
+        sandBag = false;
         updateActions();
+        clearDialogButtons();
+        updateIsleTiles();
     }
-
-    updateActions();
     updatePawns();
     updateActions();
+    updateCards();
     if(engineerSU == true)
     {
         updateIsleTiles();
@@ -1106,7 +1157,7 @@ void ForbiddenIslandUI::heloStart(int iLocation)
         int pLocation = player->getLocation();
         if(pLocation == iLocation)
         {
-            heloPlayers.push_back(i);
+            heloPlayers.push_back(i);   // players on the tile that can be helo'ed
         }
     }
     if(heloPlayers.size() > 0){heloFrom = iLocation;}
@@ -1159,7 +1210,6 @@ void ForbiddenIslandUI::updatePawns()
 
 void ForbiddenIslandUI::highlightMove(int tileLocation)
 {
-    cout << "in HL" << endl;
     QIcon icon = m_iC[tileLocation]->icon();
     QSize size = m_iC[tileLocation]->iconSize(); 
     QPixmap currentPixmap = icon.pixmap(size);
@@ -1286,6 +1336,8 @@ void ForbiddenIslandUI::cardClicked()
     int player =  sName[1] - '0';;
     cout << sName << " Player: " << player << " Slot: " << slot << endl;
     int cardValue = m_pGame->getPlayerTreasureCard(player, slot);
+    Player* activePlayer = m_pGame->getActivePlayer();
+    int actions = activePlayer->getActions(); 
     if(tooManyCards == true)
     {
         if(tooManyChoice == 0 && cardValue > 4) // tooManyChoice 0 = play, 1 = discard, 9 = default
@@ -1296,7 +1348,7 @@ void ForbiddenIslandUI::cardClicked()
                 heloSlot = slot;
                 helo = true;
                 tmSlot = slot;
-                setDMode4();
+                if(m_pGame->getActivePlayer()->getActions() < 1){setDMode4();}
                 updateActions();
                 return;
             }
@@ -1306,7 +1358,7 @@ void ForbiddenIslandUI::cardClicked()
                 sandBagPlayer = player;
                 sandBagSlot = slot;
                 tmSlot = slot;
-                setDMode4();
+                if(m_pGame->getActivePlayer()->getActions() < 1){setDMode4();}
                 updateActions();
                 return;
             }
@@ -1316,13 +1368,20 @@ void ForbiddenIslandUI::cardClicked()
             Player* player = m_pGame->getPlayer(tooManyPlayer);
             player->discardCard(slot);
         }
-        if(cardsDrawn == 1)
+        if(cardsDrawn > 1)
         {
-            setDMode4();
-        }
-        else
-        {
+            cout << "set mode 5" << endl;
             setDMode5();
+        }
+        if(cardsDrawn < 2 && actions > 0)
+        {
+            cout << "set mode 3" << endl;
+            setDMode3();
+        }
+        if(cardsDrawn < 2 && actions < 1)
+        {
+            cout << "set mode 4" << endl;
+            setDMode4();
         }
         updateCards();
         updateActions();
@@ -1347,10 +1406,19 @@ void ForbiddenIslandUI::cardClicked()
         updateActions();
         if(playerPicked == false){return;} 
         m_pGame->sendTreasure(receivingPlayer, slot);
+        cout << "receiving player = " << m_pGame->getPlayer(receivingPlayer)->getPlayerName() << endl;
         if(m_pGame->getPlayer(receivingPlayer)->getHandSize() > 5)
         {
+            cout << "in method" << endl;
             tooManyCards = true;
-            tooManyPlayer = player;
+            tooManyPlayer = receivingPlayer;
+            Player* player = m_pGame->getPlayer(receivingPlayer);
+            string pName = player->getPlayerName();
+            dialog->setText(QString::fromStdString(pName) + ": Too Many Cards \n Play or Discard");
+            sendTreasure = false;
+            giveTreasure = false;
+            playerPicked = false;
+            setDiscardMode();
         }
         updateCards();
         if(playerPicked == true)
@@ -1361,8 +1429,7 @@ void ForbiddenIslandUI::cardClicked()
         }
         updateActions();
         receivingPlayer = 9;
-        Player* activePlayer = m_pGame->getActivePlayer();
-        activePlayer->setActions(-1);
+        if(player == m_pGame->getActivePlayerSlot()){activePlayer->setActions(-1);}
         bool nextUp = m_pGame->getNextUp();
         if (nextUp == true)
         {
@@ -1378,6 +1445,7 @@ void ForbiddenIslandUI::cardClicked()
         setDMode5();
         return;
     }
+    cout << "Active Player Actions = " << activePlayer->getActions() << endl;
 }
 
 
@@ -1425,7 +1493,6 @@ void ForbiddenIslandUI::treasureClicked()
         Player* activePlayer = m_pGame->getActivePlayer();
         m_pGame->getTreasure(*activePlayer, treasureValue);
         updateCards();
-        activePlayer->setActions(-1);
         bool nextUp = m_pGame->getNextUp();
         if (nextUp == true)
         {
@@ -1434,7 +1501,9 @@ void ForbiddenIslandUI::treasureClicked()
         }
         m_treasure[tNumber]->setIcon(treasureImage[tNumber]);
     }
-
+    getTreasure = false;
+    clearDialogButtons();
+    updateActions();
 }
 
 
@@ -1458,7 +1527,13 @@ void ForbiddenIslandUI::setDMode3()
     m_dialog[1]->setText("Shore Up");
     m_dialog[2]->setText("Give Treasure");
     m_dialog[3]->setText("Get Treasure");
-    m_dialog[4]->setText("Use Special Ability");
+    Player* pPlayer = m_pGame->getActivePlayer();
+    int pClass = pPlayer->getPlayerClass();
+    bool special =  false;
+    if(pClass == 3){m_dialog[4]->setText("Fly"); special = true;}
+    if(pClass == 4){m_dialog[4]->setText("Move Other Player"); special = true;}
+    if(pClass == 6){m_dialog[4]->setText("Send Treasure"); special = true;}
+    if(special == false){m_dialog[4]->setVisible(false); m_dialog[4]->setEnabled(false);}
     m_dialog[5]->setText("End Turn");
     dialog->setText("Choose an action for: " + QString::fromStdString(pName) + "\nActions Left: " + QString::number(actions));
     updateActions();
@@ -1497,7 +1572,7 @@ void ForbiddenIslandUI::setDMode5()
 void ForbiddenIslandUI::setDiscardMode()
 {
     clearButtons();
-    dialog->setText("Too many Cards");
+    if(dialogMode == 4){dialog->setText("Too many Cards");}
     m_dialog[1]->setText("Play");
     m_dialog[1]->setVisible(true);
     m_dialog[1]->setEnabled(true);
@@ -1506,4 +1581,18 @@ void ForbiddenIslandUI::setDiscardMode()
     m_dialog[4]->setVisible(true);
     m_dialog[4]->setEnabled(true);
     m_dialog[4]->setGeometry(QRect(1380, 730, 200, 60)); 
+}
+
+
+void ForbiddenIslandUI::heloPlayersDisplay()
+{
+    string players;
+    for(int i=0; i<heloGroup.size(); i++)
+    {
+        Player* up = m_pGame->getPlayer(heloGroup[i]);
+        string name = up->getPlayerName();
+        players += name;
+        if (i != heloGroup.size() - 1){players += "  ";}
+    }
+    dialog->setText("Moving: " + QString::fromStdString(players) + "\nClick Destination When Done");
 }

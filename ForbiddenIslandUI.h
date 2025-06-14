@@ -49,6 +49,8 @@ public:
     void clearButtons();
     void heloStart(int iLocation);
     void heloEnd(int iLocation);
+    void endTurn();
+    void heloPlayersDisplay();
  
     
 public slots:

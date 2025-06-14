@@ -42,12 +42,12 @@ void Deck::makeDeck()
         av = fv;
         if (fv < 6){cv = fv+1;}
         if (fv > 5 and fv < 8){tv = 1;}
-        if (fv > 8 and fv < 10){tv = 2;}
-        if (fv > 10 and fv < 12){tv = 3;}
-        if (fv > 12 and fv < 14){tv = 4;}
-
+        if (fv > 7 and fv < 10){tv = 2;}
+        if (fv > 9 and fv < 12){tv = 3;}
+        if (fv > 11 and fv < 14){tv = 4;}
         m_deck.push_back(new Card(fv, av, id, pv, tv, cv));
         cv = 0;
+        tv = 0;
     }
 }
 
